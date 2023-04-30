@@ -1,0 +1,56 @@
+{
+    "Node": [
+          {
+		  "name":0,
+		  "connections": [
+                        1
+		  ],
+		  "UseCSMA":0,
+		  "UseWifi":0
+            
+	  },
+	  {
+                  "name":1,
+		  "connections":[
+			2
+		  ],
+		  "UseCSMA":0,
+		  "UseWifi":0
+	  },
+	  {
+                  "name":2,
+		  "connections":[
+			3
+		  ],
+		  "UseCSMA":0,
+		  "UseWifi":0
+	  },
+	  {
+                  "name":3,
+		  "connections":[
+			4
+		  ],
+		  "UseCSMA":0,
+		  "MTU":1500,
+		  "UseWifi":0
+	  },
+	  {
+                  "name":4,
+	          "connections":[
+			5
+		  ],
+	          "UseCSMA":0,
+	          "MTU":1600,
+		  "UseWifi":0	  
+	  },
+	  {
+                  "name":5,
+		  "connections":[
+                        0
+		  ],
+		  "UseCSMA":0,
+		  "UseWifi":0
+	  }
+    ]
+
+}

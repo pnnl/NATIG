@@ -1,0 +1,118 @@
+{
+    "name": "GLD",
+    "loglevel": 1,
+    "coreType": "zmq",
+    "period": 1,
+    "endpoints": [
+        {
+            "name": "mg3_regulator_4$status",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_4\": \"status\"}"
+        },
+        {
+            "name": "mg3_regulator_4$tap_A",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_4\": \"tap_A\"}"
+        },
+        {
+            "name": "mg3_regulator_4$tap_B",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_4\": \"tap_B\"}"
+        },
+        {
+            "name": "mg3_regulator_4$tap_C",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_4\": \"tap_C\"}"
+        },
+        {
+            "name": "mg3",
+            "type": "string",
+            "global": false,
+            "destination": "ns3/mg3",
+            "info": "{\"regulator_4\": [\"status\", \"tap_A\", \"tap_B\", \"tap_C\"]}"
+        },
+        {
+            "name": "substation_regulator_1$status",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_1\": \"status\"}"
+        },
+        {
+            "name": "substation_regulator_1$tap_A",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_1\": \"tap_A\"}"
+        },
+        {
+            "name": "substation_regulator_1$tap_B",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_1\": \"tap_B\"}"
+        },
+        {
+            "name": "substation_regulator_1$tap_C",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_1\": \"tap_C\"}"
+        },
+        {
+            "name": "substation_regulator_2$status",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_2\": \"status\"}"
+        },
+        {
+            "name": "substation_regulator_2$tap_A",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_2\": \"tap_A\"}"
+        },
+        {
+            "name": "substation_regulator_2$tap_B",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_2\": \"tap_B\"}"
+        },
+        {
+            "name": "substation_regulator_2$tap_C",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_2\": \"tap_C\"}"
+        },
+        {
+            "name": "substation_regulator_3$status",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_3\": \"status\"}"
+        },
+        {
+            "name": "substation_regulator_3$tap_A",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_3\": \"tap_A\"}"
+        },
+        {
+            "name": "substation_regulator_3$tap_B",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_3\": \"tap_B\"}"
+        },
+        {
+            "name": "substation_regulator_3$tap_C",
+            "type": "string",
+            "global": false,
+            "info": "{\"regulator_3\": \"tap_C\"}"
+        },
+        {
+            "name": "substation",
+            "type": "string",
+            "global": false,
+            "destination": "ns3/substation",
+            "info": "{\"regulator_1\": [\"status\", \"tap_A\", \"tap_B\", \"tap_C\"], \"regulator_2\": [\"status\", \"tap_A\", \"tap_B\", \"tap_C\"], \"regulator_3\": [\"status\", \"tap_A\", \"tap_B\", \"tap_C\"]}"
+        }
+    ]
+}

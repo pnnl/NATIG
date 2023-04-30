@@ -1,0 +1,752 @@
+Waf: Entering directory `/rd2c/ns-3-dev/build'
+Waf: Leaving directory `/rd2c/ns-3-dev/build'
+Build commands will be stored in build/compile_commands.json
+'build' finished successfully (1.494s)
+number of args: 5
+Helics configuration file: /rd2c/integration/control/direct-analog-config//ns_config.json
+MicroGrid configuration file: /rd2c/integration/control/direct-analog-config//grid.json
+Calling Calling Message Federate Constructor
+Install internet stack on all nodes.
+Assign IP Addresses.
+IN ADD INTERFACE!!!!!!!!!!!!!!
+IN ADD INTERFACE!!!!!!!!!!!!!!
+IN ADD INTERFACE!!!!!!!!!!!!!!
+IN ADD INTERFACE!!!!!!!!!!!!!!
+Microgrid network node: mg3
+hub:10.1.1.1, spike:10.1.1.2
+Control Center network node: Monitor
+App nameMonitormg3
+Names:Add("Monitormg3", 0x13757b0)
+Names:NamesPriv(0x7f8725e6b6e0)
+Names:Add(0x7f8725e6b6e0, "Monitormg3", 0x13757b0)
+Names:Add(0x7f8725e6b6e0, "/Names", "Monitormg3", 0x13757b0)
+Names:Add(0x7f8725e6b6e0, 0, "Monitormg3", 0x13757b0)
+Names:IsNamed(0x7f8725e6b6e0, 0x13757b0)
+Object does not exist in object map, returning NameNode 0
+Names:IsDuplicateName(0x7f8725e6b6e0, 0x7f8725e6b6e0, "Monitormg3")
+Name does not exist in name map
+Names:NameNode(0x1375ea0, 0x7f8725e6b6e0, "Monitormg3", 0x13757b0)
+App namemg3
+Names:Add("mg3", 0x1376b30)
+Names:Add(0x7f8725e6b6e0, "mg3", 0x1376b30)
+Names:Add(0x7f8725e6b6e0, "/Names", "mg3", 0x1376b30)
+Names:Add(0x7f8725e6b6e0, 0, "mg3", 0x1376b30)
+Names:IsNamed(0x7f8725e6b6e0, 0x1376b30)
+Object does not exist in object map, returning NameNode 0
+Names:IsDuplicateName(0x7f8725e6b6e0, 0x7f8725e6b6e0, "mg3")
+Name does not exist in name map
+Names:NameNode(0x1377220, 0x7f8725e6b6e0, "mg3", 0x1376b30)
+Microgrid network node: substation
+hub:10.1.2.1, spike:10.1.2.2
+Control Center network node: Monitor
+App nameMonitorsubstation
+Names:Add("Monitorsubstation", 0x1377c50)
+Names:Add(0x7f8725e6b6e0, "Monitorsubstation", 0x1377c50)
+Names:Add(0x7f8725e6b6e0, "/Names", "Monitorsubstation", 0x1377c50)
+Names:Add(0x7f8725e6b6e0, 0, "Monitorsubstation", 0x1377c50)
+Names:IsNamed(0x7f8725e6b6e0, 0x1377c50)
+Object does not exist in object map, returning NameNode 0
+Names:IsDuplicateName(0x7f8725e6b6e0, 0x7f8725e6b6e0, "Monitorsubstation")
+Name does not exist in name map
+Names:NameNode(0x1376480, 0x7f8725e6b6e0, "Monitorsubstation", 0x1377c50)
+App namesubstation
+Names:Add("substation", 0x1378b70)
+Names:Add(0x7f8725e6b6e0, "substation", 0x1378b70)
+Names:Add(0x7f8725e6b6e0, "/Names", "substation", 0x1378b70)
+Names:Add(0x7f8725e6b6e0, 0, "substation", 0x1378b70)
+Names:IsNamed(0x7f8725e6b6e0, 0x1378b70)
+Object does not exist in object map, returning NameNode 0
+Names:IsDuplicateName(0x7f8725e6b6e0, 0x7f8725e6b6e0, "substation")
+Name does not exist in name map
+Names:NameNode(0x1379260, 0x7f8725e6b6e0, "substation", 0x1378b70)
+Federate name: ns3
+Endpoint name: fout
+Endpoint name: Monitormg3
+Endpoint name: mg3
+Endpoint name: Monitorsubstation
+Endpoint name: substation
+Names:FindName(0x135bbd0)
+Names:FindName(0x7f8725e6b6e0, 0x135bbd0)
+Object does not exist in object map
+Names:FindName(0x1361250)
+Names:FindName(0x7f8725e6b6e0, 0x1361250)
+Object does not exist in object map
+Names:FindName(0x135bbd0)
+Names:FindName(0x7f8725e6b6e0, 0x135bbd0)
+Object does not exist in object map
+Names:FindName(0x136b3e0)
+Names:FindName(0x7f8725e6b6e0, 0x136b3e0)
+Object does not exist in object map
+Names:FindName(0x135b6c0)
+Names:FindName(0x7f8725e6b6e0, 0x135b6c0)
+Object does not exist in object map
+Names:FindName(0x1361670)
+Names:FindName(0x7f8725e6b6e0, 0x1361670)
+Object does not exist in object map
+Names:FindName(0x1361100)
+Names:FindName(0x7f8725e6b6e0, 0x1361100)
+Object does not exist in object map
+Names:FindName(0x136b7b0)
+Names:FindName(0x7f8725e6b6e0, 0x136b7b0)
+Object does not exist in object map
+Adding Binary: regulator_4$status
+Adding Analog: regulator_4$tap_A
+Adding Analog: regulator_4$tap_B
+Adding Analog: regulator_4$tap_C
+I'm Master
+Adding Binary: regulator_1$status
+Adding Analog: regulator_1$tap_A
+Adding Analog: regulator_1$tap_B
+Adding Analog: regulator_1$tap_C
+Adding Binary: regulator_2$status
+Adding Analog: regulator_2$tap_A
+Adding Analog: regulator_2$tap_B
+Adding Analog: regulator_2$tap_C
+Adding Binary: regulator_3$status
+Adding Analog: regulator_3$tap_A
+Adding Analog: regulator_3$tap_B
+Adding Analog: regulator_3$tap_C
+I'm Master
+I'm Outstation
+Starting Outstation
+Adding Binary: regulator_4$status
+Checking for ANALOG/regulator_4$status in config file
+Adding Analog: regulator_4$tap_A
+Checking for ANALOG/regulator_4$tap_A in config file
+Adding Analog: regulator_4$tap_B
+Checking for ANALOG/regulator_4$tap_B in config file
+Adding Analog: regulator_4$tap_C
+Checking for ANALOG/regulator_4$tap_C in config file
+I AM INITIALIZING AN OUTSTATION
+I'm Outstation
+Starting Outstation
+Adding Binary: regulator_1$status
+Checking for ANALOG/regulator_1$status in config file
+Adding Analog: regulator_1$tap_A
+Checking for ANALOG/regulator_1$tap_A in config file
+Adding Analog: regulator_1$tap_B
+Checking for ANALOG/regulator_1$tap_B in config file
+Adding Analog: regulator_1$tap_C
+Checking for ANALOG/regulator_1$tap_C in config file
+Adding Binary: regulator_2$status
+Checking for ANALOG/regulator_2$status in config file
+Adding Analog: regulator_2$tap_A
+Checking for ANALOG/regulator_2$tap_A in config file
+Adding Analog: regulator_2$tap_B
+Checking for ANALOG/regulator_2$tap_B in config file
+Adding Analog: regulator_2$tap_C
+Checking for ANALOG/regulator_2$tap_C in config file
+Adding Binary: regulator_3$status
+Checking for ANALOG/regulator_3$status in config file
+Adding Analog: regulator_3$tap_A
+Checking for ANALOG/regulator_3$tap_A in config file
+Adding Analog: regulator_3$tap_B
+Checking for ANALOG/regulator_3$tap_B in config file
+Adding Analog: regulator_3$tap_C
+Checking for ANALOG/regulator_3$tap_C in config file
+I AM INITIALIZING AN OUTSTATION
+I AM SETTING THE STATIONMAP!!!!!! 1
+THE OS ADDRESS IS EQUAL TO 2
+I AM SETTING THE STATIONMAP!!!!!! 1
+THE OS ADDRESS IS EQUAL TO 2
+Sending data: dÄ
+Remote addr: 04-04-0a:01:01:02 remote port 20000
+IPV4!!!!!!!!!!!!! 10.1.1.2
+UDP
+Sending data: dÄ
+Remote addr: 04-04-0a:01:02:02 remote port 20000
+IPV4!!!!!!!!!!!!! 10.1.2.2
+UDP
+mg3 03-07-0a:01:01:02:20:4e:00
+Dnp3HelicsApplication:: >>> address: 10.1.1.1
+Outstation HandleReaddÄ
+In rxData
+dest: 2addr: 2
+Processing Rxd Fragment
+Outstation Function code: 1
+Outstation::Received function code: READ
+Found Read message
+Inside Read
+IN THE WHILE LOOP
+oh.grp: 30
+IN THE WHILE LOOP
+oh.grp: 1
+READ REQUEST for Analog data 
+In transmitScadaData
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Outstation: src = 1
+mymap.size() is 1 src 1
+VICTORTEST5 A0:   regulator_4$tap_A
+VICTORTEST5 A1:   regulator_4$tap_B
+VICTORTEST5 A2:   regulator_4$tap_C
+Analog points size: 3
+Found analog value: 8
+Analog float: 8
+I will be adding 8
+The deque value is 10
+Analog2: 8
+Found analog value: 1
+Analog float: 1
+I will be adding 1
+The deque value is 15
+Analog2: 1
+Found analog value: 5
+Analog float: 5
+I will be adding 5
+The deque value is 20
+Analog2: 5
+VICTORTEST5 B0:   regulator_4$status
+binary data size 1
+In transmit
+Sending Sequence Number: 0
+Sending data: d$D
+Remote addr: 04-04-0a:01:01:01 remote port 40000
+IPV4!!!!!!!!!!!!! 10.1.1.1
+UDP
+substation 03-07-0a:01:02:02:20:4e:00
+Dnp3HelicsApplication:: >>> address: 10.1.2.1
+Outstation HandleReaddÄ
+In rxData
+dest: 2addr: 2
+Processing Rxd Fragment
+Outstation Function code: 1
+Outstation::Received function code: READ
+Found Read message
+Inside Read
+IN THE WHILE LOOP
+oh.grp: 30
+IN THE WHILE LOOP
+oh.grp: 1
+READ REQUEST for Analog data 
+In transmitScadaData
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Outstation: src = 1
+mymap.size() is 1 src 1
+VICTORTEST5 A0:   regulator_1$tap_A
+VICTORTEST5 A1:   regulator_1$tap_B
+VICTORTEST5 A2:   regulator_1$tap_C
+VICTORTEST5 A3:   regulator_2$tap_A
+VICTORTEST5 A4:   regulator_2$tap_B
+VICTORTEST5 A5:   regulator_2$tap_C
+VICTORTEST5 A6:   regulator_3$tap_A
+VICTORTEST5 A7:   regulator_3$tap_B
+VICTORTEST5 A8:   regulator_3$tap_C
+Analog points size: 9
+Found analog value: 7
+Analog float: 7
+I will be adding 7
+The deque value is 10
+Analog2: 7
+Found analog value: 7
+Analog float: 7
+I will be adding 7
+The deque value is 15
+Analog2: 7
+Found analog value: 7
+Analog float: 7
+I will be adding 7
+The deque value is 20
+Analog2: 7
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 25
+Analog2: 0
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 30
+Analog2: 0
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 35
+Analog2: -1
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 40
+Analog2: -1
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 45
+Analog2: 0
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 50
+Analog2: 0
+VICTORTEST5 B0:   regulator_1$status
+VICTORTEST5 B1:   regulator_2$status
+VICTORTEST5 B2:   regulator_3$status
+binary data size 3
+In transmit
+Sending Sequence Number: 0
+Sending data: dDD
+Remote addr: 04-04-0a:01:02:01 remote port 40000
+IPV4!!!!!!!!!!!!! 10.1.2.1
+UDP
+Monitormg3 03-07-0a:01:01:01:40:9c:00
+Dnp3HelicsApplication:: >>> address: 10.1.1.2
+Master HandleRead Recieved: d$D
+	Preliminary rxData
+dest: 1addr: 1
+	segment.data.size() > 0
+2022-09-27 15:53:58  MS (    2) Warn: Rx Unauth Seg = 1
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Master: src = 1
+mymap.size() is 1 src 1
+Monitormg3 03-07-0a:01:01:01:40:9c:00
+Dnp3HelicsApplication:: >>> address: 10.1.2.2
+Master HandleRead Recieved: dDD
+	Preliminary rxData
+dest: 1addr: 1
+	segment.data.size() > 0
+2022-09-27 15:53:58  MS (    2) Warn: Rx Unauth Seg = 2
+Dnp3HelicsApplication::send_control_analog
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Master: src = 1
+mymap.size() is 1 src 1
+Sending data: dÄ
+Remote addr: 04-04-0a:01:01:02 remote port 20000
+IPV4!!!!!!!!!!!!! 10.1.1.2
+UDP
+Dnp3HelicsApplication::send_control_analog
+Sending data: dÄ
+Remote addr: 04-04-0a:01:02:02 remote port 20000
+IPV4!!!!!!!!!!!!! 10.1.2.2
+UDP
+mg3 03-07-0a:01:01:02:20:4e:00
+Dnp3HelicsApplication:: >>> address: 10.1.1.1
+Outstation HandleReaddÄ
+In rxData
+dest: 2addr: 2
+Processing Rxd Fragment
+Outstation Function code: 5
+Outstation::Recieved function code: 5
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Outstation: src = 1
+mymap.size() is 1 src 1
+VICTORTEST6 A0:   regulator_4$tap_A
+VICTORTEST6 A1:   regulator_4$tap_B
+VICTORTEST6 A2:   regulator_4$tap_C
+VICTORTEST6 B0:   regulator_4$status
+INSIDE CONTROL
+DNP val: 0
+DNP point type: 3
+DNP flag:  
+DNP index: 0
+Requested value:-16, Status:0
+VICTORTEST4: value = -16
+key: mg3/regulator_4$tap_A
+In transmit
+Sending Sequence Number: 0
+Sending data: d
+D
+Remote addr: 04-04-0a:01:01:01 remote port 40000
+IPV4!!!!!!!!!!!!! 10.1.1.1
+UDP
+VICTORTEST2 key: mg3/regulator_4$tap_A  |  value: -16
+sending message {"regulator_4":{"tap_A":-16}} to GLD/mg3_regulator_4$tap_A
+substation 03-07-0a:01:02:02:20:4e:00
+Dnp3HelicsApplication:: >>> address: 10.1.2.1
+Outstation HandleReaddÄ
+In rxData
+dest: 2addr: 2
+Processing Rxd Fragment
+Outstation Function code: 5
+Outstation::Recieved function code: 5
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Outstation: src = 1
+mymap.size() is 1 src 1
+VICTORTEST6 A0:   regulator_1$tap_A
+VICTORTEST6 A1:   regulator_1$tap_B
+VICTORTEST6 A2:   regulator_1$tap_C
+VICTORTEST6 A3:   regulator_2$tap_A
+VICTORTEST6 A4:   regulator_2$tap_B
+VICTORTEST6 A5:   regulator_2$tap_C
+VICTORTEST6 A6:   regulator_3$tap_A
+VICTORTEST6 A7:   regulator_3$tap_B
+VICTORTEST6 A8:   regulator_3$tap_C
+VICTORTEST6 B0:   regulator_1$status
+VICTORTEST6 B1:   regulator_2$status
+VICTORTEST6 B2:   regulator_3$status
+INSIDE CONTROL
+DNP val: 0
+DNP point type: 3
+DNP flag:  
+DNP index: 0
+Requested value:-16, Status:0
+VICTORTEST4: value = -16
+key: substation/regulator_1$tap_A
+In transmit
+Sending Sequence Number: 0
+Sending data: d
+D
+Remote addr: 04-04-0a:01:02:01 remote port 40000
+IPV4!!!!!!!!!!!!! 10.1.2.1
+UDP
+VICTORTEST2 key: substation/regulator_1$tap_A  |  value: -16
+sending message {"regulator_1":{"tap_A":-16}} to GLD/substation_regulator_1$tap_A
+Monitormg3 03-07-0a:01:01:01:40:9c:00
+Dnp3HelicsApplication:: >>> address: 10.1.2.2
+Master HandleRead Recieved: d
+D
+	Preliminary rxData
+dest: 1addr: 1
+	segment.data.size() > 0
+2022-09-27 15:54:28  MS (    2) Warn: Rx Unauth Seg = 3
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Master: src = 1
+mymap.size() is 1 src 1
+Monitormg3 03-07-0a:01:01:01:40:9c:00
+Dnp3HelicsApplication:: >>> address: 10.1.1.2
+Master HandleRead Recieved: d
+D
+	Preliminary rxData
+dest: 1addr: 1
+	segment.data.size() > 0
+2022-09-27 15:54:28  MS (    2) Warn: Rx Unauth Seg = 4
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Master: src = 1
+mymap.size() is 1 src 1
+Sending data: dÄ
+Remote addr: 04-04-0a:01:01:02 remote port 20000
+IPV4!!!!!!!!!!!!! 10.1.1.2
+UDP
+Sending data: dÄ
+Remote addr: 04-04-0a:01:02:02 remote port 20000
+IPV4!!!!!!!!!!!!! 10.1.2.2
+UDP
+mg3 03-07-0a:01:01:02:20:4e:00
+Dnp3HelicsApplication:: >>> address: 10.1.1.1
+Outstation HandleReaddÄ
+In rxData
+dest: 2addr: 2
+Processing Rxd Fragment
+Outstation Function code: 1
+Outstation::Received function code: READ
+Found Read message
+Inside Read
+IN THE WHILE LOOP
+oh.grp: 30
+IN THE WHILE LOOP
+oh.grp: 1
+READ REQUEST for Analog data 
+In transmitScadaData
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Outstation: src = 1
+mymap.size() is 1 src 1
+VICTORTEST5 A0:   regulator_4$tap_A
+VICTORTEST5 A1:   regulator_4$tap_B
+VICTORTEST5 A2:   regulator_4$tap_C
+Analog points size: 3
+Found analog value: -16
+Analog float: -16
+I will be adding -16
+The deque value is 10
+Analog2: -16
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 15
+Analog2: -1
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 20
+Analog2: -1
+VICTORTEST5 B0:   regulator_4$status
+binary data size 1
+In transmit
+Sending Sequence Number: 0
+Sending data: d$D
+Remote addr: 04-04-0a:01:01:01 remote port 40000
+IPV4!!!!!!!!!!!!! 10.1.1.1
+UDP
+substation 03-07-0a:01:02:02:20:4e:00
+Dnp3HelicsApplication:: >>> address: 10.1.2.1
+Outstation HandleReaddÄ
+In rxData
+dest: 2addr: 2
+Processing Rxd Fragment
+Outstation Function code: 1
+Outstation::Received function code: READ
+Found Read message
+Inside Read
+IN THE WHILE LOOP
+oh.grp: 30
+IN THE WHILE LOOP
+oh.grp: 1
+READ REQUEST for Analog data 
+In transmitScadaData
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Outstation: src = 1
+mymap.size() is 1 src 1
+VICTORTEST5 A0:   regulator_1$tap_A
+VICTORTEST5 A1:   regulator_1$tap_B
+VICTORTEST5 A2:   regulator_1$tap_C
+VICTORTEST5 A3:   regulator_2$tap_A
+VICTORTEST5 A4:   regulator_2$tap_B
+VICTORTEST5 A5:   regulator_2$tap_C
+VICTORTEST5 A6:   regulator_3$tap_A
+VICTORTEST5 A7:   regulator_3$tap_B
+VICTORTEST5 A8:   regulator_3$tap_C
+Analog points size: 9
+Found analog value: -16
+Analog float: -16
+I will be adding -16
+The deque value is 10
+Analog2: -16
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 15
+Analog2: -1
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 20
+Analog2: -1
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 25
+Analog2: 0
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 30
+Analog2: 0
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 35
+Analog2: -1
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 40
+Analog2: -1
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 45
+Analog2: 0
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 50
+Analog2: 0
+VICTORTEST5 B0:   regulator_1$status
+VICTORTEST5 B1:   regulator_2$status
+VICTORTEST5 B2:   regulator_3$status
+binary data size 3
+In transmit
+Sending Sequence Number: 0
+Sending data: dDD
+Remote addr: 04-04-0a:01:02:01 remote port 40000
+IPV4!!!!!!!!!!!!! 10.1.2.1
+UDP
+Monitormg3 03-07-0a:01:01:01:40:9c:00
+Dnp3HelicsApplication:: >>> address: 10.1.1.2
+Master HandleRead Recieved: d$D
+	Preliminary rxData
+dest: 1addr: 1
+	segment.data.size() > 0
+2022-09-27 15:54:54  MS (    2) Warn: Rx Unauth Seg = 5
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Master: src = 1
+mymap.size() is 1 src 1
+Monitormg3 03-07-0a:01:01:01:40:9c:00
+Dnp3HelicsApplication:: >>> address: 10.1.2.2
+Master HandleRead Recieved: dDD
+	Preliminary rxData
+dest: 1addr: 1
+	segment.data.size() > 0
+2022-09-27 15:54:54  MS (    2) Warn: Rx Unauth Seg = 6
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Master: src = 1
+mymap.size() is 1 src 1
+Sending data: dÄ
+Remote addr: 04-04-0a:01:01:02 remote port 20000
+IPV4!!!!!!!!!!!!! 10.1.1.2
+UDP
+Sending data: dÄ
+Remote addr: 04-04-0a:01:02:02 remote port 20000
+IPV4!!!!!!!!!!!!! 10.1.2.2
+UDP
+mg3 03-07-0a:01:01:02:20:4e:00
+Dnp3HelicsApplication:: >>> address: 10.1.1.1
+Outstation HandleReaddÄ
+In rxData
+dest: 2addr: 2
+Processing Rxd Fragment
+Outstation Function code: 1
+Outstation::Received function code: READ
+Found Read message
+Inside Read
+IN THE WHILE LOOP
+oh.grp: 30
+IN THE WHILE LOOP
+oh.grp: 1
+READ REQUEST for Analog data 
+In transmitScadaData
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Outstation: src = 1
+mymap.size() is 1 src 1
+VICTORTEST5 A0:   regulator_4$tap_A
+VICTORTEST5 A1:   regulator_4$tap_B
+VICTORTEST5 A2:   regulator_4$tap_C
+Analog points size: 3
+Found analog value: -16
+Analog float: -16
+I will be adding -16
+The deque value is 10
+Analog2: -16
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 15
+Analog2: -1
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 20
+Analog2: -1
+VICTORTEST5 B0:   regulator_4$status
+binary data size 1
+In transmit
+Sending Sequence Number: 0
+Sending data: d$D
+Remote addr: 04-04-0a:01:01:01 remote port 40000
+IPV4!!!!!!!!!!!!! 10.1.1.1
+UDP
+substation 03-07-0a:01:02:02:20:4e:00
+Dnp3HelicsApplication:: >>> address: 10.1.2.1
+Outstation HandleReaddÄ
+In rxData
+dest: 2addr: 2
+Processing Rxd Fragment
+Outstation Function code: 1
+Outstation::Received function code: READ
+Found Read message
+Inside Read
+IN THE WHILE LOOP
+oh.grp: 30
+IN THE WHILE LOOP
+oh.grp: 1
+READ REQUEST for Analog data 
+In transmitScadaData
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Outstation: src = 1
+mymap.size() is 1 src 1
+VICTORTEST5 A0:   regulator_1$tap_A
+VICTORTEST5 A1:   regulator_1$tap_B
+VICTORTEST5 A2:   regulator_1$tap_C
+VICTORTEST5 A3:   regulator_2$tap_A
+VICTORTEST5 A4:   regulator_2$tap_B
+VICTORTEST5 A5:   regulator_2$tap_C
+VICTORTEST5 A6:   regulator_3$tap_A
+VICTORTEST5 A7:   regulator_3$tap_B
+VICTORTEST5 A8:   regulator_3$tap_C
+Analog points size: 9
+Found analog value: -16
+Analog float: -16
+I will be adding -16
+The deque value is 10
+Analog2: -16
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 15
+Analog2: -1
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 20
+Analog2: -1
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 25
+Analog2: 0
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 30
+Analog2: 0
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 35
+Analog2: -1
+Found analog value: -1
+Analog float: -1
+I will be adding -1
+The deque value is 40
+Analog2: -1
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 45
+Analog2: 0
+Found analog value: 0
+Analog float: 0
+I will be adding 0
+The deque value is 50
+Analog2: 0
+VICTORTEST5 B0:   regulator_1$status
+VICTORTEST5 B1:   regulator_2$status
+VICTORTEST5 B2:   regulator_3$status
+binary data size 3
+In transmit
+Sending Sequence Number: 0
+Sending data: dDD
+Remote addr: 04-04-0a:01:02:01 remote port 40000
+IPV4!!!!!!!!!!!!! 10.1.2.1
+UDP
+Monitormg3 03-07-0a:01:01:01:40:9c:00
+Dnp3HelicsApplication:: >>> address: 10.1.1.2
+Master HandleRead Recieved: d$D
+	Preliminary rxData
+dest: 1addr: 1
+	segment.data.size() > 0
+2022-09-27 15:55:49  MS (    2) Warn: Rx Unauth Seg = 7
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Master: src = 1
+mymap.size() is 1 src 1
+Monitormg3 03-07-0a:01:01:01:40:9c:00
+Dnp3HelicsApplication:: >>> address: 10.1.2.2
+Master HandleRead Recieved: dDD
+	Preliminary rxData
+dest: 1addr: 1
+	segment.data.size() > 0
+2022-09-27 15:55:49  MS (    2) Warn: Rx Unauth Seg = 8
+Names:~NamesPriv(0x7f8725e6b6e0)
+Names:Clear(0x7f8725e6b6e0)
+Names:~NameNode(0x1375ea0)
+Names:~NameNode(0x1377220)
+Names:~NameNode(0x1376480)
+Names:~NameNode(0x1379260)
+Names:~NameNode(0x7f8725e6b6e0)
+I AM IN THE CORRECT FUNCTION :) 3 4
+UNCONFIRMED!!!! 0
+Master: src = 1
+mymap.size() is 1 src 1

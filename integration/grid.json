@@ -1,0 +1,16 @@
+{
+    "microgrid": [
+        {
+            "name": "mg1"
+        },
+        {
+            "name": "mg2"
+        },
+        {
+            "name": "mg3"
+        }
+    ],
+    "controlCenter": {
+        "name": "Monitor"
+    }
+}

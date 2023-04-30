@@ -1,0 +1,86 @@
+{
+    "Gridlayout": [
+        {
+	    "MinX":0,
+	    "MinY":0,
+	    "DeltaX":500,
+	    "DeltaY":500,
+            "GridWidth":5,
+	    "LayoutType":"RowFirst",
+	    "setPos":1
+	}
+    ],
+    "Node": [
+          {
+		  "name":0,
+		  "connections": [
+			3,
+			5
+		  ],
+		  "UseCSMA":0,
+		  "UseWifi":1,
+		  "x":10,
+		  "y":20
+            
+	  },
+	  {
+                  "name":1,
+		  "connections":[
+			0,
+		        2
+			
+		  ],
+		  "UseCSMA":0,
+		  "UseWifi":1,
+		  "x":100,
+		  "y":200
+	  },
+	  {
+                  "name":2,
+		  "connections":[
+			1,
+			4
+		  ],
+		  "UseCSMA":0,
+		  "UseWifi":1,
+		  "x":200,
+		  "y":50
+	  },
+	  {
+                  "name":3,
+		  "connections":[
+			4,
+			5
+		  ],
+		  "UseCSMA":0,
+		  "MTU":1500,
+		  "UseWifi":1,
+		  "x":300,
+		  "y":400
+	  },
+	  {
+                  "name":4,
+	          "connections":[
+			1,
+			5
+		  ],
+	          "UseCSMA":0,
+	          "MTU":1600,
+	          "UseWifi":1,
+		  "x":50,
+		  "y":350
+	  },
+	  {
+                  "name":5,
+		  "connections":[
+                        0,
+			4
+		  ],
+		  "UseCSMA":0,
+		  "UseWifi":1,
+		  "x":250,
+		  "y":250
+	  }
+    ]
+
+}

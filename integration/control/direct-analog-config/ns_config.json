@@ -1,0 +1,314 @@
+{
+    "name": "ns3",
+    "loglevel": 1,
+    "coreType": "zmq",
+    "period": 0.1,
+    "endpoints": [
+        {
+            "name": "GLD/mg3_regulator_4$status",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/mg3_regulator_4$tap_A",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/mg3_regulator_4$tap_B",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/mg3_regulator_4$tap_C",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/mg3",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_1$status",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_1$tap_A",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_1$tap_B",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_1$tap_C",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_2$status",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_2$tap_A",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_2$tap_B",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_2$tap_C",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_3$status",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_3$tap_A",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_3$tap_B",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation_regulator_3$tap_C",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "GLD/substation",
+            "type": "string",
+            "global": false
+        },
+        {
+            "name": "CC/Monitor",
+            "type": "string",
+            "global": false
+        }
+    ],
+    "filters": [
+        {
+            "name": "filter_GLD/mg3_regulator_4$status",
+            "sourcetargets": [
+                "GLD/mg3_regulator_4$status"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/mg3_regulator_4$status"
+            }
+        },
+        {
+            "name": "filter_GLD/mg3_regulator_4$tap_A",
+            "sourcetargets": [
+                "GLD/mg3_regulator_4$tap_A"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/mg3_regulator_4$tap_A"
+            }
+        },
+        {
+            "name": "filter_GLD/mg3_regulator_4$tap_B",
+            "sourcetargets": [
+                "GLD/mg3_regulator_4$tap_B"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/mg3_regulator_4$tap_B"
+            }
+        },
+        {
+            "name": "filter_GLD/mg3_regulator_4$tap_C",
+            "sourcetargets": [
+                "GLD/mg3_regulator_4$tap_C"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/mg3_regulator_4$tap_C"
+            }
+        },
+        {
+            "name": "filter_GLD/mg3",
+            "sourcetargets": [
+                "GLD/mg3"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/mg3"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_1$status",
+            "sourcetargets": [
+                "GLD/substation_regulator_1$status"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_1$status"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_1$tap_A",
+            "sourcetargets": [
+                "GLD/substation_regulator_1$tap_A"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_1$tap_A"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_1$tap_B",
+            "sourcetargets": [
+                "GLD/substation_regulator_1$tap_B"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_1$tap_B"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_1$tap_C",
+            "sourcetargets": [
+                "GLD/substation_regulator_1$tap_C"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_1$tap_C"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_2$status",
+            "sourcetargets": [
+                "GLD/substation_regulator_2$status"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_2$status"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_2$tap_A",
+            "sourcetargets": [
+                "GLD/substation_regulator_2$tap_A"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_2$tap_A"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_2$tap_B",
+            "sourcetargets": [
+                "GLD/substation_regulator_2$tap_B"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_2$tap_B"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_2$tap_C",
+            "sourcetargets": [
+                "GLD/substation_regulator_2$tap_C"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_2$tap_C"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_3$status",
+            "sourcetargets": [
+                "GLD/substation_regulator_3$status"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_3$status"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_3$tap_A",
+            "sourcetargets": [
+                "GLD/substation_regulator_3$tap_A"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_3$tap_A"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_3$tap_B",
+            "sourcetargets": [
+                "GLD/substation_regulator_3$tap_B"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_3$tap_B"
+            }
+        },
+        {
+            "name": "filter_GLD/substation_regulator_3$tap_C",
+            "sourcetargets": [
+                "GLD/substation_regulator_3$tap_C"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation_regulator_3$tap_C"
+            }
+        },
+        {
+            "name": "filter_GLD/substation",
+            "sourcetargets": [
+                "GLD/substation"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/GLD/substation"
+            }
+        },
+        {
+            "name": "filter_CC/Monitor",
+            "sourcetargets": [
+                "CC/Monitor"
+            ],
+            "operation": "reroute",
+            "properties": {
+                "name": "newdestination",
+                "value": "ns3/CC/Monitor"
+            }
+        }
+    ]
+}

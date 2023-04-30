@@ -1,0 +1,4 @@
+BINARY,regulator_4$status,0
+ANALOG,regulator_4$tap_A,0
+ANALOG,regulator_4$tap_B,0
+ANALOG,regulator_4$tap_C,0

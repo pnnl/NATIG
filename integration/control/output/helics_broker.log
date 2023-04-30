@@ -1,0 +1,4 @@
+[2023-04-12 16:38:35.551] [console] [warning] commWarning||72161-TRwIM-n12qc-vVhzS-oVutd (1)::unknown route and no broker, dropping message send_message:From ()(131072:68) To ns3/mg1 size 2804 at 180
+[2023-04-12 16:38:35.551] [console] [warning] commWarning||72161-TRwIM-n12qc-vVhzS-oVutd (1)::unknown route and no broker, dropping message send_message:From ()(131072:125) To ns3/mg2 size 2305 at 180
+[2023-04-12 16:38:35.551] [console] [warning] commWarning||72161-TRwIM-n12qc-vVhzS-oVutd (1)::unknown route and no broker, dropping message send_message:From ()(131072:302) To ns3/mg3 size 6511 at 180
+[2023-04-12 16:38:35.551] [console] [warning] commWarning||72161-TRwIM-n12qc-vVhzS-oVutd (1)::unknown route and no broker, dropping message send_message:From ()(131072:523) To ns3/substation size 8673 at 180

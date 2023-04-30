@@ -1,0 +1,13 @@
+{
+    "name": "CC",
+    "loglevel": 1,
+    "coreType": "zmq",
+    "period": 1,
+    "endpoints": [
+        {
+            "name": "Monitor",
+            "type": "string",
+            "global": false
+        }
+    ]
+}

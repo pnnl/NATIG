@@ -1,0 +1,43 @@
+{
+    "microgrid": [
+        {
+            "name": "mg1",
+            "dest": "ns3/mg1",
+            "switch": [
+                "microgrid_switch4"
+            ]
+        },
+        {
+            "name": "mg2",
+            "dest": "ns3/mg2",
+            "switch": [
+                "switch_300-350"
+            ]
+        },
+        {
+            "name": "mg3",
+            "dest": "ns3/mg3",
+            "switch": [
+                "microgrid_switch2",
+                "switch_450-451",
+                "switch_95-195"
+            ]
+        },
+        {
+            "name": "substation",
+            "dest": "ns3/substation",
+            "switch": [
+                "microgrid_switch0",
+                "microgrid_switch1",
+                "microgrid_switch3",
+                "switch_13-152",
+                "switch_61-611",
+                "switch_250-251",
+                "switch_54-94"
+            ]
+        }
+    ],
+    "controlCenter": {
+        "name": "Monitor"
+    }
+}
