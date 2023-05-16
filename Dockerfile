@@ -202,8 +202,10 @@ RUN cd $RD2C \
     && ./waf build 
 
 RUN cd $RD2C \
-    && git clone https://stash.pnnl.gov/scm/hagen/cps_modeling.git \
-    && cd cps_modeling \
+    #&& git clone https://stash.pnnl.gov/scm/hagen/cps_modeling.git \
+    #&& cd cps_modeling \
+    && git clone git@github.com:pnnl/NATIG.git \
+    && cd NATIG \
     && cp -r integration $RD2C \
     && cd ${RD2C}/integration 
 
