@@ -26,3 +26,14 @@ Existing error: When using a mesh topology with wifi, we do run into the ressour
    - **topology.json**: Used to control the topology of the ns3 network
    - **grid.json**: Used to relate nodes of glm files to ns3 nodes. This file is also used to control the attack parameters.
    - **ns_config.json**: Used as configuration file for Helics
+
+## Simulated attacks
+
+### Currently working
+1. Injection attacks: The attacker trips relays connecting the microgrids to one another and to the grid causing islanding of the microgrid 
+2. Man-in-the-middle: The attacker modifies the Pref and Qref values of two inverters in Microgrid 1 while the microgrids are islanded
+
+### Comming soon
+1. Insider attack
+2. DDoS attack
+3. 5G attack vectors, example attack at the SDN level, attacks on slice configurations, etc.
