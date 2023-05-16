@@ -5,7 +5,10 @@
 	     "CSMAdelay":"6560",
 	     "dataRate": "5Mbps",
 	     "jitterMin": 10,
-	     "jitterMax": 100
+	     "jitterMax": 100,
+	     "WifiPropagationDelay": "ConstantSpeedPropagationDelayModel",
+	     "WifiRate": "DsssRate1Mbps",
+	     "WifiStandard": "80211b" 
 	    }
     ],
     "Gridlayout": [
@@ -16,7 +19,7 @@
 	    "DeltaY":500,
             "GridWidth":5,
 	    "LayoutType":"RowFirst",
-	    "setPos":0
+	    "setPos":1
 	}
     ],
     "5GSetup": [
@@ -38,7 +41,7 @@
 			5
 		  ],
 		  "UseCSMA":0,
-		  "UseWifi":0,
+		  "UseWifi":1,
 		  "x":10,
 		  "y":20,
 		  "error":"0.001"
@@ -52,7 +55,7 @@
 			
 		  ],
 		  "UseCSMA":0,
-		  "UseWifi":0,
+		  "UseWifi":1,
 		  "x":100,
 		  "y":200,
 		  "error":"0.001"
@@ -64,7 +67,7 @@
 			4
 		  ],
 		  "UseCSMA":0,
-		  "UseWifi":0,
+		  "UseWifi":1,
 		  "x":200,
 		  "y":50,
 		  "error":"0.001"
@@ -77,7 +80,7 @@
 		  ],
 		  "UseCSMA":0,
 		  "MTU":1500,
-		  "UseWifi":0,
+		  "UseWifi":1,
 		  "x":300,
 		  "y":400,
 		  "error":"0.001"
@@ -90,7 +93,7 @@
 		  ],
 	          "UseCSMA":0,
 	          "MTU":1600,
-	          "UseWifi":0,
+	          "UseWifi":1,
 		  "x":50,
 		  "y":350,
 		  "error":"0.001"
@@ -102,7 +105,7 @@
 			4
 		  ],
 		  "UseCSMA":0,
-		  "UseWifi":0,
+		  "UseWifi":1,
 		  "x":250,
 		  "y":250,
 		  "error":"0.001"
