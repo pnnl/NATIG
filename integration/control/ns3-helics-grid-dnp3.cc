@@ -17,26 +17,53 @@
  */
 
 #include "ns3/core-module.h"
+#include "ns3/config-store-module.h"
 #include "ns3/network-module.h"
-#include "ns3/csma-module.h"
+
 #include "ns3/internet-module.h"
+#include "ns3/internet-apps-module.h"
+
 #include "ns3/point-to-point-module.h"
 #include "ns3/point-to-point-layout-module.h"
+#include "ns3/point-to-point-helper.h"
+#include "ns3/point-to-point-epc-helper.h"
+
 #include "ns3/applications-module.h"
 #include "ns3/ipv4-global-routing-helper.h"
-// #include "ns3/dnp3-helics-helper.h"
-#include "ns3/dnp3-simulator-impl.h"
 #include "ns3/ipv4-static-routing-helper.h"
-#include "ns3/flow-monitor-module.h"
+
 #include "ns3/csma-module.h"
 #include "ns3/helics-helper.h"
 #include "ns3/wifi-module.h"
 #include "ns3/mobility-module.h"
+#include "ns3/antenna-module.h"
+#include "ns3/flow-monitor-module.h"
+
+#include "ns3/nr-module.h"
+#include "ns3/eps-bearer-tag.h"
+#include "ns3/nr-helper.h"
+#include "ns3/nr-point-to-point-epc-helper.h"
 
 #include "ns3/dnp3-application-helper-new.h"
 #include "ns3/dnp3-simulator-impl.h"
 
+
+#include "ns3/core-module.h"
+#include "ns3/network-module.h"
+#include "ns3/mobility-module.h"
+#include "ns3/config-store.h"
+#include "ns3/nr-helper.h"
+#include <ns3/buildings-helper.h>
+#include "ns3/log.h"
+#include "ns3/nr-point-to-point-epc-helper.h"
+#include "ns3/network-module.h"
 #include "ns3/ipv4-global-routing-helper.h"
+#include "ns3/internet-module.h"
+#include "ns3/applications-module.h"
+#include "ns3/point-to-point-helper.h"
+#include "ns3/nr-mac-scheduler-tdma-rr.h"
+#include "ns3/nr-module.h"
+#include <ns3/antenna-module.h>
 
 #include <jsoncpp/json/json.h>
 #include <jsoncpp/json/forwards.h>
@@ -65,8 +92,8 @@
 
 
 using namespace ns3;
-
 NS_LOG_COMPONENT_DEFINE ("IntagrationExample");
+
 
 void readMicroGridConfig(std::string fpath, Json::Value& configobj)
 {
@@ -142,6 +169,8 @@ main (int argc, char *argv[])
     LogComponentEnable ("Names", LOG_LEVEL_LOGIC);
   }
 
+  Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue (999999999));
+
   std::cout << "Helics configuration file: " << helicsConfigFileName.c_str() << std::endl;
   std::cout << "MicroGrid configuration file: " << configFileName.c_str() << std::endl;
 
@@ -154,13 +183,20 @@ main (int argc, char *argv[])
   helicsHelper.SetupApplicationFederate();
 
   std::string fedName = helics_federate->getName();
-  
+ 
+  //Ptr<NrPointToPointEpcHelper> epcHelper = CreateObject<NrPointToPointEpcHelper>();
+  //PointToPointEpcHelper epc;
+  //Ptr<IdealBeamformingHelper> idealBeamformingHelper = CreateObject<IdealBeamformingHelper>();
+  //epcHelper->Initialize ();
+  //Ptr<NrHelper> nrHelper = CreateObject<NrHelper> ();
+  //nrHelper->Initialize ();
+
   PointToPointHelper p2p;
-  p2p.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
-  p2p.SetChannelAttribute ("Delay", StringValue ("2ms"));
+  p2p.SetDeviceAttribute ("DataRate", StringValue (topologyConfigObject["Channel"][0]["dataRate"].asString()));
+  p2p.SetChannelAttribute ("Delay", StringValue (topologyConfigObject["Channel"][0]["P2Pdelay"].asString()));
 
   CsmaHelper csma2;
-  //csma.SetDeviceAttribute("Mtu", UintegerValue(1476));
+  csma2.SetChannelAttribute("Delay", TimeValue (NanoSeconds (std::stoi(topologyConfigObject["Channel"][0]["CSMAdelay"].asString()))));
 
 
   InternetStackHelper internetStack;
@@ -250,6 +286,14 @@ main (int argc, char *argv[])
 	         NetDeviceContainer NetDev = p2p.Install(NodeContainer(nodes.Get(std::stoi(topologyConfigObject["Node"][node]["name"].asString())), nodes.Get(std::stoi(topologyConfigObject["Node"][node]["connections"][con].asString()))));
                  NetRing.push_back(NetDev);
 	     }
+	     //if (){
+	     /*for (int u = 0; u < NetRing.size(); u++){
+		 //loss rate
+                 Ptr<RateErrorModel> em = CreateObject<RateErrorModel> ();
+	         em->SetAttribute ("ErrorRate", DoubleValue (0.00001));
+	         NetRing[u].Get (0)->SetAttribute ("ReceiveErrorModel", PointerValue (em));
+	     }*/
+	     //}
 	   }
         }
       }
@@ -289,9 +333,15 @@ main (int argc, char *argv[])
       std::string address = "10.1.1.0";
       ipv4Sub.SetBase(address.c_str(), "255.255.255.0", "0.0.0.1");
       for (int h = 0; h < NetRing.size(); h++){
+	    if (h < topologyConfigObject["Node"].size()){
+	      Ptr<RateErrorModel> em = CreateObject<RateErrorModel> ();
+	      std::cout << topologyConfigObject["Node"][h] << std::endl;
+	      em->SetAttribute ("ErrorRate", DoubleValue (std::stof(topologyConfigObject["Node"][h]["error"].asString())));//0.00001));
+	      NetRing[h].Get (0)->SetAttribute ("ReceiveErrorModel", PointerValue (em));
+	    }
 	    for (int x = 0; x < NetRing[h].GetN(); x++){
-	    Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign(NetRing[h].Get(x));
-            //Ipv4InterfaceContainer interfacesSubCC = ipv4Sub.Assign(NetRing[h].Get(1));
+	      Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign(NetRing[h].Get(x));
+              //Ipv4InterfaceContainer interfacesSubCC = ipv4Sub.Assign(NetRing[h].Get(1));
 	    }
 	    ipv4Sub.NewNetwork ();
 	    std::cout << "DONE" << std::endl; 
@@ -392,8 +442,8 @@ main (int argc, char *argv[])
     dnp3Master.SetAttribute("LocalPort", UintegerValue(master_port));
     dnp3Master.SetAttribute("RemoteAddress", AddressValue(tempnode1->GetObject<Ipv4>()->GetAddress(1,0).GetLocal()));//star.GetSpokeIpv4Address (i)));
     dnp3Master.SetAttribute("RemotePort", UintegerValue(port));
-    dnp3Master.SetAttribute("JitterMinNs", DoubleValue (10));
-    dnp3Master.SetAttribute("JitterMaxNs", DoubleValue (100));
+    dnp3Master.SetAttribute("JitterMinNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMin"].asString())));
+    dnp3Master.SetAttribute("JitterMaxNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMax"].asString())));
     dnp3Master.SetAttribute("isMaster", BooleanValue (true));
     dnp3Master.SetAttribute("Name", StringValue (cc_name+ep_name));
     dnp3Master.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
