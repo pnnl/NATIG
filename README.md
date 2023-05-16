@@ -2,6 +2,10 @@ HAGEN repo to build a docker image required for CPS modeling
 
 ## Available configurations
 
+NOTE: using the configuration files, a user can create a ring topology that uses wifi as a connection type, for example. Currently with th eexception of 5G and 4G a user can mix and match any connection types with any topologies.
+
+Existing error: When using a mesh topology with wifi, we do run into the ressource issue with the docker container. If a user want to run such a topology please limit the number of connections per nodes at 2 to 3 connections per nodes. **currently under investigation**
+
 ### Topologies
 1. Ring
 2. Mesh
