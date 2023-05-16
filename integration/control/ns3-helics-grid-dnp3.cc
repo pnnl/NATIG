@@ -242,7 +242,7 @@ main (int argc, char *argv[])
           internetStack.Install(hubNode);
       }else{
 	  phy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11_RADIO); 
-	  channel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
+	  channel.SetPropagationDelay("ns3::"+topologyConfigObject["Channel"][0]["WifiPropagationDelay"].asString()); // ConstantSpeedPropagationDelayModel");
 	  Ptr<UniformRandomVariable> random = CreateObject<UniformRandomVariable>();
 	  double minLoss = 98.0 - 40.0; 
 	  double maxLoss = 98.0 + 40.0;
@@ -250,8 +250,10 @@ main (int argc, char *argv[])
 	  random->SetAttribute("Max", DoubleValue(maxLoss));
 	  channel.AddPropagationLoss("ns3::RandomPropagationLossModel", "Variable", PointerValue(random));
 	  phy.SetChannel (channel.Create ());
-	  std::string phyMode("DsssRate1Mbps");
-	  wifi.SetStandard (WIFI_STANDARD_80211b);
+	  std::string phyMode(topologyConfigObject["Channel"][0]["WifiRate"].asString()); //"DsssRate1Mbps");
+	  if (topologyConfigObject["Channel"][0]["WifiStandard"].asString().compare("80211b") == 0){
+	      wifi.SetStandard (WIFI_STANDARD_80211b);
+	  }
           wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager", "DataMode", StringValue(phyMode), "ControlMode",  StringValue(phyMode));
 
       }
@@ -333,7 +335,7 @@ main (int argc, char *argv[])
       std::string address = "10.1.1.0";
       ipv4Sub.SetBase(address.c_str(), "255.255.255.0", "0.0.0.1");
       for (int h = 0; h < NetRing.size(); h++){
-	    if (h < topologyConfigObject["Node"].size()){
+	    if (h < topologyConfigObject["Node"].size() && std::stoi(topologyConfigObject["Node"][h]["UseWifi"].asString()) == 0){
 	      Ptr<RateErrorModel> em = CreateObject<RateErrorModel> ();
 	      std::cout << topologyConfigObject["Node"][h] << std::endl;
 	      em->SetAttribute ("ErrorRate", DoubleValue (std::stof(topologyConfigObject["Node"][h]["error"].asString())));//0.00001));
