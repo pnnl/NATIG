@@ -66,7 +66,9 @@ cd ${gldDir} && \
 # ===== setting up ns-3 configurations =====
 ns3Dir="/rd2c/ns-3-dev"
 ns3Scratch="${ns3Dir}/scratch"
-modelName="ns3-helics-grid-dnp3"
+modelName="ns3-helics-grid-dnp3-5G" #
+#modelName="ns3-helics-grid-dnp3"
+
 ns3Model="${ns3Scratch}/${modelName}"
 configDir="${ROOT_PATH}/config/"
 helicsConfig="${configDir}/ns_config.json"
@@ -83,6 +85,7 @@ if test -e $ns3OutFile
 
 cd ${ns3Dir} && \
 cp ${ROOT_PATH}/${modelName}.cc ${ns3Model}.cc && \
+  #./waf --run "scratch/${modelName}" >> ${ns3OutFile} 2>&1 & \
   ./waf --run "scratch/${modelName} --helicsConfig=${helicsConfig} --microGridConfig=${microGridConfig} --topologyConfig=${topologyConfig} --pointFileDir=${configDir} --pcapFileDir=$pcapFileDir" >> ${ns3OutFile} 2>&1 & \
   cd -
 
