@@ -19,6 +19,6 @@ HAGEN repo to build a docker image required for CPS modeling
 
 1. Location: integration/control/config
 2. Available config files:
-  a. **topology.json**: Used to control the topology of the ns3 network
-  b. **grid.json**: Used to relate nodes of glm files to ns3 nodes. This file is also used to control the attack parameters.
-  c. **ns_config.json**: Used as configuration file for Helics
+   - **topology.json**: Used to control the topology of the ns3 network
+   - **grid.json**: Used to relate nodes of glm files to ns3 nodes. This file is also used to control the attack parameters.
+   - **ns_config.json**: Used as configuration file for Helics
