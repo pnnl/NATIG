@@ -1,4 +1,6 @@
-HAGEN repo to build a docker image required for CPS modeling
+Network Attack Testbed in [Power] Grid (NATI[P]G), a co-simulation environment for distribution power grid network using state-of-the-art simulators.
+
+It is a standalone, containerized, and reusable environment to enable cyber analysts and researchers to run different cyber security and performance scenarios on powergrid.
 
 ## Available configurations
 
