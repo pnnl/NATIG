@@ -1,4 +1,5 @@
-Network Attack Testbed in [Power] Grid (NATI[P]G), a co-simulation environment for distribution power grid network using state-of-the-art simulators.
+**N**etwork **A**ttack **T**estbed **I**n [Power] **G
+r**rid (**NATI[P]G**), a co-simulation environment for distribution power grid network using state-of-the-art simulators.
 
 It is a standalone, containerized, and reusable environment to enable cyber analysts and researchers to run different cyber security and performance scenarios on powergrid.
 
@@ -6,7 +7,8 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
 
 NOTE: using the configuration files, a user can create a ring topology that uses wifi as a connection type, for example. Currently with th eexception of 5G and 4G a user can mix and match any connection types with any topologies.
 
-Existing error: When using a mesh topology with wifi, we do run into the ressource issue with the docker container. If a user want to run such a topology please limit the number of connections per nodes at 2 to 3 connections per nodes. *currently under investigation*
+Existing error: When using a mesh topology with wifi, we do run into the ressource issue with the docker container. If a user want to run such a topology please limit the number of connections per nodes at 2 to 3 connections pe**G
+r** nodes. *currently under investigation*
 
 ### Topologies
 1. Ring
