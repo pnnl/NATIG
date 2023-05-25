@@ -43,7 +43,7 @@
 	<strictnames>TRUE</strictnames>
 	<website>http://www.gridlabd.org/</website>
 	<urlbase>http://www.gridlabd.org/</urlbase>
-	<randomseed>-1886748918</randomseed>
+	<randomseed>-161606320</randomseed>
 	<include>""</include>
 	<trace>""</trace>
 	<gdb_window>FALSE</gdb_window>
@@ -5971,9 +5971,9 @@
 				<current_set_high>+0 A</current_set_high>
 				<current_deadband_center>-1 A</current_deadband_center>
 				<current_deadband>-1 A</current_deadband>
-				<capacitor_A>+600000 VAr</capacitor_A>
-				<capacitor_B>+600000 VAr</capacitor_B>
-				<capacitor_C>+600000 VAr</capacitor_C>
+				<capacitor_A>+200000 VAr</capacitor_A>
+				<capacitor_B>+200000 VAr</capacitor_B>
+				<capacitor_C>+200000 VAr</capacitor_C>
 				<cap_nominal_voltage>+0 V</cap_nominal_voltage>
 				<time_delay>+0 s</time_delay>
 				<dwell_time>+0 s</dwell_time>
@@ -33955,15 +33955,15 @@
 				<Gen_type>DYN_SYNCHRONOUS</Gen_type>
 				<pf>+0</pf>
 				<Rated_V>+4156 V</Rated_V>
-				<Rated_VA>+300000 VA</Rated_VA>
+				<Rated_VA>+450000 VA</Rated_VA>
 				<overload_limit>+1 pu</overload_limit>
 				<deltamode_only_changes>TRUE</deltamode_only_changes>
 				<current_out_A>+0+0d A</current_out_A>
 				<current_out_B>+0+0d A</current_out_B>
 				<current_out_C>+0+0d A</current_out_C>
-				<power_out_A>+26034.3789824+39.8061346527d VA</power_out_A>
-				<power_out_B>+26034.3789824+39.8061346527d VA</power_out_B>
-				<power_out_C>+26034.3789824+39.8061346527d VA</power_out_C>
+				<power_out_A>+52704.7330797+18.4352925969d VA</power_out_A>
+				<power_out_B>+52704.7330797+18.4352925969d VA</power_out_B>
+				<power_out_C>+52704.7330797+18.4352925969d VA</power_out_C>
 				<real_power_out_A>-1 W</real_power_out_A>
 				<real_power_out_B>-1 W</real_power_out_B>
 				<real_power_out_C>-1 W</real_power_out_C>

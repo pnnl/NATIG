@@ -321,7 +321,9 @@ main (int argc, char *argv[])
   remoteHostContainer.Create (1);
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
   InternetStackHelper internet;
+  InternetStackHelperMIM internetStackMIM;
   internet.Install (remoteHostContainer);
+  internetStackMIM.Install (enbNodes);
 
   // connect a remoteHost to pgw. Setup routing too
   PointToPointHelper p2ph;
@@ -337,7 +339,7 @@ main (int argc, char *argv[])
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
-  internet.Install (ueNodes);
+  internetStackMIM.Install (ueNodes);
 
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueNetDev));
@@ -348,9 +350,11 @@ main (int argc, char *argv[])
   //ApplicationContainer serverApps;
   uint16_t port = 20000;
   uint16_t master_port = 40000;
+  std::vector<uint16_t> mimPort;
   ApplicationContainer dnpOutstationApp, dnpMasterApp;
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
+      mimPort.push_back(master_port);
       Ptr<Node> ueNode = ueNodes.Get (u);
 
       // Set the default gateway for the UE
@@ -425,6 +429,97 @@ main (int argc, char *argv[])
 
   // attach UEs to the closest eNB
   nrHelper->AttachToClosestEnb (ueNetDev, enbNetDev);
+
+  //attack configuration
+  std::map<std::string, std::string> attack;
+  
+  for (uint32_t j = 1; j < configObject["MIM"].size(); j++){
+	  for(const auto& item : configObject["MIM"][j].getMemberNames() ){
+		  std::string ID = "MIM-"+std::to_string(j)+"-"+item;
+		  std::string my_str = configObject["MIM"][j][item].asString();
+		  my_str.erase(remove(my_str.begin(), my_str.end(), '"'), my_str.end());
+		  std::cout << "This is the keys value: " << ID << "  and the value is " << my_str << std::endl;
+		  attack.insert(pair<std::string,std::string >(ID, my_str));
+	  }
+	  
+  }
+
+  //Getting a list of MIM
+  //NOTE: The MIM nodes cannot be the GnB nodes (ns3 limitation)
+  //  //For this scenario and maybe the 4G scenario we will need to use the UEs as the MIM nodes
+  int includeMIM = std::stoi(configObject["Simulation"][0]["includeMIM"].asString());
+  std::string IDsMIM = configObject["MIM"][0]["listMIM"].asString();
+  size_t pos = 0;
+  std::string delimiter = ",";
+  std::vector<std::string> val;
+  std::string token;
+  std::string VI = IDsMIM;
+  while ((pos = VI.find(delimiter)) != std::string::npos) {
+	  token = VI.substr(0, pos);
+	  val.push_back(token);
+	  VI.erase(0, pos + delimiter.length());
+  }
+  val.push_back(VI);
+  if (includeMIM == 1){
+	  for (int x = 0; x < val.size(); x++){ //std::stoi(configObject["MIM"][0]["NumberAttackers"].asString()); x++){
+		  int MIM_ID = std::stoi(val[x]) + 1; //x+1;
+		  auto ep_name = configObject["MIM"][MIM_ID]["name"].asString();
+		  Ptr<Node> tempnode = enbNodes.Get(MIM_ID-1); //star.GetSpokeNode (MIM_ID-1);
+		  Names::Add(ep_name, tempnode);
+		  std::string enamestring = ep_name;
+		  Ptr<Ipv4> ip = Names::Find<Node>(enamestring)->GetObject<Ipv4>();
+		  int ID = 1;
+		  ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = internetIpIfaces.GetAddress(0);
+		  
+		  Dnp3ApplicationHelperNew dnp3MIM1 ("ns3::UdpSocketFactory", InetSocketAddress (tempnode->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), port)); 
+		  dnp3MIM1.SetAttribute("LocalPort", UintegerValue(port));
+		  dnp3MIM1.SetAttribute("RemoteAddress", AddressValue(internetIpIfaces.GetAddress(0))); //star.GetHubIpv4Address(MIM_ID-1)));
+		  if(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 3 || std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 4){
+			  dnp3MIM1.SetAttribute("RemoteAddress2", AddressValue(ueIpIface.GetAddress(x)));
+		  }
+		  dnp3MIM1.SetAttribute("RemotePort", UintegerValue(mimPort[MIM_ID-1]));
+		  
+		  dnp3MIM1.SetAttribute ("PointsFilename", StringValue (pointFileDir+"/points_mg"+std::to_string(MIM_ID)+".csv"));
+		  dnp3MIM1.SetAttribute("JitterMinNs", DoubleValue (500));
+		  dnp3MIM1.SetAttribute("JitterMaxNs", DoubleValue (1000));
+		  dnp3MIM1.SetAttribute("isMaster", BooleanValue (false));
+		  dnp3MIM1.SetAttribute ("Name", StringValue (enamestring));
+		  dnp3MIM1.SetAttribute("MasterDeviceAddress", UintegerValue(1));
+ 		  dnp3MIM1.SetAttribute("StationDeviceAddress", UintegerValue(2));
+	    	  dnp3MIM1.SetAttribute("IntegrityPollInterval", UintegerValue (10));
+	    	  dnp3MIM1.SetAttribute("EnableTCP", BooleanValue (false));
+	    	  dnp3MIM1.SetAttribute("AttackSelection", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]))); 
+
+		  if (std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 2 || std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 4){
+			  if(attack["MIM-"+std::to_string(MIM_ID)+"-scenario_id"] == "b"){
+				  dnp3MIM1.SetAttribute("Value_attck_max", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-attack_val"]));
+				  dnp3MIM1.SetAttribute("Value_attck_min", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-real_val"]));
+				  dnp3MIM1.SetAttribute("NodeID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-node_id"])); 
+				  dnp3MIM1.SetAttribute("PointID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-point_id"])); 
+			  }
+			  if(attack["MIM-"+std::to_string(MIM_ID)+"-scenario_id"] == "a"){
+				  dnp3MIM1.SetAttribute("Value_attck", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-attack_val"]));
+				  dnp3MIM1.SetAttribute("NodeID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-node_id"])); 
+				  dnp3MIM1.SetAttribute("PointID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-point_id"])); 
+			  }
+		  }
+		  
+		  if(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 3){
+			  dnp3MIM1.SetAttribute("Value_attck", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-attack_val"]));
+			  dnp3MIM1.SetAttribute("NodeID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-node_id"])); 
+			  dnp3MIM1.SetAttribute("PointID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-point_id"])); 
+		  }
+		  
+		  dnp3MIM1.SetAttribute("AttackStartTime", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-Start"]))); 
+		  dnp3MIM1.SetAttribute("AttackEndTime", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-End"]))); 
+		  dnp3MIM1.SetAttribute("mitmFlag", BooleanValue(true));
+		  Ptr<Dnp3ApplicationNew> mim = dnp3MIM1.Install (tempnode, enamestring);
+		  ApplicationContainer dnpMIMApp(mim);
+		  dnpMIMApp.Start (Seconds (0.0));
+		  dnpMIMApp.Stop (Seconds(simTime));
+
+	  }
+  }
 
   // start server and client apps
   dnpMasterApp.Start (Seconds (0.0));

@@ -2,7 +2,7 @@
     "Simulation":[{
             "SimTime":180,
 	    "StartTime":0.0,
-	    "includeMIM":0,
+	    "includeMIM":1,
 	    "UseDynTop":1
         }
     ],
@@ -238,7 +238,7 @@
 	    "point_id": "status",
 	    "scenario_id": "b",
 	    "attack_type": 3,
-	    "Start": 120,
+	    "Start": 0,
 	    "End": 180
 	},
 	{
@@ -249,7 +249,7 @@
 	    "point_id": "status,status",
 	    "scenario_id": "b",
 	    "attack_type": 3,
-	    "Start": 120,
+	    "Start": 0,
 	    "End": 180
 	},
 	{
