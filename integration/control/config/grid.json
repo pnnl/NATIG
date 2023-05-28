@@ -227,7 +227,7 @@
 	    "point_id": "Pref,Pref",
 	    "scenario_id": "b",
 	    "attack_type": 4,
-	    "Start": 120,
+	    "Start": 1,
 	    "End": 180
         },
 	{
@@ -238,7 +238,7 @@
 	    "point_id": "status",
 	    "scenario_id": "b",
 	    "attack_type": 3,
-	    "Start": 0,
+	    "Start": 1,
 	    "End": 180
 	},
 	{
@@ -249,7 +249,7 @@
 	    "point_id": "status,status",
 	    "scenario_id": "b",
 	    "attack_type": 3,
-	    "Start": 0,
+	    "Start": 1,
 	    "End": 180
 	},
 	{
@@ -260,7 +260,7 @@
 	    "point_id": "status",
 	    "scenario_id": "b",
 	    "attack_type": 3,
-	    "Start": 120,
+	    "Start": 1,
 	    "End": 180
 	}
     ],
