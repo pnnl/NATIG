@@ -338,7 +338,7 @@ main (int argc, char *argv[])
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"),epcHelper->GetUeDefaultGatewayAddress(), 1);
   internetStackMIM.Install (ueNodes);
 
   Ipv4InterfaceContainer ueIpIface;
@@ -358,9 +358,9 @@ main (int argc, char *argv[])
 	  Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign(NetDev);
 	  std::cout << "Second route" << std::endl;
 	  Ptr<Ipv4StaticRouting> MicrogridRouting = ipv4RoutingHelper.GetStaticRouting (Microgrid.Get(i)->GetObject<Ipv4>());
-	  MicrogridRouting->AddNetworkRouteTo (internetIpIfaces.GetAddress(0), Ipv4Mask("255.0.0.0"), ueIpIface.GetAddress(i), 1);
+	  MicrogridRouting->AddNetworkRouteTo (internetIpIfaces.GetAddress(0), Ipv4Mask("255.0.0.0"), ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1);
 	  std::cout << "Microgrid Added" << std::endl;
-	  remoteHostStaticRouting->AddNetworkRouteTo(Microgrid.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.0.0.0"), ueIpIface.GetAddress(i), 1);
+	  remoteHostStaticRouting->AddNetworkRouteTo(Microgrid.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.0.0.0"), ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1);
   }
 
   // assign IP address to UEs, and install UDP downlink applications

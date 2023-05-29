@@ -36,6 +36,8 @@
 #include "ns3/mobility-module.h"
 #include "ns3/config-store-module.h"
 #include "ns3/lte-module.h"
+#include "ns3/ipv4-global-routing-helper.h"
+#include "ns3/ipv4-static-routing-helper.h"
 //#include "ns3/gtk-config-store.h"
 #include "ns3/csma-module.h"
 
@@ -357,7 +359,7 @@ main (int argc, char *argv[])
     //Assign IP Address
     Ipv4AddressHelper ipv4Sub;
     std::string address = "172."+std::to_string(17+i)+".0.0";
-    ipv4Sub.SetBase (address.c_str(), "255.255.0.0"); //, "0.0.0.1");
+    ipv4Sub.SetBase (address.c_str(), "255.255.0.0", "0.0.0.1");
     Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign (internetDevicesSub);
 
     inter.Add(interfacesSub.Get(2));
@@ -381,22 +383,31 @@ main (int argc, char *argv[])
 
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("172.0.0.0"), Ipv4Mask ("255.0.0.0"), gateway, 1);
+  for (int i = 0; i < ueNodes.GetN(); i++){
+      remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(2,0).GetLocal(), Ipv4Mask ("255.0.0.0"),gateway, 1);
+  }
+  for (int i = 0; i < subNodes.GetN(); i ++){
+    remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1);
+  }
 
   for (int i = 0; i < MIM.GetN(); i++){
-    Ipv4Address addr2_ = ueIpIface.GetAddress(i%ueNodes.GetN()); //ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress (1, 0).GetLocal ();
+    Ipv4Address addr2_ = ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress (2+i, 0).GetLocal ();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
-    subNodeStaticRouting->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), addr2_, 1);
-    subNodeStaticRouting->AddNetworkRouteTo (Ipv4Address ("172.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+    for (int j = 0; j < remoteHostContainer.GetN(); j++){
+        subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr2_, 1);
+    }
+    subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), 1);
   }
 
   for (int i = 0; i < subNodes.GetN(); i++){
     Ptr<Ipv4> ipv4_2 = MIM.Get(i)->GetObject<Ipv4>();
-    Ipv4Address addr5_ = inter_MIM.GetAddress(i); //ipv4_2->GetAddress(1,0).GetLocal();
+    Ipv4Address addr5_ = ipv4_2->GetAddress(1,0).GetLocal();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
-    subNodeStaticRouting3->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), addr5_, 1);
+    for (int j = 0; j < remoteHostContainer.GetN(); j++){
+        subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, 1);
+    }
   }
+  //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
 
   //std::cout << "UE Node routing table" << "\n";
@@ -405,8 +416,10 @@ main (int argc, char *argv[])
   // Install and start applications on UEs and remote host
   std::vector<std::string> val;
   if (includeMIM){
-    //Ptr<Ipv4> ip = MIM.Get(0)->GetObject<Ipv4>();
-    //ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = remoteHostAddr;//remoteHostsInterfaces.GetAddress (0);
+    /*for (int i = 0; i < MIM.GetN(); i++){
+      Ptr<Ipv4> ip = MIM.Get(i)->GetObject<Ipv4>();
+      ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = remoteHostAddr;//remoteHostsInterfaces.GetAddress (0);
+    }*/
     std::string IDsMIM = configObject["MIM"][0]["listMIM"].asString();
     size_t pos = 0;
     std::string delimiter = ",";
@@ -512,12 +525,12 @@ main (int argc, char *argv[])
 		  int ID = MIM_ID;
 		  
 		  
-		  ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = remoteHostAddr; //hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal(); //star.GetHubIpv4Address(MIM_ID-1);
-                   Dnp3ApplicationHelperNew dnp3MIM1 ("ns3::UdpSocketFactory", InetSocketAddress (inter_MIM.GetAddress(x), port)); //star.GetSpokeIpv4Address(MIM_ID-1),port)); 
+		  ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = remoteHostAddr; //subNodes.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(); //remoteHostAddr; //hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal(); //star.GetHubIpv4Address(MIM_ID-1);
+                   Dnp3ApplicationHelperNew dnp3MIM1 ("ns3::UdpSocketFactory", InetSocketAddress (tempnode->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), port)); //star.GetSpokeIpv4Address(MIM_ID-1),port)); 
 		   dnp3MIM1.SetAttribute("LocalPort", UintegerValue(port));
 		   dnp3MIM1.SetAttribute("RemoteAddress", AddressValue(remoteHostAddr)); //star.GetHubIpv4Address(MIM_ID-1)));
 		   if(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 3 || std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 4){
-			   dnp3MIM1.SetAttribute("RemoteAddress2", AddressValue(inter.GetAddress(x)));
+			   dnp3MIM1.SetAttribute("RemoteAddress2", AddressValue(subNodes.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal())); //remoteHostAddr)); //inter.GetAddress(x)));
 		   }
 		   dnp3MIM1.SetAttribute("RemotePort", UintegerValue(mimPort[MIM_ID-1]));
 		   
@@ -527,7 +540,7 @@ main (int argc, char *argv[])
 		   dnp3MIM1.SetAttribute("isMaster", BooleanValue (false));
 		   dnp3MIM1.SetAttribute ("Name", StringValue (enamestring));
 		   dnp3MIM1.SetAttribute("MasterDeviceAddress", UintegerValue(1));
-		   dnp3MIM1.SetAttribute("StationDeviceAddress", UintegerValue(x+2));
+		   dnp3MIM1.SetAttribute("StationDeviceAddress", UintegerValue(2+x));
 		   dnp3MIM1.SetAttribute("IntegrityPollInterval", UintegerValue (10));
 		   dnp3MIM1.SetAttribute("EnableTCP", BooleanValue (false));
 		   dnp3MIM1.SetAttribute("AttackSelection", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"])));
