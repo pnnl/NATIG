@@ -66,8 +66,8 @@ cd ${gldDir} && \
 # ===== setting up ns-3 configurations =====
 ns3Dir="/rd2c/ns-3-dev"
 ns3Scratch="${ns3Dir}/scratch"
-modelName="ns3-helics-grid-dnp3-4G"
-#modelName="ns3-helics-grid-dnp3-5G" 
+#modelName="ns3-helics-grid-dnp3-4G"
+modelName="ns3-helics-grid-dnp3-5G" 
 #modelName="ns3-helics-grid-dnp3"
 
 ns3Model="${ns3Scratch}/${modelName}"

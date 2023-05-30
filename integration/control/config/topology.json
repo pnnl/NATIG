@@ -29,7 +29,7 @@
 	   "N2Delay": 0.01,
 	   "numUE": 4,
 	   "numEnb":4,
-	   "scenario":"UMa",
+	   "scenario":"UMi-StreetCanyon",
 	   "txPower": 40  
 	}
     ],

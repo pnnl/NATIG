@@ -46,14 +46,11 @@
 #include "ns3/nr-mac-scheduler-tdma-rr.h"
 #include "ns3/nr-module.h"
 #include <ns3/antenna-module.h>
+
 #include "ns3/csma-module.h"
-
-#include "ns3/mobility-module.h"
-#include "ns3/config-store-module.h"
-// #include "ns3/lte-module.h"
-#include "ns3/ipv4-static-routing-helper.h"
-
 #include "ns3/helics-helper.h"
+#include "ns3/wifi-module.h"
+
 #include "ns3/dnp3-application-helper-new.h"
 #include "ns3/dnp3-simulator-impl.h"
 
@@ -73,29 +70,31 @@
 #include <unistd.h>
 
 using namespace ns3;
+NS_LOG_COMPONENT_DEFINE ("IntagrationExample5G");
 
 void readMicroGridConfig(std::string fpath, Json::Value& configobj)
 {
-	std::ifstream tifs(fpath);
-	Json::Reader configreader;
-	configreader.parse(tifs, configobj);
+    std::ifstream tifs(fpath);
+    Json::Reader configreader;
+    configreader.parse(tifs, configobj);
 }
 
 int dirExists(const char *path)
 {
-	struct stat info;
-	
-	if(stat( path, &info ) != 0)
-		return 0;
-	else if(info.st_mode & S_IFDIR)
-		return 1;
-	else
-		return 0;
+    struct stat info;
+
+    if(stat( path, &info ) != 0)
+        return 0;
+    else if(info.st_mode & S_IFDIR)
+        return 1;
+    else
+        return 0;
 }
 
 int
 main (int argc, char *argv[])
 {
+
   std::string configFileName;
   std::string helicsConfigFileName;
   std::string topologyConfigFileName;
@@ -110,15 +109,12 @@ main (int argc, char *argv[])
   Json::Value helicsConfigObject;
   Json::Value topologyConfigObject;
 
+  //5G parameter settings
   std::string scenario = "UMa"; //scenario
   double frequency = 28e9; // central frequency
   double bandwidth = 100e6; //bandwidth
-  uint16_t numerologyBwp2 = 2;
-  double centralFrequencyBand2 = 28.2e9;
-  double bandwidthBand2 = 100e6;
   double mobility = false; //whether to enable mobility
-  //double simTime = 1; // in second
-  Time simTime = MilliSeconds (25000);
+  double simTime = 180; // in second
   double speed = 1; // in m/s for walking UT.
   bool logging = true; //whether to enable logging from the simulation, another option is by exporting the NS_LOG environment variable
   double hBS; //base station antenna height in meters
@@ -126,6 +122,9 @@ main (int argc, char *argv[])
   double txPower = 40; // txPower
   enum BandwidthPartInfo::Scenario scenarioEnum = BandwidthPartInfo::UMa;
 
+
+  //Getting the configuration parameters
+  std::cout << "number of args: " << argc << std::endl;
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
   cmd.AddValue("helicsConfig", "Helics configuration file path", helicsConfigFileName);
   cmd.AddValue("microGridConfig", "NS3 MicroGrid configration file path", configFileName);
@@ -136,15 +135,15 @@ main (int argc, char *argv[])
   cmd.AddValue ("frequency", "The central carrier frequency in Hz.", frequency);
   cmd.AddValue ("mobility","If set to 1 UEs will be mobile, when set to 0 UE will be static. By default, they are mobile.", mobility);
   cmd.AddValue ("logging","If set to 0, log components will be disabled.",logging);
-
   cmd.Parse (argc, argv);
 
   // enable logging
   if (logging)
     {
-      LogComponentEnable("Dnp3Application", LOG_LEVEL_INFO);
-      LogComponentEnable ("Dnp3SimulatorImpl", LOG_LEVEL_INFO); 
-      LogComponentEnable ("Ipv4L3ProtocolMIM", LOG_LEVEL_INFO);
+      //LogComponentEnable ("ThreeGppPropagationLossModel", LOG_LEVEL_ALL);
+      LogComponentEnable ("IntagrationExample5G", LOG_LEVEL_INFO);
+      LogComponentEnable ("Dnp3ApplicationNew", LOG_LEVEL_INFO);
+      LogComponentEnable ("Names", LOG_LEVEL_LOGIC);
     }
 
   /*
@@ -159,13 +158,13 @@ main (int argc, char *argv[])
   readMicroGridConfig(configFileName, configObject);
   readMicroGridConfig(helicsConfigFileName, helicsConfigObject);
   readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
-  
+
   scenario = topologyConfigObject["5GSetup"][0]["scenario"].asString();
-  
+
   HelicsHelper helicsHelper(6000);
   std::cout << "Calling Calling Message Federate Constructor" << std::endl;
   helicsHelper.SetupApplicationFederate();
-  
+
   std::string fedName = helics_federate->getName();
 
   // set mobile device and base station antenna heights in meters, according to the chosen scenario
@@ -209,39 +208,43 @@ main (int argc, char *argv[])
   NodeContainer ueNodes;
   int numUE = std::stoi(topologyConfigObject["5GSetup"][0]["numUE"].asString());
   int numEnb = std::stoi(topologyConfigObject["5GSetup"][0]["numEnb"].asString());
-  simTime = Seconds(std::stof(configObject["Simulation"][0]["SimTime"].asString()));
-  float start = std::stof(configObject["Simulation"][0]["StartTime"].asString());
   int includeMIM = std::stoi(configObject["Simulation"][0]["includeMIM"].asString());
   enbNodes.Create (numEnb);
   ueNodes.Create (numUE);
 
   // position the base stations
   Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator> ();
-  for (int i = 0; i < enbNodes.GetN(); i++){
-      enbPositionAlloc->Add (Vector (0.0, 40*i, hBS));
+  for (int x = 0; x < enbNodes.GetN(); x++){
+    enbPositionAlloc->Add (Vector (0.0+x*10, 0.0+x*20, hBS));
   }
+  //enbPositionAlloc->Add (Vector (0.0, 80.0, hBS));
   MobilityHelper enbmobility;
   enbmobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   enbmobility.SetPositionAllocator (enbPositionAlloc);
   enbmobility.Install (enbNodes);
+  enbmobility.Install (ueNodes);
 
   // position the mobile terminals and enable the mobility
-  MobilityHelper uemobility;
+  /*MobilityHelper uemobility;
   uemobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
   uemobility.Install (ueNodes);
 
-  for (int i = 0; i < ueNodes.GetN(); i++){
-     ueNodes.Get (i)->GetObject<MobilityModel> ()->SetPosition (Vector (0.0, 40*i, hUT));
-  }
+  for (int x = 0; x < ueNodes.GetN(); x++){
+    ueNodes.Get (x)->GetObject<MobilityModel> ()->SetPosition (Vector (90+x, 15*x, hUT)); // (x, y, z) in m
+    //speed = speed*-1;
+    //ueNodes.Get (x)->GetObject<ConstantVelocityMobilityModel> ()->SetVelocity (Vector (0, speed, 0)); // move UE1 along the y axis
+  }*/
+
 
   /*
    * Create NR simulation helpers
    */
   Ptr<NrPointToPointEpcHelper> epcHelper = CreateObject<NrPointToPointEpcHelper> ();
+  epcHelper->SetAttribute ("S1uLinkDelay", TimeValue (MilliSeconds (std::stof(topologyConfigObject["5GSetup"][0]["S1uLinkDelay"].asString()))));
   Ptr<IdealBeamformingHelper> idealBeamformingHelper = CreateObject <IdealBeamformingHelper> ();
-  epcHelper->Initialize();
   Ptr<NrHelper> nrHelper = CreateObject<NrHelper> ();
-  nrHelper->Initialize();
+  nrHelper->SetGnbPhyAttribute ("N2Delay", UintegerValue (std::stof(topologyConfigObject["5GSetup"][0]["N2Delay"].asString())));
+  nrHelper->SetGnbPhyAttribute ("N1Delay", UintegerValue (std::stof(topologyConfigObject["5GSetup"][0]["N1Delay"].asString())));
   nrHelper->SetBeamformingHelper (idealBeamformingHelper);
   nrHelper->SetEpcHelper (epcHelper);
 
@@ -262,54 +265,45 @@ main (int argc, char *argv[])
    * |---------------BWP----------------|
    */
   CcBwpCreator::SimpleOperationBandConf bandConf (frequency, bandwidth, numCcPerBand, scenarioEnum);
-  CcBwpCreator::SimpleOperationBandConf bandConf2 (centralFrequencyBand2, bandwidthBand2, numCcPerBand, BandwidthPartInfo::UMi_StreetCanyon);
   OperationBandInfo band = ccBwpCreator.CreateOperationBandContiguousCc (bandConf);
-  OperationBandInfo band2 = ccBwpCreator.CreateOperationBandContiguousCc (bandConf2);
   //Initialize channel and pathloss, plus other things inside band.
   nrHelper->InitializeOperationBand (&band);
-  nrHelper->InitializeOperationBand (&band2);
-  allBwps = CcBwpCreator::GetAllBwps ({band, band2});
-  //allBwps = CcBwpCreator::GetAllBwps ({band});
+  allBwps = CcBwpCreator::GetAllBwps ({band});
 
   // Configure ideal beamforming method
   idealBeamformingHelper->SetAttribute ("BeamformingMethod", TypeIdValue (DirectPathBeamforming::GetTypeId ()));
 
   // Configure scheduler
-  nrHelper->SetSchedulerTypeId (NrMacSchedulerTdmaPF::GetTypeId ());
+  nrHelper->SetSchedulerTypeId (NrMacSchedulerTdmaRR::GetTypeId ());
 
   // Antennas for the UEs
-  nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (8));
+  nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (2));
   nrHelper->SetUeAntennaAttribute ("NumColumns", UintegerValue (4));
   nrHelper->SetUeAntennaAttribute ("AntennaElement", PointerValue (CreateObject<IsotropicAntennaModel> ()));
 
   // Antennas for the gNbs
-  nrHelper->SetGnbAntennaAttribute ("NumRows", UintegerValue (4));
+  nrHelper->SetGnbAntennaAttribute ("NumRows", UintegerValue (8));
   nrHelper->SetGnbAntennaAttribute ("NumColumns", UintegerValue (8));
   nrHelper->SetGnbAntennaAttribute ("AntennaElement", PointerValue (CreateObject<IsotropicAntennaModel> ()));
-
-  uint32_t bwpIdForLowLat = 0;
-  uint32_t bwpIdForVoice = 1;
-
-  nrHelper->SetGnbBwpManagerAlgorithmAttribute ("NGBR_LOW_LAT_EMBB", UintegerValue (bwpIdForLowLat));
-  nrHelper->SetGnbBwpManagerAlgorithmAttribute ("GBR_CONV_VOICE", UintegerValue (bwpIdForVoice));
-
-  nrHelper->SetUeBwpManagerAlgorithmAttribute ("NGBR_LOW_LAT_EMBB", UintegerValue (bwpIdForLowLat));
-  nrHelper->SetUeBwpManagerAlgorithmAttribute ("GBR_CONV_VOICE", UintegerValue (bwpIdForVoice));
 
   // install nr net devices
   NetDeviceContainer enbNetDev = nrHelper->InstallGnbDevice (enbNodes, allBwps);
   NetDeviceContainer ueNetDev = nrHelper->InstallUeDevice (ueNodes, allBwps);
+
+  /*for (int i = 0; i < ueNetDev.GetN(); i++){
+    Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();
+    em->SetAttribute("ErrorRate", DoubleValue(0.00001));
+    ueNetDev.Get(i)->SetAttribute("ReceiveErrorModel", PointerValue(em));
+  }*/
 
   int64_t randomStream = 1;
   randomStream += nrHelper->AssignStreams (enbNetDev, randomStream);
   randomStream += nrHelper->AssignStreams (ueNetDev, randomStream);
 
   for (int i = 0; i < enbNetDev.GetN(); i++){
-      nrHelper->GetGnbPhy (enbNetDev.Get (i), 0)->SetAttribute ("Numerology", UintegerValue (4));
-      nrHelper->GetGnbPhy (enbNetDev.Get (i), 0)->SetTxPower (10 * log10(2));
-      nrHelper->GetGnbPhy (enbNetDev.Get (i), 1)->SetAttribute ("Numerology", UintegerValue (2));
-      nrHelper->GetGnbPhy (enbNetDev.Get (i), 1)->SetTxPower (10 * log10(2));
+      nrHelper->GetGnbPhy (enbNetDev.Get (0), 0)->SetTxPower (txPower);
   }
+  //nrHelper->GetGnbPhy (enbNetDev.Get (1), 0)->SetTxPower (txPower);
 
   // When all the configuration is done, explicitly call UpdateConfig ()
   for (auto it = enbNetDev.Begin (); it != enbNetDev.End (); ++it)
@@ -322,21 +316,16 @@ main (int argc, char *argv[])
       DynamicCast<NrUeNetDevice> (*it)->UpdateConfig ();
     }
 
-  InternetStackHelper internet;
-  InternetStackHelperMIM internetMIM;
-  internet.Install(ueNodes);
-
-
-  Ipv4InterfaceContainer ueIpIface;
-  ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueNetDev));
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
   // create the internet and install the IP stack on the UEs
   // get SGW/PGW and create a single RemoteHost
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
   NodeContainer remoteHostContainer;
   remoteHostContainer.Create (1);
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
+  InternetStackHelper internet;
+  InternetStackHelperMIM internetStackMIM;
   internet.Install (remoteHostContainer);
+  //internetStackMIM.Install (enbNodes);
 
   // connect a remoteHost to pgw. Setup routing too
   PointToPointHelper p2ph;
@@ -348,49 +337,24 @@ main (int argc, char *argv[])
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
-  Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
 
-  Ipv4Address gateway = epcHelper->GetUeDefaultGatewayAddress ();
 
-  int numSSPUE = configObject["microgrid"].size(); //10;
-  NodeContainer subNodes;
-  subNodes.Create (numSSPUE);
-  internet.Install (subNodes);
+  internet.Install (ueNodes);
+  Ipv4InterfaceContainer ueIpIface;
+  ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueNetDev));
 
-  NodeContainer MIM;
-  MIM.Create(numSSPUE);
-  if (includeMIM){
-	  internetMIM.Install (MIM);
-  }else{
-  	  internet.Install (MIM);
-  }
-  
-  std::vector<NodeContainer> csmaSubNodes;
-  for (int i = 0; i < subNodes.GetN(); i++){
-	  std::cout << "Creating the csma nodes" << std::endl;
-	  NodeContainer csmaSubNodes_temp (ueNodes.Get(i), MIM.Get(i), subNodes.Get(i));
-	  csmaSubNodes.push_back(csmaSubNodes_temp);
-  }
-  
-  CsmaHelper csma;
-  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  csma.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
-  
-  Ipv4InterfaceContainer inter;
-  Ipv4InterfaceContainer inter_MIM;
-  for (int i = 0; i < csmaSubNodes.size(); i++){
-	  NetDeviceContainer internetDevicesSub = csma.Install (csmaSubNodes[i]);
-	  //Assign IP Address
-	  Ipv4AddressHelper ipv4Sub;
-	  std::string address = "172."+std::to_string(17+i)+".0.0";
-	  ipv4Sub.SetBase (address.c_str(), "255.255.0.0", "0.0.0.1");
-	  Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign (internetDevicesSub);
-	
-	  inter.Add(interfacesSub.Get(2));
-	  inter_MIM.Add(interfacesSub.Get(1));
+  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
+  {
+       Ptr<Node> ueNode = ueNodes.Get (u);
+       Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
+       ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
   }
 
-  std::map<std::string, std::string> attack;
+  nrHelper->AttachToClosestEnb (ueNetDev, enbNetDev);
+
+  //Getting the attack vectors from the config file
+  std::map<std::string, std::string> attack; 
   for (uint32_t j = 1; j < configObject["MIM"].size(); j++){
 	  for(const auto& item : configObject["MIM"][j].getMemberNames() ){
 		  std::string ID = "MIM-"+std::to_string(j)+"-"+item;
@@ -402,54 +366,7 @@ main (int argc, char *argv[])
 	  
   }
 
-  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  for (int i = 0; i < ueNodes.GetN(); i++){
-	  remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(2,0).GetLocal(), Ipv4Mask ("255.0.0.0"),gateway, 1);
-  }
-  for (int i = 0; i < subNodes.GetN(); i ++){
-	  remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(2,0).GetLocal(), 1);
-  }
-  
-  for (int i = 0; i < MIM.GetN(); i++){
-	  Ipv4Address addr2_ = ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress (2, 0).GetLocal ();
-	  Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
-	  for (int j = 0; j < remoteHostContainer.GetN(); j++){
-		  subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr2_, 1);
-	  }
-	  subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), 1);
-  }
-  
-  for (int i = 0; i < subNodes.GetN(); i++){
-	  Ptr<Ipv4> ipv4_2 = MIM.Get(i)->GetObject<Ipv4>();
-	  Ipv4Address addr5_ = ipv4_2->GetAddress(1,0).GetLocal();
-	  Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
-	  for (int j = 0; j < remoteHostContainer.GetN(); j++){
-		  subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, 1);
-	  }
-  }
 
-  //internet.Install(ueNodes);
-
-  //Ipv4InterfaceContainer ueIpIface;
-  //ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueNetDev));
-
-  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
-  {
-    Ptr<Node> ueNode = ueNodes.Get (u);
-    Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-    ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);					   
-  }
-
-  for (uint16_t i = 0; i < ueNetDev.GetN(); i++)
-  {
-     auto enbDev = DynamicCast<NrGnbNetDevice> (enbNetDev.Get (i));
-     auto ueDev = DynamicCast<NrUeNetDevice> (ueNetDev.Get (i));
-     NS_ASSERT (enbDev != nullptr);
-     NS_ASSERT (ueDev != nullptr);
-     nrHelper->AttachToEnb (ueDev, enbDev);
-  }
-
-  
   std::string IDsMIM = configObject["MIM"][0]["listMIM"].asString();
   size_t pos = 0;
   std::string delimiter = ",";
@@ -463,91 +380,120 @@ main (int argc, char *argv[])
   }
   val.push_back(VI);
 
-  // assign IP address to UEs, and install UDP downlink applications
-  /*uint16_t dlPort = 1234;
-  ApplicationContainer clientApps;
-  ApplicationContainer serverApps;
-  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
-    {
-      UdpServerHelper dlPacketSinkHelper (dlPort);
-      serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get (u)));
+  //Getting the UE gateway
+  Ipv4Address gateway = epcHelper->GetUeDefaultGatewayAddress ();
 
-      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
-      dlClient.SetAttribute ("Interval", TimeValue (MicroSeconds (1)));
-      //dlClient.SetAttribute ("MaxPackets", UintegerValue(0xFFFFFFFF));
-      dlClient.SetAttribute ("MaxPackets", UintegerValue (10));
-      dlClient.SetAttribute ("PacketSize", UintegerValue (1500));
-      clientApps.Add (dlClient.Install (remoteHost));
-    }*/
+  //Creating the Microgrid Nodes
+  NodeContainer Microgrid;
+  Microgrid.Create(ueNodes.GetN());
+  internet.Install(Microgrid);
+
+  //Creating the Man-In-The-Middle nodes
+  NodeContainer MIM;
+  MIM.Create(ueNodes.GetN());
+  if (includeMIM){
+       internetStackMIM.Install (MIM);
+  }else{
+       internet.Install (MIM);
+  }
+
+  CsmaHelper csma;
+  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
+  csma.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
+
+  //Building the routing tables
+  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  for (int i = 0; i < Microgrid.GetN(); i++){
+	  Ptr<Node> tempNode = Microgrid.Get(i);
+	  NetDeviceContainer NetDev = csma.Install(NodeContainer(ueNodes.Get(i), MIM.Get(i), tempNode)); //star.GetSpokeNode(i)));
+	  Ipv4AddressHelper ipv4Sub;
+	  std::string address = std::to_string(i+20)+".0.0.0";
+	  ipv4Sub.SetBase(address.c_str(), "255.0.0.0"); //, "0.0.0.1");
+	  Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign(NetDev);
+
+	  std::cout << "MIM route" << std::endl;
+          Ipv4Address addr2_ = ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress (2, 0).GetLocal ();
+	  Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
+	  for (int j = 0; j < remoteHostContainer.GetN(); j++){
+	       subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr2_, 1);
+	  }
+	  subNodeStaticRouting->AddNetworkRouteTo (tempNode->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), 1);
+
+	  std::cout << "Microgrid route" << std::endl;
+	  Ptr<Ipv4StaticRouting> MicrogridRouting = ipv4RoutingHelper.GetStaticRouting (Microgrid.Get(i)->GetObject<Ipv4>());
+	  Ptr<Ipv4> ipv4_2 = MIM.Get(i)->GetObject<Ipv4>();
+	  Ipv4Address addr5_ = ipv4_2->GetAddress(1,0).GetLocal();
+	  for (int j = 0; j < remoteHostContainer.GetN(); j++){
+	      MicrogridRouting->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.0.0.0"), addr5_, 1);
+	  }
+
+	  std::cout << "Remote Host" << std::endl;
+	  remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(2,0).GetLocal(), Ipv4Mask ("255.0.0.0"),gateway, 1);
+	  remoteHostStaticRouting->AddNetworkRouteTo(Microgrid.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.0.0.0"),gateway, 1);
+  }
+
+  // assign IP address to UEs, and install UDP downlink applications
+  uint16_t dlPort = 1234;
+  //ApplicationContainer clientApps;
+  //ApplicationContainer serverApps;
   uint16_t port = 20000;
   uint16_t master_port = 40000;
-  ApplicationContainer dnpOutstationApp, dnpMasterApp;
   std::vector<uint16_t> mimPort;
-  for (i = 0;i < configObject["microgrid"].size();i++)
-  {
-	  mimPort.push_back(master_port);
-	  auto ep_name = configObject["microgrid"][i]["name"].asString();
-	  std::cout << "Microgrid network node: " << ep_name << " " << subNodes.GetN() << " " << configObject["microgrid"][i].size() << " " << i << std::endl;
-	  Ptr<Node> tempnode1 = subNodes.Get(i);
-	  auto cc_name = configObject["controlCenter"]["name"].asString();
-	  std::cout << "Control Center network node: " << cc_name << std::endl;
-	  
-	  int ID = i+1;
-	  Dnp3ApplicationHelperNew dnp3Master ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, master_port));  //star.GetHubIpv4Address(i), master_port));
-	  
-	  dnp3Master.SetAttribute("LocalPort", UintegerValue(master_port));
-	  dnp3Master.SetAttribute("RemoteAddress", AddressValue(inter.GetAddress(i)));//star.GetSpokeIpv4Address (i)));
-	  dnp3Master.SetAttribute("RemotePort", UintegerValue(port));
-	  dnp3Master.SetAttribute("JitterMinNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMin"].asString())));
-	  dnp3Master.SetAttribute("JitterMaxNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMax"].asString())));
-	  dnp3Master.SetAttribute("isMaster", BooleanValue (true));
-	  dnp3Master.SetAttribute("Name", StringValue (cc_name+ep_name));
-	  dnp3Master.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
-	  dnp3Master.SetAttribute("MasterDeviceAddress", UintegerValue(1));
-	  dnp3Master.SetAttribute("StationDeviceAddress", UintegerValue(i+2));
-	  dnp3Master.SetAttribute("IntegrityPollInterval", UintegerValue(10));
-	  dnp3Master.SetAttribute("EnableTCP", BooleanValue (false));
-	  
-	  Ptr<Dnp3ApplicationNew> master = dnp3Master.Install (remoteHost, std::string(cc_name+ep_name));
-	  dnpMasterApp.Add(master);
-	  
-	  Dnp3ApplicationHelperNew dnp3Outstation ("ns3::UdpSocketFactory", InetSocketAddress (inter.GetAddress(i), port)); //star.GetSpokeIpv4Address (i), port));
-	  dnp3Outstation.SetAttribute("LocalPort", UintegerValue(port));
-	  dnp3Outstation.SetAttribute("RemoteAddress", AddressValue(remoteHostAddr)); //star.GetHubIpv4Address(i)));
-	  dnp3Outstation.SetAttribute("RemotePort", UintegerValue(master_port));
-	  dnp3Outstation.SetAttribute("isMaster", BooleanValue (false));
-	  dnp3Outstation.SetAttribute("Name", StringValue (ep_name));
-	  dnp3Outstation.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
-	  dnp3Outstation.SetAttribute("MasterDeviceAddress", UintegerValue(1));
-	  dnp3Outstation.SetAttribute("StationDeviceAddress", UintegerValue(i+2));
-	  dnp3Outstation.SetAttribute("EnableTCP", BooleanValue (false));
-	  
-	  Ptr<Dnp3ApplicationNew> slave = dnp3Outstation.Install (tempnode1, std::string(ep_name));
-	  dnpOutstationApp.Add(slave);
-	  Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, master, 0);
-	  Simulator::Schedule(MilliSeconds(3005), &Dnp3ApplicationNew::send_control_analog, master, 
-			  Dnp3ApplicationNew::DIRECT, 0, -16);
-	  master_port += 1;
-	  
-  }
-  
-  fedName = helics_federate->getName();
-  std::cout << "Federate name: " << helics_federate->getName().c_str() << std::endl;
-  int ep_count = helics_federate->getEndpointCount();
-  for(int i=0; i < ep_count; i++){
-	  helics::Endpoint ep = helics_federate->getEndpoint(i);
-	  std::string epName = ep.getName();
-	  std::string ep_info = ep.getInfo();
-	  size_t pos = epName.find(fedName);
-	  if(pos != std::string::npos) {
-		  epName.erase(pos, fedName.length()+1);
-	  }
-	  std::cout << "Endpoint name: " << epName << std::endl;
-  }
+  ApplicationContainer dnpOutstationApp, dnpMasterApp;
+  for (uint32_t u = 0; u < Microgrid.GetN(); u++){
+      mimPort.push_back(master_port);
+      auto ep_name = configObject["microgrid"][u]["name"].asString();
+      auto cc_name = configObject["controlCenter"]["name"].asString();
+      std::cout << "Microgrid network node: " << ep_name << " " << configObject["microgrid"][u].size() << std::endl;
+      Dnp3ApplicationHelperNew dnp3Master ("ns3::UdpSocketFactory", InetSocketAddress (internetIpIfaces.GetAddress(1), master_port)); //remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), master_port));  //star.GetHubIpv4Address(i), master_port));
+      std::cout << "FFFFFFFFFFFFFFFFFFFFFF" << std::endl;
+      dnp3Master.SetAttribute("LocalPort", UintegerValue(master_port));
+      dnp3Master.SetAttribute("RemoteAddress", AddressValue(Microgrid.Get(u)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal()));//star.GetSpokeIpv4Address (i)));
+      dnp3Master.SetAttribute("RemotePort", UintegerValue(port));
+      dnp3Master.SetAttribute("JitterMinNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMin"].asString())));
+      dnp3Master.SetAttribute("JitterMaxNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMax"].asString())));
+      dnp3Master.SetAttribute("isMaster", BooleanValue (true));
+      dnp3Master.SetAttribute("Name", StringValue (cc_name+ep_name));
+      dnp3Master.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
+      dnp3Master.SetAttribute("MasterDeviceAddress", UintegerValue(1));
+      dnp3Master.SetAttribute("StationDeviceAddress", UintegerValue(u+2));
+      dnp3Master.SetAttribute("IntegrityPollInterval", UintegerValue(10));
+      dnp3Master.SetAttribute("EnableTCP", BooleanValue (false));
+      
+      Ptr<Dnp3ApplicationNew> master = dnp3Master.Install (remoteHostContainer.Get(0), std::string(cc_name+ep_name));
+      dnpMasterApp.Add(master);
+      Dnp3ApplicationHelperNew dnp3Outstation ("ns3::UdpSocketFactory", InetSocketAddress (Microgrid.Get(u)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), port)); //star.GetSpokeIpv4Address (i), port));
+      dnp3Outstation.SetAttribute("LocalPort", UintegerValue(port));
+      dnp3Outstation.SetAttribute("RemoteAddress", AddressValue(internetIpIfaces.GetAddress(1)));//remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal())); //star.GetHubIpv4Address(i)));
+      dnp3Outstation.SetAttribute("RemotePort", UintegerValue(master_port));
+      dnp3Outstation.SetAttribute("isMaster", BooleanValue (false));
+      dnp3Outstation.SetAttribute("Name", StringValue (ep_name));
+      dnp3Outstation.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
+      dnp3Outstation.SetAttribute("MasterDeviceAddress", UintegerValue(1));
+      dnp3Outstation.SetAttribute("StationDeviceAddress", UintegerValue(u+2));
+      dnp3Outstation.SetAttribute("EnableTCP", BooleanValue (false));
+      
+      Ptr<Dnp3ApplicationNew> slave = dnp3Outstation.Install (Microgrid.Get(u), std::string(ep_name));
+      dnpOutstationApp.Add(slave);
+      Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, master, 0);
+      Simulator::Schedule(MilliSeconds(3005), &Dnp3ApplicationNew::send_control_analog, master, Dnp3ApplicationNew::DIRECT, 0, -16);
+      master_port += 1;
+    }
 
-  // attach UEs to the closest eNB
-  //nrHelper->AttachToClosestEnb (ueNetDev, enbNetDev);
-  std::cout << "IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII" << std::endl;
+
+   fedName = helics_federate->getName();
+   std::cout << "Federate name: " << helics_federate->getName().c_str() << std::endl;
+   int ep_count = helics_federate->getEndpointCount();
+   for(int i=0; i < ep_count; i++){
+      helics::Endpoint ep = helics_federate->getEndpoint(i);
+      std::string epName = ep.getName();
+      std::string ep_info = ep.getInfo();
+      size_t pos = epName.find(fedName);
+      if(pos != std::string::npos) {
+             epName.erase(pos, fedName.length()+1);
+      }
+      std::cout << "Endpoint name: " << epName << std::endl;
+  }
 
   if (includeMIM == 1){
 	  for (int x = 0; x < val.size(); x++){ //std::stoi(configObject["MIM"][0]["NumberAttackers"].asString()); x++){
@@ -557,35 +503,28 @@ main (int argc, char *argv[])
 		  Names::Add(ep_name, tempnode);
 		  std::string enamestring = ep_name;
 		  Ptr<Ipv4> ip = Names::Find<Node>(enamestring)->GetObject<Ipv4>();
-		  int ID = MIM_ID;
-		  std::cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH" << std::endl; 
-		  std::cout << MIM_ID-1 << std::endl;
-		  std::cout << MIM.GetN() << std::endl; 
-		  std::cout << ip << std::endl;
-		  std::cout << ip->GetObject<Ipv4L3ProtocolMIM>() << std::endl;
-		  ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = remoteHostAddr;
-                  std::cout << "I AM HERE!!!!!!!!!!!!" << std::endl;
-
+		  int ID = 1;
+		  ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = internetIpIfaces.GetAddress(1); //Microgrid.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(); //internetIpIfaces.GetAddress(0);
+		  
 		  Dnp3ApplicationHelperNew dnp3MIM1 ("ns3::UdpSocketFactory", InetSocketAddress (tempnode->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), port)); 
 		  dnp3MIM1.SetAttribute("LocalPort", UintegerValue(port));
-		  dnp3MIM1.SetAttribute("RemoteAddress", AddressValue(remoteHostAddr)); //star.GetHubIpv4Address(MIM_ID-1)));
+		  dnp3MIM1.SetAttribute("RemoteAddress", AddressValue(internetIpIfaces.GetAddress(1))); //star.GetHubIpv4Address(MIM_ID-1)));
 		  if(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 3 || std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 4){
-			  dnp3MIM1.SetAttribute("RemoteAddress2", AddressValue(subNodes.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal())); 
+			  dnp3MIM1.SetAttribute("RemoteAddress2", AddressValue(Microgrid.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal()));
 		  }
 		  dnp3MIM1.SetAttribute("RemotePort", UintegerValue(mimPort[MIM_ID-1]));
 		  
-		  std::cout << "LLLLLLLLLLLLLLLLL" << std::endl;
 		  dnp3MIM1.SetAttribute ("PointsFilename", StringValue (pointFileDir+"/points_mg"+std::to_string(MIM_ID)+".csv"));
 		  dnp3MIM1.SetAttribute("JitterMinNs", DoubleValue (500));
 		  dnp3MIM1.SetAttribute("JitterMaxNs", DoubleValue (1000));
 		  dnp3MIM1.SetAttribute("isMaster", BooleanValue (false));
 		  dnp3MIM1.SetAttribute ("Name", StringValue (enamestring));
 		  dnp3MIM1.SetAttribute("MasterDeviceAddress", UintegerValue(1));
-		  dnp3MIM1.SetAttribute("StationDeviceAddress", UintegerValue(2+x));
-		  dnp3MIM1.SetAttribute("IntegrityPollInterval", UintegerValue (10));
-		  dnp3MIM1.SetAttribute("EnableTCP", BooleanValue (false));
-		  dnp3MIM1.SetAttribute("AttackSelection", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"])));
-		  
+ 		  dnp3MIM1.SetAttribute("StationDeviceAddress", UintegerValue(2+x));
+	    	  dnp3MIM1.SetAttribute("IntegrityPollInterval", UintegerValue (10));
+	    	  dnp3MIM1.SetAttribute("EnableTCP", BooleanValue (false));
+	    	  dnp3MIM1.SetAttribute("AttackSelection", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]))); 
+
 		  if (std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 2 || std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 4){
 			  if(attack["MIM-"+std::to_string(MIM_ID)+"-scenario_id"] == "b"){
 				  dnp3MIM1.SetAttribute("Value_attck_max", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-attack_val"]));
@@ -611,27 +550,22 @@ main (int argc, char *argv[])
 		  dnp3MIM1.SetAttribute("mitmFlag", BooleanValue(true));
 		  Ptr<Dnp3ApplicationNew> mim = dnp3MIM1.Install (tempnode, enamestring);
 		  ApplicationContainer dnpMIMApp(mim);
-		  dnpMIMApp.Start (Seconds (start));
-		  dnpMIMApp.Stop (simTime);
-		  
+		  dnpMIMApp.Start (Seconds (0.0));
+		  dnpMIMApp.Stop (Seconds(simTime));
+
 	  }
   }
-  dnpMasterApp.Start (Seconds (start));
-  dnpMasterApp.Stop (simTime);
-  dnpOutstationApp.Start (Seconds (start));
-  dnpOutstationApp.Stop (simTime);
-
 
   // start server and client apps
-  //serverApps.Start (Seconds (0.4));
-  //clientApps.Start (Seconds (0.4));
-  //serverApps.Stop (Seconds (simTime));
-  //clientApps.Stop (Seconds (simTime - 0.2));
+  dnpMasterApp.Start (Seconds (0.0));
+  dnpOutstationApp.Start (Seconds (0.0));
+  dnpMasterApp.Stop (Seconds (simTime));
+  dnpOutstationApp.Stop (Seconds (simTime));
 
   // enable the traces provided by the nr module
   nrHelper->EnableTraces ();
 
-  //Simulator::Stop (simTime);
+  //Simulator::Stop (Seconds (simTime));
   Simulator::Run ();
   Simulator::Destroy ();
   return 0;
