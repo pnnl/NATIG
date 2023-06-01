@@ -273,7 +273,7 @@ main (int argc, char *argv[])
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   for (uint16_t i = 0; i < numNodePairs*2; i++)
   {
-	  positionAlloc->Add (Vector (distance * i, 0, 0));
+	  positionAlloc->Add (Vector (distance * i, 0, 10));
   }
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -380,7 +380,7 @@ main (int argc, char *argv[])
   // Create the Internet
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (5000));
   p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
   Ipv4AddressHelper ipv4h;
@@ -402,13 +402,18 @@ main (int argc, char *argv[])
       // Set the default gateway for the UE
       Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
       ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+      ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), epcHelper->GetUeDefaultGatewayAddress(), 1);
+      ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("172.0.0.0"), Ipv4Mask ("255.0.0.0"),1);
     }
 
   // Attach one UE per eNodeB
   for (uint16_t i = 0; i < numNodePairs; i++)
     {
-      nrHelper->AttachToEnb (ueLowLatNetDev.Get(i), enbNetDev.Get(i));
-      // side effect: the default EPS bearer will be activated
+	    auto enbDev = DynamicCast<NrGnbNetDevice> (enbNetDev.Get (i%enbNetDev.GetN ()));
+	    auto ueDev = DynamicCast<NrUeNetDevice> (ueLowLatNetDev.Get (i));
+	    NS_ASSERT (enbDev != nullptr);
+	    NS_ASSERT (ueDev != nullptr);
+	    nrHelper->AttachToEnb (ueDev, enbDev);
     }
 
   //This is where the substation setup starts
@@ -429,7 +434,7 @@ main (int argc, char *argv[])
   std::vector<NodeContainer> csmaSubNodes;
   for (int i = 0; i < subNodes.GetN(); i++){
     std::cout << "Creating the csma nodes" << std::endl;
-    NodeContainer csmaSubNodes_temp (ueNodes.Get(i%ueNodes.GetN()), MIM.Get(i), subNodes.Get(i));
+    NodeContainer csmaSubNodes_temp (ueNodes.Get(i%ueNodes.GetN()), MIM.Get(i), subNodes.Get(i));// i%ueNodes.GetN()
     csmaSubNodes.push_back(csmaSubNodes_temp);
   }
 
@@ -470,19 +475,19 @@ main (int argc, char *argv[])
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   for (int i = 0; i < ueNodes.GetN(); i++){
-      remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(2,0).GetLocal(), Ipv4Mask ("255.0.0.0"),gateway, 1);
+      remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(2,0).GetLocal(), Ipv4Mask ("255.255.0.0"),ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1);//gateway, 1);
   }
   for (int i = 0; i < subNodes.GetN(); i ++){
-    remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1);
+    remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
   }
 
   for (int i = 0; i < MIM.GetN(); i++){
-    Ipv4Address addr2_ = ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress (2+i, 0).GetLocal ();
+    Ipv4Address addr2_ = ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress (2+int(i/ueNodes.GetN()), 0).GetLocal ();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
     for (int j = 0; j < remoteHostContainer.GetN(); j++){
         subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr2_, 1);
     }
-    subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), 1);
+    subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), 1);
   }
 
   for (int i = 0; i < subNodes.GetN(); i++){

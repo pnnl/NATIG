@@ -282,7 +282,7 @@ main (int argc, char *argv[])
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
-  numNodePairs = 1; //configObject["microgrid"].size();
+  numNodePairs = 2; //1; //configObject["microgrid"].size();
   enbNodes.Create (numNodePairs);
   ueNodes.Create (numNodePairs);
 
@@ -383,15 +383,20 @@ main (int argc, char *argv[])
 
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  for (int i = 0; i < ueNodes.GetN(); i++){
-      remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(2,0).GetLocal(), Ipv4Mask ("255.0.0.0"),gateway, 1);
-  }
+  /*for (int i = 0; i < ueNodes.GetN(); i++){
+      for (int x = 0; x < subNodes.GetN()/ueNodes.GetN(); x++){
+          remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(2+x,0).GetLocal(), Ipv4Mask ("255.0.0.0"),gateway, 1);
+      }
+  }*/
   for (int i = 0; i < subNodes.GetN(); i ++){
-    remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1);
+    remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
   }
 
   for (int i = 0; i < MIM.GetN(); i++){
-    Ipv4Address addr2_ = ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress (2+i, 0).GetLocal ();
+    Ipv4Address addr3_ = MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
+    Ptr<Ipv4StaticRouting> ueNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>());
+    ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2+int(i/ueNodes.GetN()));
+    Ipv4Address addr2_ = ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress (2+int(i/ueNodes.GetN()), 0).GetLocal ();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
     for (int j = 0; j < remoteHostContainer.GetN(); j++){
         subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr2_, 1);
