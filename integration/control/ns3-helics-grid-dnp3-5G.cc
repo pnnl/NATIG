@@ -199,7 +199,7 @@ main (int argc, char *argv[])
   uint16_t numerologyBwp2 = 2;
   double centralFrequencyBand2 = 28.2e9;
   double bandwidthBand2 = 100e6;
-  double totalTxPower = 4;
+  double totalTxPower = 40;
 
   // Command line arguments
   CommandLine cmd (__FILE__);
@@ -266,7 +266,7 @@ main (int argc, char *argv[])
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
-  numNodePairs = 1; //configObject["microgrid"].size();
+  numNodePairs = 2; //configObject["microgrid"].size();
   enbNodes.Create (numNodePairs);
   ueNodes.Create (numNodePairs);
 
@@ -381,7 +381,7 @@ main (int argc, char *argv[])
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (5000));
-  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
+  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (0)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
@@ -402,8 +402,8 @@ main (int argc, char *argv[])
       // Set the default gateway for the UE
       Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
       ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
-      ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), epcHelper->GetUeDefaultGatewayAddress(), 1);
-      ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("172.0.0.0"), Ipv4Mask ("255.0.0.0"),1);
+      //ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), epcHelper->GetUeDefaultGatewayAddress(), 1);
+      //ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("172.0.0.0"), Ipv4Mask ("255.0.0.0"),1);
     }
 
   // Attach one UE per eNodeB
@@ -440,7 +440,7 @@ main (int argc, char *argv[])
 
   CsmaHelper csma;
   csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  csma.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
+  csma.SetChannelAttribute ("Delay", TimeValue (Seconds (0.000)));
 
   Ipv4InterfaceContainer inter;
   Ipv4InterfaceContainer inter_MIM;
@@ -482,6 +482,9 @@ main (int argc, char *argv[])
   }
 
   for (int i = 0; i < MIM.GetN(); i++){
+    Ipv4Address addr3_ = MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
+    Ptr<Ipv4StaticRouting> ueNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>());
+    ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2+int(i/ueNodes.GetN()));
     Ipv4Address addr2_ = ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress (2+int(i/ueNodes.GetN()), 0).GetLocal ();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
     for (int j = 0; j < remoteHostContainer.GetN(); j++){
