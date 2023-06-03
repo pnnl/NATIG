@@ -678,7 +678,7 @@ main (int argc, char *argv[])
   //csma.EnablePcapAll("routing-dev-csma", true);
   enablePcapAllBaseTime("radics-exercise2-utility1-1day", remoteHostContainer, ncP2P_nodes);
 
-  //Simulator::Stop (simTime);
+  Simulator::Stop (simTime);
   Simulator::Run ();
 
   /*GtkConfigStore config;
