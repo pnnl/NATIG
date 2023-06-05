@@ -84,6 +84,18 @@ To enable 5G capabilities:
 7. return to the main ns-3-dev folder
 8. run ./make.sh
 
+
+Once the setup is done you can start to run the code
+1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
+2. open the run.sh script
+3. Lines 69, 70 and 71 contain 3 versions of the network setup
+   - line 69 is the 4G setup
+   - line 70 is the 5G setup
+   - line 71 is the base setup
+4. Select the setup
+5. Save the changes
+6. run ./run.sh
+
    
 
 ## Available configurations
@@ -96,14 +108,13 @@ Existing error: When using a mesh topology with wifi, we do run into the ressour
 1. Ring
 2. Mesh
 3. Star
-4. 5G
-#### Future topologies
-1. 4G
 
 ### Connection types:
 1. point to point connections (p2p)
 2. CSMA
 3. Wifi
+5. 4G
+6. 5G
 
 ## Configuration files
 
