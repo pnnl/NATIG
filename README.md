@@ -20,7 +20,6 @@ To enable 5G capabilities:
 1. request access to https://gitlab.com/cttc-lena/nr
 2. clone the nr repo in the contrib folder of ns-3-dev folder
 3. checkout the branch labeled 5g-lena-v1.2.y
-4. return to the main ns-3-dev folder
 5. Some updates that need to be done to the code before it can be compiled:
    - the nr-gnb-net-device.cc in the model folder needs the following function:   
      ```
@@ -49,7 +48,8 @@ To enable 5G capabilities:
      ```
      NOTE: dont forget to add **Ptr<Queue<Packet\>\> GetQueue (void) const** to nr-net-device.h
    - 
-7. run ./make.sh
+7. return to the main ns-3-dev folder
+8. run ./make.sh
 
    
 
