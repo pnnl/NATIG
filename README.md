@@ -47,6 +47,36 @@ To enable 5G capabilities:
       }
      ```
      NOTE: dont forget to add **Ptr<Queue<Packet\>\> GetQueue (void) const** to nr-net-device.h
+   - In nr-point-to-point-epc-helper.cc in the helper folder replace the DoAddX2Interface function with the following:
+     ```
+     void
+     NrPointToPointEpcHelper::DoAddX2Interface (const Ptr<EpcX2> &gnb1X2, const Ptr<NetDevice> &gnb1NetDev,
+                                           const Ipv4Address &gnb1X2Address,
+                                           const Ptr<EpcX2> &gnb2X2, const Ptr<NetDevice> &gnb2NetDev,
+                                           const Ipv4Address &gnb2X2Address) const
+     {
+       NS_LOG_FUNCTION (this);
+       Ptr<NrGnbNetDevice> gnb1NetDevice = gnb1NetDev->GetObject<NrGnbNetDevice> ();
+       Ptr<NrGnbNetDevice> gnb2NetDevice = gnb2NetDev->GetObject<NrGnbNetDevice> ();
+       uint16_t gnb1CellId = gnb1NetDevice->GetCellId ();
+       uint16_t gnb2CellId = gnb2NetDevice->GetCellId ();
+
+       NS_ABORT_IF (gnb1NetDevice == nullptr);
+       NS_ABORT_IF (gnb2NetDevice == nullptr);
+
+       NS_LOG_LOGIC ("NrGnbNetDevice #1 = " << gnb1NetDev << " - CellId = " << gnb1CellId);
+       NS_LOG_LOGIC ("NrGnbNetDevice #2 = " << gnb2NetDev << " - CellId = " << gnb2CellId);
+
+       std::vector<short unsigned int> gnb1 = gnb1NetDevice->GetCellIds();
+       std::vector<short unsigned int> gnb2 = gnb2NetDevice->GetCellIds();
+
+       gnb1X2->AddX2Interface (gnb1CellId, gnb1X2Address, gnb2, gnb2X2Address);
+       gnb2X2->AddX2Interface (gnb2CellId, gnb2X2Address, gnb1, gnb1X2Address);
+
+       gnb1NetDevice->GetRrc ()->AddX2Neighbour (gnb2.at(0));
+       gnb2NetDevice->GetRrc ()->AddX2Neighbour (gnb1.at(0));
+     }
+     ```
    - 
 7. return to the main ns-3-dev folder
 8. run ./make.sh
