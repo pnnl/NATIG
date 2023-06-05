@@ -38,6 +38,16 @@ To enable 5G capabilities:
      ```
      
      NOTE: dont forget to add **std::vector<uint16_t> GetCellIds () const** to nr-gnb-net-device.h
+   - the nr-net-device.cc in the model folder needs the following function:
+     ```
+      Ptr<Queue<Packet>>
+      NrNetDevice::GetQueue (void) const
+      {
+	  NS_LOG_FUNCTION_NOARGS ();
+	 return 0;
+      }
+     ```
+     NOTE: dont forget to add **Ptr<Queue<Packet\>\> GetQueue (void) const** to nr-net-device.h
    - 
 7. run ./make.sh
 
