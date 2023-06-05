@@ -14,10 +14,14 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
 
 
 NOTE: The default docker container does not come with 5G enabled
+
+
 To enable 5G capabilities:
 1. request access to https://gitlab.com/cttc-lena/nr
 2. clone the nr repo in the contrib folder of ns-3-dev folder
 3. checkout the branch labeled 5g-lena-v1.2.y
+4. return to the main ns-3-dev folder
+5. run ./make.sh
    
 
 ## Available configurations
