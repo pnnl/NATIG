@@ -21,7 +21,26 @@ To enable 5G capabilities:
 2. clone the nr repo in the contrib folder of ns-3-dev folder
 3. checkout the branch labeled 5g-lena-v1.2.y
 4. return to the main ns-3-dev folder
-5. run ./make.sh
+5. Some updates that need to be done to the code before it can be compiled:
+   - the nr-gnb-net-device.cc in the model folder needs the following function:   
+     ```
+     std::vector<uint16_t>
+     NrGnbNetDevice::GetCellIds () const
+     {
+	    std::vector<uint16_t> cellIds;
+	
+	    for (auto &it: m_ccMap)
+	    {
+		    cellIds.push_back (it.second->GetCellId ());
+	    }
+	    return cellIds;
+     }
+     ```
+     
+     NOTE: dont forget to add std::vector<uint16_t> GetCellIds () const to nr-gnb-net-device.h
+   - 
+7. run ./make.sh
+
    
 
 ## Available configurations
