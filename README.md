@@ -37,7 +37,7 @@ To enable 5G capabilities:
      }
      ```
      
-     NOTE: dont forget to add std::vector<uint16_t> GetCellIds () const to nr-gnb-net-device.h
+     NOTE: dont forget to add **std::vector<uint16_t> GetCellIds () const** to nr-gnb-net-device.h
    - 
 7. run ./make.sh
 
