@@ -3,6 +3,17 @@ r**rid (**NATI[P]G**), a co-simulation environment for distribution power grid n
 
 It is a standalone, containerized, and reusable environment to enable cyber analysts and researchers to run different cyber security and performance scenarios on powergrid.
 
+## How to get started
+1. Have docker installed
+2. clone the NATIG repo
+3. Make sure you have access to the NS3 stash repo at: https://stash.pnnl.gov/projects/HAGEN/repos/ns-3-dev/browse
+4. run the following commands:
+   - cd NATIG
+   - ./buildimage.sh 
+   - Once the docker finishes building successfully, run: ./rundocker.sh
+NOTE: The default docker container does not come with 5G enabled
+   
+
 ## Available configurations
 
 NOTE: using the configuration files, a user can create a ring topology that uses wifi as a connection type, for example. Currently with th eexception of 5G and 4G a user can mix and match any connection types with any topologies.
