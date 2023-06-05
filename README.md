@@ -77,7 +77,10 @@ To enable 5G capabilities:
        gnb2NetDevice->GetRrc ()->AddX2Neighbour (gnb1.at(0));
      }
      ```
-   - 
+   - Replace line 946 of the nr-helper.cc class in the helper folder by:
+     ```
+      m_epcHelper->AddEnb (n, dev, dev->GetCellIds ());
+     ```
 7. return to the main ns-3-dev folder
 8. run ./make.sh
 
