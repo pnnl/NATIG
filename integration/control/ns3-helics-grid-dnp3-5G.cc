@@ -37,6 +37,7 @@
 #include "ns3/config-store-module.h"
 #include "ns3/ipv4-global-routing-helper.h"
 #include "ns3/ipv4-static-routing-helper.h"
+#include "ns3/flow-monitor-module.h"
 //#include "ns3/gtk-config-store.h"
 #include "ns3/csma-module.h"
 
@@ -76,6 +77,10 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("RoutingDev");
 Time baseDate("1509418800s");
+
+
+Ptr<FlowMonitor> flowMonitor;
+FlowMonitorHelper flowHelper;
 
 void readMicroGridConfig(std::string fpath, Json::Value& configobj)
 {
@@ -166,6 +171,46 @@ void PrintRoutingTable (Ptr<Node>& n)
     }
 }
 
+void Throughput (){
+	Ptr<Ipv4FlowClassifier> classifier=DynamicCast<Ipv4FlowClassifier>(flowHelper.GetClassifier());
+	
+	std::stringstream netStatsOut;
+	
+	
+	string proto;
+	map< FlowId, FlowMonitor::FlowStats > stats = flowMonitor->GetFlowStats();
+	for (map< FlowId, FlowMonitor::FlowStats>::iterator
+			flow=stats.begin(); flow!=stats.end(); flow++)
+	{
+		Ipv4FlowClassifier::FiveTuple  t = classifier->FindFlow(flow->first);
+		switch(t.protocol)
+		{
+			case(6):
+				proto = "TCP";
+				break;
+			case(17):
+				proto = "UDP";
+				break;
+			default:
+				exit(1);
+		}
+               
+		netStatsOut << Simulator::Now ().GetSeconds () << " " <<  flow->first << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 << " " << flow->second.lostPackets << " " << flow->second.txBytes << " " << flow->second.rxBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
+		
+		
+		FILE * pFile;
+		pFile = fopen ("/rd2c/integration/control/TP.txt","a");
+		if (pFile!=NULL)
+		{
+			fprintf(pFile, netStatsOut.str().c_str());
+			fclose (pFile);
+		}
+		
+	}
+	Simulator::Schedule (Seconds (.5), &Throughput); // Callback every 0.5s
+
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -200,6 +245,7 @@ main (int argc, char *argv[])
   double centralFrequencyBand2 = 28.2e9;
   double bandwidthBand2 = 100e6;
   double totalTxPower = 40;
+  int numBots = 4;
 
   // Command line arguments
   CommandLine cmd (__FILE__);
@@ -422,6 +468,9 @@ main (int argc, char *argv[])
   subNodes.Create (numSSPUE);
   internet.Install (subNodes);
 
+  NodeContainer botNodes;
+  botNodes.Create(numBots); // we have 4 bots for testing
+
   //Creating the man in the middle attacker
   NodeContainer MIM;
   MIM.Create(numSSPUE);
@@ -534,6 +583,23 @@ main (int argc, char *argv[])
 	  }
 	  
   }
+
+  NetDeviceContainer botDeviceContainer[numBots];
+  for (int i = 0; i < numBots; ++i)
+  {
+	  botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
+  }
+  
+  internet.Install(botNodes);
+  Ipv4AddressHelper ipv4_n;
+  ipv4_n.SetBase("30.0.0.0", "255.255.255.252");
+  
+  for (int j = 0; j < numBots; ++j)
+  {
+	  ipv4_n.Assign(botDeviceContainer[j]);
+	  ipv4_n.NewNetwork();
+  }
+
   uint16_t port = 20000;
   uint16_t master_port = 40000;
   ApplicationContainer dnpOutstationApp, dnpMasterApp;
@@ -666,99 +732,55 @@ main (int argc, char *argv[])
     dnpMasterApp.Stop (simTime);
     dnpOutstationApp.Start (Seconds (start));
     dnpOutstationApp.Stop (simTime);
-  /*
-  uint16_t dlPort = (rand() % 16380 + 49152);
-  uint16_t mimPort = dlPort;
-  uint16_t ulPort = 2000;
-  uint16_t otherPort = 3000;
-  ApplicationContainer clientApps;
-  ApplicationContainer serverApps;
-  for (uint32_t u = 0; u < subNodes.GetN (); ++u)
-    {
-
-      //++dlPort;
-      //dlPort = (rand() % 16380 + 49152);
-      Dnp3ApplicationHelper dnp3Master1 ("ns3::UdpSocketFactory",
-		      		         InetSocketAddress (remoteHostAddr, dlPort));
-      dnp3Master1.SetAttribute("LocalPort", UintegerValue(dlPort));
-      dnp3Master1.SetAttribute("RemoteAddress", AddressValue(inter.GetAddress (u)));
-      dnp3Master1.SetAttribute("RemotePort", UintegerValue(20000));
-      dnp3Master1.SetAttribute("JitterMinNs", DoubleValue (500));
-      dnp3Master1.SetAttribute("JitterMaxNs", DoubleValue (1000));
-      dnp3Master1.SetAttribute("isMaster", BooleanValue (true));
-      dnp3Master1.SetAttribute ("Name", StringValue (std::string("control_center")+std::to_string(1+u).c_str()));
-      dnp3Master1.SetAttribute ("PointsFilename", StringValue ("points.csv"));
-      dnp3Master1.SetAttribute("MasterDeviceAddress", UintegerValue(1));
-      dnp3Master1.SetAttribute("StationDeviceAddress", UintegerValue(2+u));
-      dnp3Master1.SetAttribute("IntegrityPollInterval", UintegerValue (10));
-      dnp3Master1.SetAttribute("EnableTCP", BooleanValue (false));
-      Ptr<Dnp3Application> master1 = dnp3Master1.Install (remoteHost, std::string("control_center")+std::to_string(1+u));
-      serverApps.Add(master1);
-
-      Simulator::Schedule(MilliSeconds(4000+11*u), &Dnp3Application::periodic_poll, master1, 0);
-
-      //Add the substation code here
-      Dnp3ApplicationHelper dnp3Outstation1 ("ns3::UdpSocketFactory",
-		                              InetSocketAddress (inter.GetAddress (u), 20000));
-      dnp3Outstation1.SetAttribute("LocalPort", UintegerValue(20000));
-      dnp3Outstation1.SetAttribute("RemoteAddress", AddressValue(remoteHostAddr));
-      dnp3Outstation1.SetAttribute("RemotePort", UintegerValue(dlPort));
-      dnp3Outstation1.SetAttribute("isMaster", BooleanValue (false));
-      dnp3Outstation1.SetAttribute ("Name", StringValue (std::string("GLD")+std::to_string(2+u).c_str()));
-      dnp3Outstation1.SetAttribute ("PointsFilename", StringValue ("points.csv"));
-      dnp3Outstation1.SetAttribute("MasterDeviceAddress", UintegerValue(1));
-      dnp3Outstation1.SetAttribute("StationDeviceAddress", UintegerValue(2+u));
-      dnp3Outstation1.SetAttribute("EnableTCP", BooleanValue (false));
-      Ptr<Dnp3Application> station1 = dnp3Outstation1.Install (subNodes.Get(u), std::string("GLD")+std::to_string(2+u));		
-      clientApps.Add(station1);
-      dlPort = (rand() % 16380 + 49152);
 
 
-   }
-   NS_LOG_INFO("Installing MIM server spoofing as SS.");
-   //The MIM node that will conduct the man in the middle attack
-   if (includeMIM){
-     Dnp3ApplicationHelper dnp3MIM1 ("ns3::UdpSocketFactory",
-                                InetSocketAddress (inter_MIM.GetAddress(0), mimPort));
+    int BOT_START = 4;
+    int BOT_STOP = 30.0;
+    std::string str_on_time = "2.0";
+    std::string str_off_time = "0.0";
+    int TCP_SINK_PORT = 9000;
+    int UDP_SINK_PORT = 9001;
+    int MAX_BULK_BYTES = 20971520000;
+    std::string DDOS_RATE = "2000kb/s";
+    
+    bool DDoS = 0;
+    
+    if (DDoS){
+	    OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(remoteHostAddr, UDP_SINK_PORT)));
+	    onoff.SetConstantRate(DataRate(DDOS_RATE));
+	    onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
+	    onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_off_time+"]"));
+	    
+	    ApplicationContainer onOffApp[numBots];
+	    for (int k = 0; k < numBots; ++k)
+	    {
+		    onOffApp[k] = onoff.Install(botNodes.Get(k));
+		    onOffApp[k].Start(Seconds(BOT_START));
+		    onOffApp[k].Stop(Seconds(BOT_STOP));
+	    }
+	    
+	    
+	    PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
+			    Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
+	    ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost);
+	    UDPSinkApp.Start(Seconds(0.0));
+	    UDPSinkApp.Stop(Seconds(BOT_STOP));
+    }
+    
+    flowMonitor = flowHelper.InstallAll();
+    flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.001));
+    flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.001));
+    flowMonitor->SetAttribute("PacketSizeBinWidth", DoubleValue(20));
+    Simulator::Schedule (Seconds (0.2), &Throughput);
 
-     dnp3MIM1.SetAttribute("LocalPort", UintegerValue(mimPort));
-     dnp3MIM1.SetAttribute("RemoteAddress", AddressValue(remoteHostAddr));
-     dnp3MIM1.SetAttribute("RemotePort", UintegerValue(20000));
-     dnp3MIM1.SetAttribute ("PointsFilename", StringValue ("./points.csv"));
-     dnp3MIM1.SetAttribute("JitterMinNs", DoubleValue (500));
-     dnp3MIM1.SetAttribute("JitterMaxNs", DoubleValue (1000));
-     dnp3MIM1.SetAttribute("isMaster", BooleanValue (false));
-     dnp3MIM1.SetAttribute ("Name", StringValue ("MIM"));
-     dnp3MIM1.SetAttribute("MasterDeviceAddress", UintegerValue(1));
-     dnp3MIM1.SetAttribute("StationDeviceAddress", UintegerValue(2));
-     dnp3MIM1.SetAttribute("IntegrityPollInterval", UintegerValue (10));
-     dnp3MIM1.SetAttribute("EnableTCP", BooleanValue (false));
-     dnp3MIM1.SetAttribute("AttackSelection", UintegerValue(attackSelection));
-     dnp3MIM1.SetAttribute("AttackStartTime", UintegerValue(attackStartTime));
-     dnp3MIM1.SetAttribute("AttackEndTime", UintegerValue(attackEndTime));
-     dnp3MIM1.SetAttribute("mitmFlag", BooleanValue(true));
-     Ptr<Dnp3Application> mim = dnp3MIM1.Install (MIM.Get(0), std::string("MIM"));
-     ApplicationContainer dnpMIMApp(mim);
+    if (DDoS){
+	    p2ph.EnablePcapAll (pcapFileDir+"p2p-DDoS", false);
+    }else{
+	    p2ph.EnablePcapAll (pcapFileDir+"p2p", false);
+    }
+    enablePcapAllBaseTime("radics-exercise2-utility1-1day", remoteHostContainer, ncP2P_nodes);
 
-     dnpMIMApp.Start (Seconds (0.0));
-     dnpMIMApp.Stop (Seconds (10000));
-   }
-  
 
-   serverApps.Start(Seconds (0.0));
-   serverApps.Stop (Seconds (10000));
-   clientApps.Start(Seconds (0.0));
-   clientApps.Stop (Seconds (10000));
-  */
-
-  //Simulator::Schedule(MilliSeconds(4000), &Dnp3Application::periodic_poll, master1, 0);
-  //Simulator::Schedule(MilliSeconds(4011), &Dnp3Application::periodic_poll, serverApps.Get(1), 0);
-
-  // nrHelper->EnableTraces ();
-  // Uncomment to enable PCAP tracing
-  //p2ph.EnablePcapAll("routing-dev");
-  //csma.EnablePcapAll("routing-dev-csma", true);
-  enablePcapAllBaseTime("radics-exercise2-utility1-1day", remoteHostContainer, ncP2P_nodes);
 
   Simulator::Stop (simTime);
   Simulator::Run ();
