@@ -1,5 +1,4 @@
-**N**etwork **A**ttack **T**estbed **I**n [Power] **G
-r**rid (**NATI[P]G**), a co-simulation environment for distribution power grid network using state-of-the-art simulators.
+**N**etwork **A**ttack **T**estbed **I**n [Power] **G**rid (**NATI[P]G**), a co-simulation environment for distribution power grid network using state-of-the-art simulators.
 
 It is a standalone, containerized, and reusable environment to enable cyber analysts and researchers to run different cyber security and performance scenarios on powergrid.
 
