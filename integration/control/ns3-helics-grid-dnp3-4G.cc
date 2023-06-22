@@ -353,6 +353,7 @@ main (int argc, char *argv[])
 
   Ipv4InterfaceContainer inter;
   Ipv4InterfaceContainer inter_MIM;
+  std::stringstream addrTrans;
   for (int i = 0; i < csmaSubNodes.size(); i++){
     NetDeviceContainer internetDevicesSub = csma.Install (csmaSubNodes[i]);
 
@@ -361,9 +362,20 @@ main (int argc, char *argv[])
     std::string address = "172."+std::to_string(17+i)+".0.0";
     ipv4Sub.SetBase (address.c_str(), "255.255.0.0", "0.0.0.1");
     Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign (internetDevicesSub);
+    addrTrans << csmaSubNodes[i].Get(2)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal() << ": " << csmaSubNodes[i].Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal() << endl;
 
     inter.Add(interfacesSub.Get(2));
     inter_MIM.Add(interfacesSub.Get(1));
+  }
+  std::cout << "The translation table" << std::endl;
+  std::cout << addrTrans.str().c_str() << std::endl;
+  
+  FILE * addFile;
+  addFile = fopen ("/rd2c/integration/control/add.txt","w");
+  if (addFile!=NULL)
+  {
+	  fprintf(addFile, addrTrans.str().c_str());
+	  fclose (addFile);
   }
 
   Ipv4Address gateway = epcHelper->GetUeDefaultGatewayAddress ();
