@@ -2,7 +2,7 @@
     "Simulation":[{
             "SimTime":180,
 	    "StartTime":0.0,
-	    "includeMIM":1,
+	    "includeMIM":0,
 	    "UseDynTop":1
         }
     ],

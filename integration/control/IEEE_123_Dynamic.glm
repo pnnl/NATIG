@@ -31,7 +31,7 @@ module reliability {
 
 module powerflow {
 	enable_subsecond_models true;
-	deltamode_timestep 2 ms;	//10 ms
+	deltamode_timestep 1 ms;	//10 ms
 	solver_method NR;
 	all_powerflow_delta true;
 	lu_solver "KLU";
@@ -43,13 +43,13 @@ module connection;
 object helics_msg {
     name GLD;
     message_type JSON;
-    publish_period 2;
+    publish_period 1;
     configure "config/gridlabd_config.json";
 }
 
 module generators {
 	enable_subsecond_models true;
-	deltamode_timestep 2 ms;
+	deltamode_timestep 1 ms;
 }
 
  module climate;
