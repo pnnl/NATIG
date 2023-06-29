@@ -81,7 +81,7 @@ To enable 5G capabilities:
       m_epcHelper->AddEnb (n, dev, dev->GetCellIds ());
      ```
 7. return to the main ns-3-dev folder
-8. run ./make.sh
+8. run sudo ./make.sh
 
 
 Once the setup is done you can start to run the code
