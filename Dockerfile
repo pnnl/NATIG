@@ -3,35 +3,34 @@
 # Version 1.0
 # Date: 11/21/2021
 # Author: Sumit Purohit Sumit.Purohit@pnnl.gov
-FROM python:3.7.9-slim-stretch AS builder
+FROM python:3.6-slim AS builder
 #FROM ubuntu:xenial
 
-
 RUN apt-get update \
-    && apt-get install -y \
+    && apt-get install --allow-unauthenticated -y \
        wget \
        git \
        automake \
        autoconf \
        make \
-       g++-6 \
-       gcc-6 \
+       g++ \
+       gcc \
        libtool \
        ca-certificates \
        openssl \
-	   libssl1.0-dev \
-       python-dev \ 
-       python-pip \
+	   libssl-dev \
+       python3 \ 
+       python3-pip \
        sudo \
        vim \
        # helics \
        libboost-dev \
        libzmq5-dev \
        m4 \
-    && sudo /usr/bin/update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 1 \
-    && sudo /usr/bin/update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 1 \
-    && sudo sudo /usr/bin/update-alternatives  --set gcc /usr/bin/gcc-6 \
-    && sudo sudo /usr/bin/update-alternatives  --set g++ /usr/bin/g++-6 \
+    #&& sudo /usr/bin/update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc 1 \
+    #&& sudo /usr/bin/update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++ 1 \
+    #&& sudo sudo /usr/bin/update-alternatives  --set gcc /usr/bin/gcc \
+    #&& sudo sudo /usr/bin/update-alternatives  --set g++ /usr/bin/g++ \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/cache/apt/archives/*
 	
@@ -85,6 +84,7 @@ ENV PYHELICS_INSTALL=/usr/local
 # ----------------------------------------------------
 # INSTALL ZMQ and BINDINGS for c++
 # ----------------------------------------------------
+RUN cd ${RD2C}
 
 RUN cd ${RD2C} \
     && wget --no-check-certificate http://github.com/zeromq/libzmq/releases/download/v${ZMQ_VERSION}/zeromq-${ZMQ_VERSION}.tar.gz \
@@ -129,6 +129,7 @@ RUN cd ${RD2C} \
 # ----------------------------------------------------
 # INSTALL Helics
 # ----------------------------------------------------
+
 
 RUN cd ${RD2C} \
     && git clone https://github.com/GMLC-TDC/HELICS -b v2.7.1 \ 
@@ -185,26 +186,29 @@ RUN cd ${RD2C} \
 #    && cmake -DCMAKE_BUILD_TYPE=debug -DJSONCPP_LIB_BUILD_STATIC=ON-DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../.. \
 #    && make ; make install
 
-RUN apt-get update && apt-get install -y libjsoncpp-dev 
+RUN apt-get update && apt-get install -y libjsoncpp-dev
+
+# RUN pip install zmq
+
 ENV LDFLAGS="-ljsoncpp -L/usr/local/include/jsoncpp/"
 RUN cd $RD2C \
     && git clone https://stash.pnnl.gov/scm/hagen/ns-3-dev.git \
 	&& cd ns-3-dev \
     && git checkout OceaneBranch \
-    #&& git clone https://github.com/GMLC-TDC/helics-ns3 contrib/helics \
-	#&& chmod -R 777 contrib/helics \
-    && git clone https://stash.pnnl.gov/scm/hagen/helics-ns3.git contrib/helics \
-	&& cd contrib/helics \
-	&& git checkout dev-dnp3 \
-    && cd - \
-    #&& cp -r scratch-helics/*.cc scratch \
-	&& ./waf configure --with-helics=/usr/local --with-fncs=/rd2c --with-czmq=/rd2c --with-zmq=/rd2c --disable-werror --enable-examples --enable-tests \
-    && ./waf build 
+    && cp -r helics-backup contrib/helics \
+    && cp -r nr-backup contrib/nr \
+    && sudo ./make.sh 
+    # && git clone https://stash.pnnl.gov/scm/hagen/helics-ns3.git contrib/helics \
+	# && cd contrib/helics \
+	# && git checkout dev-dnp3 \
+    # && cd - \
+	# && ./waf configure --with-helics=/usr/local --with-fncs=/rd2c --with-czmq=/rd2c --with-zmq=/rd2c --disable-werror --enable-examples --enable-tests \
+    # && ./waf build 
 
 RUN cd $RD2C \
     #&& git clone https://stash.pnnl.gov/scm/hagen/cps_modeling.git \
     #&& cd cps_modeling \
-    && git clone git@github.com:pnnl/NATIG.git \
+    && git clone https://github.com/pnnl/NATIG.git \
     && cd NATIG \
     && cp -r integration $RD2C \
     && cd ${RD2C}/integration 
@@ -213,10 +217,13 @@ RUN apt-get update && apt-get install -y procps
 # ----------------------------------------------------
 # INSTALL Java
 # ----------------------------------------------------
+#RUN apt-get install -y software-properties-common 
+    # && add-apt-repository ppa:webupd8team/java
 
 RUN apt update \
      && mkdir -p /usr/share/man/man1 \
-     && apt install -y openjdk-8-jdk-headless \
+     && sudo apt-get install -y openjdk-11-jdk \
+     # && apt install -y openjdk-8-jdk-headless \
      && apt-get clean
 
 # ----------------------------------------------------

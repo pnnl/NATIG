@@ -1,1 +1,1 @@
-docker run -it --rm --name=cps rd2c:dev bash
+docker run -it --rm --name=cps_clean rd2c:dev_clean bash
