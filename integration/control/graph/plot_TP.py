@@ -5,7 +5,7 @@ import math
 import statistics
 plt.rcParams.update({'font.size': 22})
 
-list_files = glob.glob("2UE/*.txt")
+list_files = glob.glob("4UE1S/*.txt")
 
 for i in list_files:
     f = open(i, "r")
