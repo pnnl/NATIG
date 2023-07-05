@@ -3,7 +3,8 @@
             "SimTime":180,
 	    "StartTime":0.0,
 	    "includeMIM":0,
-	    "UseDynTop":1
+	    "UseDynTop":1,
+	    "MonitorPerf":1
         }
     ],
     "microgrid": [
@@ -213,6 +214,20 @@
                 "regulator_3"
             ]
         }
+    ],
+    "DDoS":[
+	    {
+              "NumberOfBots":4,
+	      "Active":0,
+	      "Start":4,
+	      "End":30,
+	      "TimeOn":2.0,
+	      "TimeOff":0.0,
+	      "PacketSize":20971520000,
+	      "Rate":"2000kb/s",
+	      "NodeType":["CC"],
+	      "NodeID":[0]
+	    }
     ],
     "MIM": [
 	{

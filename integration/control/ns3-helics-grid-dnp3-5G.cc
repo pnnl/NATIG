@@ -312,7 +312,7 @@ main (int argc, char *argv[])
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
-  numNodePairs = 4; //configObject["microgrid"].size();
+  numNodePairs = std::stoi(topologyConfigObject["5GSetup"][0]["numUE"].asString()); //configObject["microgrid"].size();
   enbNodes.Create (numNodePairs);
   ueNodes.Create (numNodePairs);
 
@@ -749,16 +749,16 @@ main (int argc, char *argv[])
     dnpOutstationApp.Stop (simTime);
 
 
-    int BOT_START = 4;
-    int BOT_STOP = 30.0;
-    std::string str_on_time = "2.0";
-    std::string str_off_time = "0.0";
+    int BOT_START = std::stof(configObject["DDoS"][0]["Start"].asString());;
+    int BOT_STOP = std::stof(configObject["DDoS"][0]["End"].asString());;
+    std::string str_on_time = configObject["DDoS"][0]["TimeOn"].asString();
+    std::string str_off_time = configObject["DDoS"][0]["TimeOff"].asString();
     int TCP_SINK_PORT = 9000;
     int UDP_SINK_PORT = 9001;
-    int MAX_BULK_BYTES = 20971520000;
-    std::string DDOS_RATE = "2000kb/s";
-    
-    bool DDoS = 0;
+    int MAX_BULK_BYTES = std::stof(configObject["DDoS"][0]["PacketSize"].asString()); //20971520000;
+    std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
+
+    bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
     
     if (DDoS){
 	    OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(remoteHostAddr, UDP_SINK_PORT)));
@@ -786,8 +786,10 @@ main (int argc, char *argv[])
     flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.001));
     flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.001));
     flowMonitor->SetAttribute("PacketSizeBinWidth", DoubleValue(20));
-    Simulator::Schedule (Seconds (0.2), &Throughput);
-
+    int mon = std::stoi(configObject["Simulation"][0]["MonitorPerf"].asString());
+    if (mon){
+        Simulator::Schedule (Seconds (0.2), &Throughput);
+    }
     if (DDoS){
 	    p2ph.EnablePcapAll (pcapFileDir+"p2p-DDoS", false);
     }else{
