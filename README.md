@@ -135,6 +135,12 @@ Existing error: When using a mesh topology with wifi, we do run into the ressour
 3. DDoS: parameters for the DDoS attacker (ex: number of bots)
 4. Simulation: general parameters for the simulation (ex: the start and end time of the simulation)
 
+###gridlabd\_config.json
+1. Helics parameters: Helics broker setup parameters (ex: IP address and port number for helics setup)
+2. Endpoint: Gridlabd endpoint
+
+NOTE: to change the helics broker's port, the run.sh, the gridlabd\_config.json and the ns3-*.cc need to be updated. All 3 of the files have a reference to the port used by the helics broker. 
+
 ## Simulated attacks
 
 ### Currently working
