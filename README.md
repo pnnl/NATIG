@@ -129,11 +129,17 @@ Existing error: When using a mesh topology with wifi, we do run into the ressour
 3. 5GSetup parameter: settings used in both 5G and 4G networks.
 4. Node parameter: settings for each node of the network. The configuration file contains default values for each of the nodes. 
 
+###grid.json
+1. Microgrids: connects the gridlabd components from glm with the NS3 nodes. Ex: mg1 is 1 NS3 node.
+2. MIM: parameter settings for the man-in-the-middle attacks (injection and parameter changes) 
+3. DDoS: parameters for the DDoS attacker (ex: number of bots)
+4. Simulation: general parameters for the simulation (ex: the start and end time of the simulation)
+
 ## Simulated attacks
 
 ### Currently working
-1. Injection attacks: The attacker trips relays connecting the microgrids to one another and to the grid causing islanding of the microgrid 
-2. Man-in-the-middle: The attacker modifies the Pref and Qref values of two inverters in Microgrid 1 while the microgrids are islanded
+1. Injection attacks (Man-in-the-middle): The attacker trips relays connecting the microgrids to one another and to the grid causing islanding of the microgrid 
+2. Parameter changes (Man-in-the-middle): The attacker modifies the Pref and Qref values of two inverters in Microgrid 1 while the microgrids are islanded
 3. DDoS: The attacker generates a number of bots that will flood 1 to n nodes in the network to slow down the network performance
 
 ### Comming soon
