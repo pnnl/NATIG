@@ -602,7 +602,13 @@ main (int argc, char *argv[])
   NetDeviceContainer botDeviceContainer[numBots];
   for (int i = 0; i < numBots; ++i)
   {
-	  botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
+	  if (configObject["DDoS"][0]["NodeType"][0].asString().find("CC") != std::string::npos){
+              botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), remoteHostContainer.Get(0)); 
+	  }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
+              botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), ueNodes.Get(2));
+	  }else{
+	      botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), MIM.Get(2)); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
+	  }
   }
   
   internet.Install(botNodes);
@@ -762,6 +768,13 @@ main (int argc, char *argv[])
     
     if (DDoS){
 	    OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(remoteHostAddr, UDP_SINK_PORT)));
+	    if (configObject["DDoS"][0]["NodeType"][0].asString().find("MIM") != std::string::npos){
+                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter_MIM.GetAddress(2), UDP_SINK_PORT))); 
+		onoff = onoff1;
+	    }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
+                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter.GetAddress(2), UDP_SINK_PORT)));
+		onoff = onoff1;
+	    }
 	    onoff.SetConstantRate(DataRate(DDOS_RATE));
 	    onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
 	    onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_off_time+"]"));
@@ -777,7 +790,12 @@ main (int argc, char *argv[])
 	    
 	    PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
 			    Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
-	    ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost);
+            ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost);
+	    if (configObject["DDoS"][0]["NodeType"][0].asString().find("MIM") != std::string::npos){
+	        UDPSinkApp = UDPsink.Install(MIM.Get(2)); 
+	    }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
+                UDPSinkApp = UDPsink.Install(ueNodes.Get(2));
+	    }
 	    UDPSinkApp.Start(Seconds(0.0));
 	    UDPSinkApp.Stop(Seconds(BOT_STOP));
     }
