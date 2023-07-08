@@ -24,6 +24,7 @@
 #include "ns3/names.h"
 #include "ns3/dnp3-application-new.h"
 #include "ns3/pointer.h"
+#include "ns3/boolean.h"
 
 using namespace std;
 
