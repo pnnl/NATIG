@@ -1,0 +1,1702 @@
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
+/*
+ * Copyright 2007 University of Washington
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation;
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Author:  Tom Henderson (tomhend@u.washington.edu)
+ */
+
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <map>
+#include <sstream>
+#include <algorithm>
+#include <string>
+#include <string_view>
+#include <functional>
+
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <jsoncpp/json/json.h>
+#include <jsoncpp/json/forwards.h>
+#include <jsoncpp/json/writer.h>
+
+
+using namespace std;
+
+#include "ns3/log.h"
+#include "ns3/inet-socket-address.h"
+#include "ns3/inet6-socket-address.h"
+#include "ns3/node.h"
+#include "ns3/socket.h"
+#include "ns3/udp-socket.h"
+#include "ns3/simulator.h"
+#include "ns3/socket-factory.h"
+#include "ns3/packet.h"
+#include "ns3/trace-source-accessor.h"
+#include "ns3/udp-socket-factory.h"
+#include "dnp3-helics-application.h"
+#include "ns3/uinteger.h"
+#include "ns3/double.h"
+#include "ns3/trace-source-accessor.h"
+#include "ns3/names.h"
+#include "ns3/string.h"
+#include "ns3/random-variable-stream.h"
+#include "ns3/boolean.h"
+#include "ns3/simulator.h"
+#include "ns3/event_interface.hpp"
+#include "ns3/object.hpp"
+#include "ns3/asdu.hpp"
+#include "ns3/seq-ts-header.h"
+#include "ns3/helics.h"
+#include "ns3/helics-simulator-impl.h"
+#include "helics/helics.hpp"
+
+namespace ns3 {
+
+NS_LOG_COMPONENT_DEFINE ("Dnp3HelicsApplication");
+
+NS_OBJECT_ENSURE_REGISTERED (Dnp3HelicsApplication);
+
+std::string&
+SanitizeName (std::string &name)
+{
+  std::replace (name.begin(), name.end(), '/', '+');
+  return name;
+}
+
+std::string
+SanitizeName (const std::string &name)
+{
+  std::string copy = name;
+  std::replace (copy.begin(), copy.end(), '/', '+');
+  return copy;
+}
+
+std::string
+toEndpointName (const std::string &name)
+{
+  std::string copy = name;
+  std::replace (copy.begin(), copy.end(), '/', '_');
+  return copy;
+}
+
+vector<std::string> split (std::string s, std::string delimiter) {
+  size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+  string token;
+  vector<string> res;
+
+  while ((pos_end = s.find (delimiter, pos_start)) != std::string::npos) {
+    token = s.substr (pos_start, pos_end - pos_start);
+    pos_start = pos_end + delim_len;
+    res.push_back (token);
+  }
+
+  res.push_back (s.substr (pos_start));
+  return res;
+}
+
+static bool endsWith(const std::string& str, const std::string& suffix)
+{
+    return str.size() >= suffix.size() && 0 == str.compare(str.size()-suffix.size(), suffix.size(), suffix);
+}
+
+static bool startsWith(const std::string& str, const std::string& prefix)
+{
+    return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix);
+}
+
+class CSVRow
+{
+    public:
+        string const& geti(std::size_t index) const
+        {
+            return m_data[index];
+        }
+        std::size_t size() const
+        {
+            return m_data.size();
+        }
+        void readNextRow(std::istream& str)
+        {
+            std::string         line;
+            std::getline(str,line);
+
+            std::stringstream   lineStream(line);
+            std::string         cell;
+
+            m_data.clear();
+            while(std::getline(lineStream,cell,','))
+            {
+                m_data.push_back(cell);
+            }
+        }
+    private:
+        std::vector<std::string>    m_data;
+};
+
+TypeId
+Dnp3HelicsApplication::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::Dnp3HelicsApplication")
+    .SetParent<Application> ()
+    .SetGroupName("Applications")
+    .AddConstructor<Dnp3HelicsApplication> ()
+    .AddAttribute ("Protocol",
+                   "The type id of the protocol to use for the rx socket.",
+                   TypeIdValue (UdpSocketFactory::GetTypeId ()),
+                   MakeTypeIdAccessor (&Dnp3HelicsApplication::m_tid),
+                   MakeTypeIdChecker ())
+    .AddTraceSource ("Rx",
+                     "A packet has been received",
+                     MakeTraceSourceAccessor (&Dnp3HelicsApplication::m_rxTrace),
+                     "ns3::Packet::AddressTracedCallback")
+    .AddAttribute ("LocalAddress",
+                   "The source Address of the outbound packets",
+                   AddressValue (),
+                   MakeAddressAccessor (&Dnp3HelicsApplication::m_localAddress),
+                   MakeAddressChecker ())
+    .AddAttribute ("LocalPort",
+                   "The source port of the outbound packets",
+                   UintegerValue (0),
+                   MakeUintegerAccessor (&Dnp3HelicsApplication::m_localPort),
+                   MakeUintegerChecker<uint16_t> ())
+    .AddAttribute ("MasterDeviceAddress",
+                   "master device address",
+                   UintegerValue (0),
+                   MakeUintegerAccessor (&Dnp3HelicsApplication::m_master_device_addr),
+                   MakeUintegerChecker<uint16_t> ())
+    .AddAttribute ("StationDeviceAddress",
+                   "station device address",
+                   UintegerValue (0),
+                   MakeUintegerAccessor (&Dnp3HelicsApplication::m_station_device_addr),
+                   MakeUintegerChecker<uint16_t> ())
+    .AddAttribute ("RemoteAddress",
+                   "The source Address of the outbound packets",
+                   AddressValue (),
+                   MakeAddressAccessor (&Dnp3HelicsApplication::m_remoteAddress),
+                   MakeAddressChecker ())
+    .AddAttribute ("RemoteAddress2",
+		    "The source of the outbound packets for the insider",
+		    AddressValue (Ipv4Address("10.0.0.0")),
+		    MakeAddressAccessor (&Dnp3HelicsApplication::m_remoteAddress2),
+		    MakeAddressChecker())
+    .AddAttribute ("RemotePort",
+                   "The destination port of the outbound packets",
+                   UintegerValue (0),
+                   MakeUintegerAccessor (&Dnp3HelicsApplication::m_remotelPort),
+                   MakeUintegerChecker<uint16_t> ())
+    .AddAttribute ("isMaster",
+                   "master or outstation",
+                   BooleanValue (false),
+                   MakeBooleanAccessor (&Dnp3HelicsApplication::m_isMaster),
+                   MakeBooleanChecker())
+    .AddAttribute ("IntegrityPollInterval",
+                   "Integrity poll interval",
+                   UintegerValue (0),
+                   MakeUintegerAccessor (&Dnp3HelicsApplication::m_integrityInterval),
+                   MakeUintegerChecker<uint16_t> ())
+    .AddAttribute ("PointsFilename",
+                   "Input Points Definitions",
+                   StringValue (),
+                   MakeStringAccessor (&Dnp3HelicsApplication::points_filename),
+                   MakeStringChecker ())
+    .AddAttribute ("JitterMinNs",
+                   "The source port of the outbound packets",
+                   DoubleValue  (1000),
+                   MakeDoubleAccessor (&Dnp3HelicsApplication::m_jitterMinNs),
+                   MakeDoubleChecker<double> ())
+    .AddAttribute ("JitterMaxNs",
+                   "The source port of the outbound packets",
+                   DoubleValue (100000),
+                   MakeDoubleAccessor (&Dnp3HelicsApplication::m_jitterMaxNs),
+                   MakeDoubleChecker<double> ())
+    .AddAttribute ("EnableTCP", "Enable TCP connection",
+                   BooleanValue (true),
+                   MakeBooleanAccessor (&Dnp3HelicsApplication::m_enableTcp),
+                   MakeBooleanChecker())
+    .AddTraceSource ("Tx", "A new packet is created and is sent",
+                     MakeTraceSourceAccessor (&Dnp3HelicsApplication::m_txTrace),
+                     "ns3::Packet::TracedCallback")
+    .AddAttribute ("AttackSelection", "Select the type of attack. Disconnect or send 0 payload",
+                   UintegerValue (0),
+                   MakeUintegerAccessor (&Dnp3HelicsApplication::m_attackType),
+                   MakeUintegerChecker<uint16_t> ())
+    .AddAttribute ("Value_attck", "Select a value to set the point that is being manipulated",
+		    StringValue ("NA"),
+		    MakeStringAccessor (&Dnp3HelicsApplication::m_attack_point_val),
+		    MakeStringChecker ())
+    .AddAttribute ("Value_attck_max", "Select the max value to set the point that is being manipulated",
+		    StringValue ("NA"),
+		    MakeStringAccessor (&Dnp3HelicsApplication::m_attack_max),
+		    MakeStringChecker ())
+    .AddAttribute ("Value_attck_min", "Select the min value to set the point that is being manipulated",
+		    StringValue ("NA"),
+		    MakeStringAccessor (&Dnp3HelicsApplication::m_attack_min),
+		    MakeStringChecker ())
+    .AddAttribute ("PointID", "The ID of the point that is being modified for nodeX ex:Pref, Qref",
+		    StringValue (),
+		    MakeStringAccessor (&Dnp3HelicsApplication::point_id),
+		    MakeStringChecker ())
+    .AddAttribute ("NodeID", "The ID of the node that has a point being modified, note before the $",
+		    StringValue (),
+		    MakeStringAccessor (&Dnp3HelicsApplication::node_id),
+		    MakeStringChecker())
+    .AddAttribute ("AttackStartTime", "Attack start time in seconds",
+                   UintegerValue (0),
+                   MakeUintegerAccessor (&Dnp3HelicsApplication::m_attackStartTime),
+                   MakeUintegerChecker<uint16_t> ())
+    .AddAttribute ("AttackEndTime", "Attack end time in seconds",
+                   UintegerValue (0),
+                   MakeUintegerAccessor (&Dnp3HelicsApplication::m_attackEndTime),
+                   MakeUintegerChecker<uint16_t> ())
+    .AddAttribute ("Name",
+                   "The name of the application",
+                   StringValue (),
+                   MakeStringAccessor (&Dnp3HelicsApplication::m_name),
+                   MakeStringChecker ())
+    .AddAttribute ("OutFileName",
+                   "The name of the output file",
+                   StringValue (),
+                   MakeStringAccessor (&Dnp3HelicsApplication::f_name),
+                   MakeStringChecker ())
+    .AddAttribute ("mitmFlag", "Man in the middle flag",
+	          	     BooleanValue (false),
+		               MakeBooleanAccessor (&Dnp3HelicsApplication::mitm_flag),
+		               MakeBooleanChecker())
+  ;
+  return tid;
+}
+
+Dnp3HelicsApplication::Dnp3HelicsApplication ()
+{
+  NS_LOG_FUNCTION (this);
+  m_socket = 0;
+  mim_socket = 0;
+  //Setting up jitter random variable stream
+  m_rand_delay_ns = CreateObject<UniformRandomVariable> ();
+  m_rand_delay_ns->SetAttribute ("Min", DoubleValue  (m_jitterMinNs));
+  m_rand_delay_ns->SetAttribute ("Max", DoubleValue  (m_jitterMaxNs));
+  m_gld_federate_name = "GLD";
+}
+
+Dnp3HelicsApplication::~Dnp3HelicsApplication()
+{
+  NS_LOG_FUNCTION (this);
+}
+
+uint32_t Dnp3HelicsApplication::GetTotalRx () const
+{
+  NS_LOG_FUNCTION (this);
+  return m_totalRx;
+}
+
+Ptr<Socket>
+Dnp3HelicsApplication::GetListeningSocket (void) const
+{
+  NS_LOG_FUNCTION (this);
+  return m_socket;
+}
+
+std::list<Ptr<Socket> >
+Dnp3HelicsApplication::GetAcceptedSockets (void) const
+{
+  NS_LOG_FUNCTION (this);
+  return m_socketList;
+}
+
+void Dnp3HelicsApplication::DoDispose (void)
+{
+  NS_LOG_FUNCTION (this);
+  m_socket = 0;
+  mim_socket = 0;
+  m_socketList.clear ();
+
+  // chain up
+  Application::DoDispose ();
+}
+
+void
+Dnp3HelicsApplication::SetName (const std::string &name)
+{
+  NS_LOG_FUNCTION (this << name);
+  m_name = name;
+  std::string fedName = helics_federate->getName();
+  size_t pos = name.find(fedName);
+  if(pos != std::string::npos) {
+	  m_name.erase(pos, fedName.length()+1);
+  }
+  if (m_name.find("MIM") != std::string::npos){
+      Names::Add ("Monitor1"+m_name, this);
+  }else{
+      Names::Add (SanitizeName (m_name), this);
+  }
+}
+
+std::string
+Dnp3HelicsApplication::GetName (void) const
+{
+  return m_name;
+}
+
+void
+Dnp3HelicsApplication::SetLocal (Address ip, uint16_t port)
+{
+  NS_LOG_FUNCTION (this << ip << port);
+  m_localAddress = ip;
+  m_localPort = port;
+}
+
+void Dnp3HelicsApplication::Store(std::string point, std::string value)
+{
+  NS_LOG_FUNCTION (this << value);
+
+  if (false == m_isMaster) {
+    //cout << "Point: " << point << "Value: " << value << endl;
+    store_points(point, value);
+    //o_p->store(point, value);
+
+  }
+}
+
+void
+Dnp3HelicsApplication::SetLocal (Ipv4Address ip, uint16_t port)
+{
+  NS_LOG_FUNCTION (this << ip << port);
+  //m_localAddress = Address (ip);
+  m_localAddress = ip;
+  m_localPort = port;
+}
+
+void
+Dnp3HelicsApplication::SetLocal (Ipv6Address ip, uint16_t port)
+{
+  NS_LOG_FUNCTION (this << ip << port);
+  m_localAddress = Address (ip);
+  m_localPort = port;
+}
+
+// Application Methods
+void Dnp3HelicsApplication::StartApplication ()    // Called at time specified by Start
+{
+  NS_LOG_FUNCTION (this << m_enableTcp);
+
+  running = true;
+  m_input_select = 0;
+  m_victim = 0;
+  m_attack_on = false;
+  if(m_enableTcp)
+  {
+    makeTcpConnection();
+  }
+  else {
+    makeUdpConnection();
+  }
+}
+
+void Dnp3HelicsApplication::makeTcpConnection(void) {
+  NS_LOG_FUNCTION (this);
+  // Create the socket if not already
+  if (!m_socket)
+  {
+    m_socket = Socket::CreateSocket (GetNode (), m_tid);
+    m_socket->Bind (m_localAddress);
+
+
+    if (addressUtils::IsMulticast (m_localAddress))
+    {
+      Ptr<UdpSocket> udpSocket = DynamicCast<UdpSocket> (m_socket);
+      if (udpSocket)
+      {
+        // equivalent to setsockopt (MCAST_JOIN_GROUP)
+        udpSocket->MulticastJoinGroup (0, m_local);
+      }
+      else
+      {
+        NS_FATAL_ERROR ("Error: joining multicast on a non-UDP socket");
+      }
+    }
+  }
+
+  if(m_isMaster == true) {
+    NS_LOG_INFO("I'm Master");
+    Simulator::Schedule(Seconds(10), &Dnp3HelicsApplication::ConnectToPeer, this, m_socket,  m_remotelPort);
+    startMaster();
+    if (m_name.compare("MIM")!= 0) {
+        //periodic_poll(0);
+        //new code
+        // periodic_poll_Integrity(4000);
+        // periodic_poll_Class(4000);
+        // periodic_poll_Analog(4000);
+        // periodic_poll_Binary(4000);
+    }
+  } else {
+    NS_LOG_INFO("I'm Outstation!");
+    m_socket->Listen ();
+    //m_socket->ShutdownSend ();
+  }
+  m_socket->SetRecvCallback (MakeCallback (&Dnp3HelicsApplication::HandleRead, this));
+  m_socket->SetAcceptCallback (
+  MakeNullCallback<bool, Ptr<Socket>, const Address &> (),
+  MakeCallback (&Dnp3HelicsApplication::HandleAccept, this));
+  m_socket->SetCloseCallbacks (
+  MakeCallback (&Dnp3HelicsApplication::HandlePeerClose, this),
+  MakeCallback (&Dnp3HelicsApplication::HandlePeerError, this));
+}
+
+void Dnp3HelicsApplication::makeUdpConnection(void) {
+  NS_LOG_FUNCTION (this);
+
+  if (m_socket == 0)
+  {
+    TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+    m_socket = Socket::CreateSocket (GetNode (), tid);
+
+      if (Ipv4Address::IsMatchingType(m_localAddress) == true)
+      {
+        InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_localPort);
+        m_socket->Bind(local);
+      }
+    else if (Ipv6Address::IsMatchingType(m_localAddress) == true)
+      {
+        Inet6SocketAddress local = Inet6SocketAddress (Ipv6Address::GetAny (), m_localPort);
+        m_socket->Bind(local);
+      }
+    else
+      {
+        InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_localPort);
+        m_socket->Bind(local);
+        //NS_ASSERT_MSG (false, "Incompatible address type: " << m_localAddress);
+      }
+//Added TWE
+      TypeId tid2 = TypeId::LookupByName ("ns3::UdpSocketFactory");
+      mim_socket = Socket::CreateSocket (GetNode (), tid2);
+
+       if (Ipv4Address::IsMatchingType(m_remoteAddress2) == true)
+        {
+          InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_remotelPort);
+        mim_socket->Bind(local);
+        }
+      else if (Ipv6Address::IsMatchingType(m_remoteAddress2) == true)
+        {
+          Inet6SocketAddress local = Inet6SocketAddress (Ipv6Address::GetAny (), m_remotelPort);
+          mim_socket->Bind(local);
+        }
+      else
+        {
+          InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_remotelPort);
+         mim_socket->Bind(local);
+        //NS_ASSERT_MSG (false, "Incompatible address type: " << m_localAddress);
+        }
+
+  }
+  m_socket->SetRecvCallback (MakeCallback (&Dnp3HelicsApplication::HandleRead, this));
+  mim_socket->SetRecvCallback (MakeCallback (&Dnp3HelicsApplication::HandleRead, this));
+  if(m_isMaster == true) {
+
+    startMaster();
+    if (m_name.compare("MIM")!= 0) {
+      NS_LOG_INFO("I'm Master");
+   //         periodic_poll(0);
+   //         Simulator::Schedule(Seconds(11), &Dnp3HelicsApplication::send_control_binary, this, Dnp3HelicsApplication::SELECT_OPERATE, 0, ControlOutputRelayBlock::TRIP);
+   //         Simulator::Schedule(Seconds(21), &Dnp3HelicsApplication::send_control_binary, this, Dnp3HelicsApplication::DIRECT, 0, ControlOutputRelayBlock::CLOSE);
+   //         Simulator::Schedule(Seconds(31), &Dnp3HelicsApplication::send_control_analog, this, Dnp3HelicsApplication::SELECT_OPERATE, 0, 3);
+   //         Simulator::Schedule(Seconds(41), &Dnp3HelicsApplication::send_control_analog, this, Dnp3HelicsApplication::DIRECT, 0, 5);
+
+            //Kyle's new code code above was already commented out
+            //call just integrity code for now
+            // periodic_poll_Integrity(4000);
+            // periodic_poll_Class(4000);
+            // periodic_poll_Analog(4000);
+            // periodic_poll_Binary(4000);
+    } else {
+      NS_LOG_INFO("I'm MIM Master");
+      if(m_attackStartTime)
+      {
+        //Schedule for start of the attack (in seconds)
+        Simulator::Schedule(Seconds(m_attackStartTime), &Dnp3HelicsApplication::set_attack, this, true); //virtual method
+      }
+      if(m_attackEndTime) {
+        //Schedule for end of the attack (in seconds)
+        Simulator::Schedule(Seconds(m_attackEndTime), &Dnp3HelicsApplication::set_attack, this, false); //virtual method
+      }
+      //startOutstation(m_socket);
+      //if (m_name.find("Inside") != std::string::npos or m_name.find("MIM")!=std::string::npos){
+      //   startOutstation(mim_socket);
+      //}
+    }
+
+  } else {
+    if (m_name.compare("MIM")!= 0) {
+      startMaster();
+      NS_LOG_INFO("I'm Outstation");
+    } else {
+      NS_LOG_INFO("I'm MIM Outstation");
+      if(m_attackStartTime)
+      {
+        //Schedule for start of the attack (in seconds)
+        Simulator::Schedule(Seconds(m_attackStartTime), &Dnp3HelicsApplication::set_attack, this, true); //virtual method
+      }
+      if(m_attackEndTime) {
+        //Schedule for end of the attack (in seconds)
+        Simulator::Schedule(Seconds(m_attackEndTime), &Dnp3HelicsApplication::set_attack, this, false); //virtual method
+      }
+    }
+    m_socket->Connect (InetSocketAddress (Ipv4Address::ConvertFrom(m_remoteAddress), m_remotelPort));
+    mim_socket->Connect (InetSocketAddress (Ipv4Address::ConvertFrom(m_remoteAddress2), m_localPort));
+    startOutstation(m_socket);
+    if (m_name.find("MIM") != std::string::npos){
+        startOutstation(mim_socket);
+    }
+  }
+}
+
+void Dnp3HelicsApplication::ConnectToPeer(Ptr<Socket> localSocket, uint16_t servPort)
+{
+  NS_LOG_INFO("Remote: "<<m_remoteAddress);
+  m_socket->Connect (InetSocketAddress(Ipv4Address::ConvertFrom(m_remoteAddress), m_remotelPort));
+}
+
+void Dnp3HelicsApplication::StopApplication ()     // Called at time specified by Stop
+{
+  NS_LOG_FUNCTION (this);
+  running = false;
+  NS_LOG_INFO("CLOSING APPLICATION @@@@@@@@@@@@@@@@@@@@@@@@");
+  while(!m_socketList.empty ()) //these are accepted sockets, close them
+  {
+    Ptr<Socket> acceptedSocket = m_socketList.front ();
+    m_socketList.pop_front ();
+    acceptedSocket->Close ();
+  }
+  if (m_socket)
+  {
+    m_socket->Close ();
+    m_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket> > ());
+  }
+}
+
+void Dnp3HelicsApplication::initConfig(void)
+{
+  NS_LOG_FUNCTION (this);
+  ifstream  pointsFile(points_filename, ifstream::in);
+  if(pointsFile) {
+    bool isValid;
+    CSVRow row;
+    int i = 0;
+    while(pointsFile.good()) {
+      row.readNextRow(pointsFile);
+      if(row.size() > 0) {
+        if(row.geti(0).compare("ANALOG") == 0) {
+            NS_LOG_INFO("Adding Analog: " << ((string) row.geti(1)));
+            isValid = true;
+            analog_points.insert(make_pair((string)row.geti(1), stoi(row.geti(2))));//0.0));
+            analog_point_names.push_back((string)row.geti(1));
+        } else if (row.geti(0).compare("BINARY") == 0) {
+                        NS_LOG_INFO("Adding Binary: " << ((string) row.geti(1)));
+            isValid = true;
+            bin_points[row.geti(1)] = stoi(row.geti(2));//0;
+            binary_point_names.push_back((string)row.geti(1));
+        } else {
+            NS_LOG_INFO("Invalid row %s" << row.geti(1).c_str());
+            isValid = false;
+        }
+
+        if(!m_isMaster && isValid){
+
+          int indexStart = points_filename.find("-",0);
+          int indexEnd = points_filename.find("-", indexStart+1);
+          string combinedName = (string)row.geti(1);
+          string alteredFileName = points_filename.substr(indexStart+1, indexEnd-indexStart-1);
+          transform(alteredFileName.begin(), alteredFileName.end(), alteredFileName.begin(), ::toupper);
+          combinedName = alteredFileName+ "/" + combinedName;
+          NS_LOG_INFO("Checking for " << combinedName << " in config file");
+        }
+        i++;
+      }
+    }
+  } else {
+    NS_LOG_INFO("Unable to open points file:" << points_filename);
+    exit(-1);
+  }
+}
+
+void Dnp3HelicsApplication::store_points(std::string name, std::string value)
+{
+
+  if (!analog_points.empty()) {
+    if (analog_points.find(name) != analog_points.end()) {
+      analog_points[name] = atof(value.c_str());
+      //cout << "analog point found: " << name << "New item:" << analog_points[name] << endl;
+    } else if (bin_points.find(name) != bin_points.end()) {
+      if(value.compare("CLOSED") == 0) {
+          bin_points[name] = 1;
+      } else{
+          bin_points[name] = 0;
+      }
+      //  cout << "bin point found: " << name << "New item:" << bin_points[name] << endl;
+    } else {
+      //cout << "point not found: " << name << endl;
+      NS_LOG_INFO("point not found " << name);
+    }
+  }
+}
+
+void Dnp3HelicsApplication::HandlePeerClose (Ptr<Socket> socket)
+{
+  NS_LOG_FUNCTION (this << m_name << socket);
+}
+
+void Dnp3HelicsApplication::HandlePeerError (Ptr<Socket> socket)
+{
+  NS_LOG_FUNCTION (this << socket);
+}
+
+
+void Dnp3HelicsApplication::HandleAccept (Ptr<Socket> s, const Address& from)
+{
+  NS_LOG_FUNCTION (this << s << from);
+  s->SetRecvCallback (MakeCallback (&Dnp3HelicsApplication::HandleRead, this));
+  m_socketList.push_back (s);
+  startOutstation(s);
+}
+
+// implementation of EventInterface
+void Dnp3HelicsApplication::changePoint(        DnpAddr_t addr, DnpIndex_t index,
+				     PointType_t    pointType,
+				     int value, DnpTime_t timestamp)
+{
+  
+}
+void  Dnp3HelicsApplication::registerName(       DnpAddr_t      addr,
+				      DnpIndex_t     index,
+				      PointType_t    pointType,
+				      char*          name,
+				      int            initialValue )
+{
+//    assert( pointType < NUM_POINT_TYPES);
+//    QString key = convertDnpIndexToName(addr, index, pointType);
+//    pointNameHash[key] = QString(name);
+    changePoint( addr, index, pointType, initialValue);
+}
+
+void Dnp3HelicsApplication::startMaster()
+{
+  //EventInterface ei_p;
+  debugLevel = 0;
+	// master and station config
+	masterConfig.addr = m_master_device_addr;
+	masterConfig.consecutiveTimeoutsForCommsFail = 1;
+	integrityPollInterval = m_integrityInterval;
+	masterConfig.integrityPollInterval_p = &integrityPollInterval;
+	masterConfig.debugLevel_p = &debugLevel;
+	stationConfig.addr = m_station_device_addr;
+	stationConfig.debugLevel_p = &debugLevel;
+
+	// datalink config
+	datalinkConfig.addr                  = masterConfig.addr;
+	datalinkConfig.isMaster              = true;
+	datalinkConfig.debugLevel_p          = &debugLevel;
+
+  // end point config
+  endpointConfig.ownerDnpAddr     = masterConfig.addr;
+  endpointConfig.tcp              = m_enableTcp;
+  endpointConfig.initiating       = false;
+  endpointConfig.listenPort       = m_remotelPort;
+
+  remoteDevice.ip = m_remoteAddress;
+  remoteDevice.port = m_remotelPort;
+  deviceMap[stationConfig.addr]   = remoteDevice;
+
+  endpointConfig.deviceMap        = deviceMap;
+  endpointConfig.debugLevel_p     = &debugLevel;
+  endpointConfig.jitterMinNs      = m_jitterMinNs;
+  endpointConfig.jitterMaxNs      = m_jitterMaxNs;
+	Endpoint* ep_p = new Endpoint(endpointConfig, m_txTrace, mim_socket, this);
+
+	// datalink required pointer to the transmit interface
+	datalinkConfig.tx_p                  = ep_p;
+	//TimerInterface* ti = NULL; //To check
+  initConfig();
+
+	m_p = new Master (masterConfig, datalinkConfig, &stationConfig,
+			  1,      // one station
+			  this,   // event interface
+			  &ti);   // timer interface
+}
+
+
+
+void Dnp3HelicsApplication::periodic_poll(int count)
+{
+//    cout << count << endl;
+//    if (count == 0) {
+//        Simulator::Schedule(Seconds(4), &Dnp3HelicsApplication::periodic_poll, this, ++count); //virtual method
+//    }
+//    else{
+  if(running) {
+    // std::size_t stepsize = 16, i, stop;
+    // for (i=0; i<analog_point_names.size(); i+=stepsize) {
+    //   stop = (i+stepsize-1)<analog_point_names.size()? i+stepsize-1:analog_point_names.size()-1;
+    //   m_p->poll(Master::INTEGRITY, i, stop);
+    // }
+    m_p->poll(Master::INTEGRITY);
+
+    Simulator::Schedule(MilliSeconds(4000), &Dnp3HelicsApplication::periodic_poll, this, ++count); //virtual method
+  }
+//    }
+}
+
+void Dnp3HelicsApplication::periodic_poll_Integrity(int pollRate){
+  if(running){
+    NS_LOG_INFO("INSIDE periodic_poll_Integrity");
+    m_p->poll(Master::INTEGRITY);
+    Simulator::Schedule(MilliSeconds(pollRate), &Dnp3HelicsApplication::periodic_poll_Integrity, this, pollRate); //virtual method
+  }
+
+}
+
+void Dnp3HelicsApplication::periodic_poll_Binary(int pollRate){
+  if(running){
+    NS_LOG_INFO("INSIDE periodic_poll_Binary");
+    m_p->poll(Master::BINARY);
+    Simulator::Schedule(MilliSeconds(pollRate), &Dnp3HelicsApplication::periodic_poll_Binary, this, pollRate);
+  }
+
+}
+
+void Dnp3HelicsApplication::periodic_poll_Analog(int pollRate){
+  if(running){
+    NS_LOG_INFO("INSIDE periodic_poll_Analog");
+    m_p->poll(Master::ANALOG);
+    Simulator::Schedule(MilliSeconds(pollRate), &Dnp3HelicsApplication::periodic_poll_Analog, this, pollRate);
+  }
+}
+
+void Dnp3HelicsApplication::periodic_poll_Class(int pollRate){
+  if(running){
+
+    NS_LOG_INFO("INSIDE periodic_poll_Class");
+    m_p->poll(Master::CLASS);
+    Simulator::Schedule(MilliSeconds(pollRate), &Dnp3HelicsApplication::periodic_poll_Class, this, pollRate);
+  }
+
+}
+
+void Dnp3HelicsApplication::set_attack(bool state) {
+    NS_LOG_INFO ("MIMServer::set_attack >>> Start Attack Mode: " << m_attackType);
+    m_attack_on = state;
+}
+
+void Dnp3HelicsApplication::send_control_binary(Dnp3HelicsApplication::ControlType type, DnpIndex_t index, ControlOutputRelayBlock::Code code) {
+  NS_LOG_INFO ("Dnp3HelicsApplication::send_control_binary");
+  NS_LOG_INFO ("Kyle application name: " << m_name);
+  ControlOutputRelayBlock cb( code, index );
+  if(type == Dnp3HelicsApplication::SELECT_OPERATE) {
+      m_p->control(cb);
+  } else if(type == Dnp3HelicsApplication::DIRECT) {
+      m_p->direct_operate(true, cb);
+  } else {
+      NS_LOG_INFO ("Call to Dnp3HelicsApplication::send_control_binary with bad control type");
+  }
+}
+
+void Dnp3HelicsApplication::send_control_analog(Dnp3HelicsApplication::ControlType type, DnpIndex_t index, double value) {
+  NS_LOG_INFO ("Dnp3HelicsApplication::send_control_analog");
+  Bit32AnalogOutput ao(value, index);
+  if(type == Dnp3HelicsApplication::SELECT_OPERATE) {
+      m_p->control(ao);
+  } else if(type== Dnp3HelicsApplication::DIRECT) {
+      m_p->direct_operate(true, ao);
+  } else {
+      NS_LOG_INFO ("Call to Dnp3HelicsApplication::send_control_analog with bad control type");
+  }
+}
+
+void Dnp3HelicsApplication::send_device_attribute_request(DnpIndex_t index) {
+  NS_LOG_INFO ("Dnp3HelicsApplication::send_device_attribute_request");
+  
+  m_p->getAttribute(index);
+}
+
+
+void Dnp3HelicsApplication::startOutstation(Ptr<Socket> sock)
+{
+  NS_LOG_INFO("Starting Outstation");
+
+  //OutstationConfig             outstationConfig;
+  Endpoint::EndpointConfig                 epConfig;
+  Datalink::DatalinkConfig                 dlConfig;
+  RemoteDevice                             rd;
+  std::map<DnpAddr_t, RemoteDevice>        rdMap;
+
+  // debugs will be set by the outstation window
+  debugLevel = 0;
+  // outstation config
+  outstationConfig.addr                = m_station_device_addr;
+  outstationConfig.masterAddr          = m_master_device_addr;
+  outstationConfig.userNum             = 3; // hard coded for prototype
+  outstationConfig.debugLevel_p        = &debugLevel;
+
+  // end point config
+  epConfig.ownerDnpAddr          = m_master_device_addr;
+  epConfig.tcp                   = m_enableTcp;
+  epConfig.initiating            = false;
+  epConfig.listenPort            = m_remotelPort;
+  endpointConfig.debugLevel_p    = &debugLevel;
+
+  rd.ip                          = m_remoteAddress;
+  rd.port                        = m_remotelPort;
+  rdMap[m_master_device_addr]    = rd;
+
+  epConfig.deviceMap             = rdMap;
+  epConfig.jitterMinNs           = m_jitterMinNs;
+  epConfig.jitterMaxNs           = m_jitterMaxNs;
+
+  // datalink config
+  dlConfig.addr                  = outstationConfig.addr;
+  dlConfig.isMaster              = false;
+  dlConfig.debugLevel_p          = &debugLevel;
+
+  Endpoint* ep_p = new Endpoint(epConfig, m_txTrace, sock, this);
+
+  // datalink required pointer to the transmit interface
+  dlConfig.tx_p  = ep_p;
+  initConfig();
+  //TimerInterface* ti = NULL; //Todo
+  NS_LOG_INFO("I AM INITIALIZING AN OUTSTATION");
+  o_p = new Outstation ( outstationConfig, dlConfig,
+        this,   // event interface
+        &ti);   // timer interface
+  o_p->set_point_names(analog_point_names, binary_point_names);
+  o_p->set_stationName(m_name);
+  // Add a callback (or delegate) to handle publishing data
+  using std::placeholders::_1;
+  using std::placeholders::_2;
+  using std::placeholders::_3;
+  std::function<void(std::string,std::string,std::string)> func;
+  func = std::bind (&Dnp3HelicsApplication::DoMessage, this, _1, _2, _3);
+  o_p->set_publishCallback(func);
+  vector<string>::iterator it;
+  m_respond = true;
+  m_offline = false;
+}
+
+static uint8_t
+char_to_uint8_t (char c)
+{
+  return uint8_t(c);
+}
+
+//This function provides a way to set an outstation to not respond to requests
+void Dnp3HelicsApplication::set_respond(bool respond) {
+  NS_LOG_INFO ("Dnp3HelicsApplication::setRespond");
+  m_respond = respond;
+}
+
+//This function provides a way to set the values of an outstation to offline in DNP3 responses
+void Dnp3HelicsApplication::set_offline(bool offline) {
+  NS_LOG_INFO ("Dnp3HelicsApplication::set_offline");
+  if (m_isMaster == true) {
+    //cout << "Master HandleRead Recieved: " << temp << endl;
+    NS_LOG_INFO ("Error: Tried to set a master DNP3 to offline; only valid for outstation DNP3 applications");
+  } else {
+    //cout << "Outstation HandleRead" << temp << endl;
+    o_p->set_offline(offline);
+    if(offline) {
+        frozen_analog_points = analog_points;
+        frozen_bin_points = bin_points;
+    }
+    m_offline = offline;
+  }
+}
+
+//This function provides a way to set a multiplier for the analog values responded
+void Dnp3HelicsApplication::set_multiplier(float multiplier) {
+  NS_LOG_INFO ("Dnp3HelicsApplication::set_multiplier");
+  if (m_isMaster == true) {
+    //cout << "Master HandleRead Recieved: " << temp << endl;
+    NS_LOG_INFO ("Error: Tried to set a master DNP3 to offline; only valid for outstation DNP3 applications");
+  } else {
+    //cout << "Outstation HandleRead" << temp << endl;
+    o_p->set_multiplier(multiplier);
+  }
+}
+
+void
+Dnp3HelicsApplication::HandleRead (Ptr<Socket> socket)
+{
+  NS_LOG_FUNCTION (this << m_name << socket);
+
+  cout << m_name << " " << m_localAddress << endl;
+
+  if (m_name.compare("MIM") == 0) {
+      cout << m_name << endl;
+      handle_MIM(socket);
+  }
+  else {
+    handle_normal(socket);
+  }
+}
+
+
+void 
+Dnp3HelicsApplication::save_data(Ptr<Socket> socket, Ptr<Packet> packet, Address from)
+{
+  Address localAddress;
+  socket->GetSockName (localAddress);
+  if (packet->GetSize () > 0)
+  {
+    uint32_t receivedSize = packet->GetSize ();
+    SeqTsHeader seqTs;
+    packet->RemoveHeader (seqTs);
+    uint32_t currentSequenceNumber = seqTs.GetSeq ();
+    std::ofstream outfile;
+    if(not (access( "perf.txt", F_OK ) == 0)){
+       outfile.open("perf.txt", std::ios_base::app);
+       outfile << "Timestamp : Bytes Received : From IP : Node ID : Sequence Number : Packet UID\n"; // : Delay\n";
+       outfile.close();
+     }
+
+     outfile.open("perf.txt", std::ios_base::app); // append instead of overwrite
+     outfile  << Simulator::Now () <<
+     " : " << packet->GetSize () <<
+     " : " << InetSocketAddress::ConvertFrom (from).GetIpv4 () <<
+     " : " << m_remoteAddress <<
+     " : " << currentSequenceNumber <<
+     " : " << packet->GetUid () << "\n";
+     //" : " << Simulator::Now () - seqTs.GetTs () << "\n";		    
+     outfile.close();
+  }
+
+}
+
+void Dnp3HelicsApplication::handle_normal(Ptr<Socket> socket) {
+  Address from;
+  Ptr<Packet> packet;
+  Uptime_t timeRxd = 0;
+
+
+  while ((packet = socket->RecvFrom (from)))
+  {
+    m_txTrace(packet);
+
+    NS_LOG_INFO ("Dnp3HelicsApplication:: >>> address: " << InetSocketAddress::ConvertFrom (from).GetIpv4 ()); // << "   VictimAddress: " << victimAddr);
+    uint32_t size = packet->GetSize();
+    uint8_t *temp = new uint8_t[size];
+    packet->CopyData(temp, size);
+    save_data(socket, packet, from);
+    Bytes buf((unsigned char*) temp, (unsigned char*)temp+size);
+
+    DnpStat_t state;
+    if (m_isMaster == true) {
+      cout << "Master HandleRead Recieved: " << temp << endl;
+      state = m_p->rxData(&buf, timeRxd);
+    } else {
+      cout << "Outstation HandleRead" << temp << endl;
+      if(m_respond) {
+        if(!m_offline) state = o_p->rxData(&buf, analog_points, bin_points, timeRxd);
+        else state = o_p->rxData(&buf, frozen_analog_points, frozen_bin_points, timeRxd);
+      }
+
+    }
+    //cout << state;
+    if ( state != Station::IDLE) {
+    }
+  }
+}
+
+void Dnp3HelicsApplication::calc_crc(Bytes buf_temp, uint8_t * temp2, Ptr<Packet> testPack){
+	    static unsigned short crctable[256] = {
+		    0x0000,  0x365e,  0x6cbc,  0x5ae2,  0xd978,  0xef26,  0xb5c4,  0x839a,
+		    0xff89,  0xc9d7,  0x9335,  0xa56b,  0x26f1,  0x10af,  0x4a4d,  0x7c13,
+		    0xb26b,  0x8435,  0xded7,  0xe889,  0x6b13,  0x5d4d,  0x07af,  0x31f1,
+		    0x4de2,  0x7bbc,  0x215e,  0x1700,  0x949a,  0xa2c4,  0xf826,  0xce78,
+		    0x29af,  0x1ff1,  0x4513,  0x734d,  0xf0d7,  0xc689,  0x9c6b,  0xaa35,
+		    0xd626,  0xe078,  0xba9a,  0x8cc4,  0x0f5e,  0x3900,  0x63e2,  0x55bc,
+		    0x9bc4,  0xad9a,  0xf778,  0xc126,  0x42bc,  0x74e2,  0x2e00,  0x185e,
+		    0x644d,  0x5213,  0x08f1,  0x3eaf,  0xbd35,  0x8b6b,  0xd189,  0xe7d7,
+		    0x535e,  0x6500,  0x3fe2,  0x09bc,  0x8a26,  0xbc78,  0xe69a,  0xd0c4,
+		    0xacd7,  0x9a89,  0xc06b,  0xf635,  0x75af,  0x43f1,  0x1913,  0x2f4d,
+		    0xe135,  0xd76b,  0x8d89,  0xbbd7,  0x384d,  0x0e13,  0x54f1,  0x62af,
+		    0x1ebc,  0x28e2,  0x7200,  0x445e,  0xc7c4,  0xf19a,  0xab78,  0x9d26,
+		    0x7af1,  0x4caf,  0x164d,  0x2013,  0xa389,  0x95d7,  0xcf35,  0xf96b,
+		    0x8578,  0xb326,  0xe9c4,  0xdf9a,  0x5c00,  0x6a5e,  0x30bc,  0x06e2,
+		    0xc89a,  0xfec4,  0xa426,  0x9278,  0x11e2,  0x27bc,  0x7d5e,  0x4b00,
+		    0x3713,  0x014d,  0x5baf,  0x6df1,  0xee6b,  0xd835,  0x82d7,  0xb489,
+		    0xa6bc,  0x90e2,  0xca00,  0xfc5e,  0x7fc4,  0x499a,  0x1378,  0x2526,
+		    0x5935,  0x6f6b,  0x3589,  0x03d7,  0x804d,  0xb613,  0xecf1,  0xdaaf,
+		    0x14d7,  0x2289,  0x786b,  0x4e35,  0xcdaf,  0xfbf1,  0xa113,  0x974d,
+		    0xeb5e,  0xdd00,  0x87e2,  0xb1bc,  0x3226,  0x0478,  0x5e9a,  0x68c4,
+		    0x8f13,  0xb94d,  0xe3af,  0xd5f1,  0x566b,  0x6035,  0x3ad7,  0x0c89,
+		    0x709a,  0x46c4,  0x1c26,  0x2a78,  0xa9e2,  0x9fbc,  0xc55e,  0xf300,
+		    0x3d78,  0x0b26,  0x51c4,  0x679a,  0xe400,  0xd25e,  0x88bc,  0xbee2,
+		    0xc2f1,  0xf4af,  0xae4d,  0x9813,  0x1b89,  0x2dd7,  0x7735,  0x416b,
+		    0xf5e2,  0xc3bc,  0x995e,  0xaf00,  0x2c9a,  0x1ac4,  0x4026,  0x7678,
+		    0x0a6b,  0x3c35,  0x66d7,  0x5089,  0xd313,  0xe54d,  0xbfaf,  0x89f1,
+		    0x4789,  0x71d7,  0x2b35,  0x1d6b,  0x9ef1,  0xa8af,  0xf24d,  0xc413,
+		    0xb800,  0x8e5e,  0xd4bc,  0xe2e2,  0x6178,  0x5726,  0x0dc4,  0x3b9a,
+		    0xdc4d,  0xea13,  0xb0f1,  0x86af,  0x0535,  0x336b,  0x6989,  0x5fd7,
+		    0x23c4,  0x159a,  0x4f78,  0x7926,  0xfabc,  0xcce2,  0x9600,  0xa05e,
+		    0x6e26,  0x5878,  0x029a,  0x34c4,  0xb75e,  0x8100,  0xdbe2,  0xedbc,
+		    0x91af,  0xa7f1,  0xfd13,  0xcb4d,  0x48d7,  0x7e89,  0x246b,  0x1235
+	    };
+	    
+	    unsigned int crc32 = 0;
+	    int data_length = 8; //274;
+	    Bytes::const_iterator j = buf_temp.begin();
+	    int i;
+	    for (i = 0; i < data_length; i++, j++) {
+		    std::cout << "I am in here 1" << std::endl;
+		    const uint16_t lookupIndex = (crc32^(*j)) & 0x00ff;
+		    crc32 = (crc32 >> 8) ^ crctable[lookupIndex];  // CRCTable is an array of 256 32-bit constants
+	    }
+	    
+	    crc32 = (~crc32 & 0xffff);
+	    Bytes crc3;
+	    appendUINT16(crc3, crc32);
+	    std::cout << "After the append" << std::endl;
+	    int crc1 = crc3[0]; //(crc32) & 0xff;
+	    int crc2 = crc3[1]; //(crc32 >> (8*1)) & 0xff;
+	    
+	    std::cout << "The calculated crc is "  << crc1 << " " << crc2 << " the observed crc is " << (int)buf_temp[8] << " and " << (int) buf_temp[9] << std::endl;
+	    temp2[8] = crc1;
+	    temp2[9] = crc2;
+	    
+	    int remainder = (buf_temp.size()-10)%18;
+	    Bytes crc3_temp;
+	    unsigned int crc32_temp = 0;
+	    Bytes::const_iterator jj = j;
+	    int index1 = 26;
+	    int index2 = 27;
+	    for (int ss = 0; ss < buf_temp.size()-(remainder+10); ss+=18){ //(buf.size()-(remainder+10)); ss++){
+		    if((int)buf_temp[index1] != 0){
+			    crc32_temp = 0;
+			    jj = jj + 2;
+			    
+			    for (i = 0; i < 16; i++, jj++){
+				    const uint16_t lookupIndex = (crc32_temp^(*jj)) & 0x00ff;
+				    crc32_temp = (crc32_temp >> 8) ^ crctable[lookupIndex];
+			    } 
+			    crc32_temp = (~crc32_temp & 0xffff);
+			    
+			    appendUINT16(crc3_temp, crc32_temp);
+			    
+			    int crc1_temp = crc3_temp[crc3_temp.size()-2];
+			    int crc2_temp = crc3_temp[crc3_temp.size()-1];
+			    
+			    std::cout << "The calculated crc is " << crc1_temp << " " << crc2_temp << " the observed crc is " << (int)buf_temp[index1] << " and " << (int)buf_temp[index2] << std::endl;
+			    
+			    temp2[index1] = crc1_temp;
+			    temp2[index2] = crc2_temp;
+			    
+			    index1 = index1 + 18;
+			    index2 = index2 + 18;
+			    crc3_temp.clear();
+		    }
+	    }
+	    std::cout << "The remainder is equal to " << remainder-2 << std::endl;
+	    if( testPack->GetSize() == 188 ){
+		    crc32_temp = 0;
+		    jj = jj+2;
+		    
+		    for (i = 0; i < remainder-2; i++, jj++){
+			    const uint16_t lookupIndex = (crc32_temp^(*jj)) & 0x00ff;
+			    crc32_temp = (crc32_temp >> 8) ^ crctable[lookupIndex];
+		    }
+		    crc32_temp = (~crc32_temp & 0xffff);
+		    
+		    appendUINT16(crc3_temp, crc32_temp);
+		    
+		    int crc1_temp = crc3_temp[crc3_temp.size()-2];
+		    int crc2_temp = crc3_temp[crc3_temp.size()-1];
+		    
+		    std::cout << "The calculated crc is 11111 " << crc1_temp << " " << crc2_temp << std::endl;
+		    temp2[index1-(18-remainder)] = crc1_temp;
+		    temp2[index2-(18-remainder)] = crc2_temp;
+		    crc3_temp.clear();
+	    }
+	    
+	    cout << "Captured Response: " << testPack->GetSize() << endl;
+}
+
+std::vector<std::string> Dnp3HelicsApplication::get_val_vector (std::string delimiter, std::string m_attack_val){
+	size_t pos = 0;
+	std::vector<std::string> val;
+	std::string token;
+	std::string VI = m_attack_val;
+	while ((pos = VI.find(delimiter)) != std::string::npos) {
+		token = VI.substr(0, pos);
+		val.push_back(token);
+		VI.erase(0, pos + delimiter.length());
+	}
+	val.push_back(VI);
+	return val;
+}
+
+int Dnp3HelicsApplication::start_byte(uint8_t * temp2, Ptr<Packet> testPack){
+	int start;
+	if ((int)temp2[15] == 30 && (int)temp2[16] == 5){
+		start = 0;
+	}else if(testPack->GetSize() == 274){
+		start = 46;
+	}else{
+		start = 92;
+	}
+	return start;
+}
+
+float Dnp3HelicsApplication::get_val(std::vector<std::string> val, std::vector<std::string> val_min, std::vector<std::string> val_max, int index){
+	float f = 0.0;
+	if (index < val_min.size() && index < val_max.size()){
+		if (val_min[index] != "NA" && val_max[index] != "NA"){
+			float r = (rand() % 10) + 1;//rand() / (RAND_MAX);
+			std::cout << "The random number that is selected is " << r << std::endl;
+			if (r > 5){
+				f = (std::stof(val_min[index])); 
+			}else{
+				f = (std::stof(val_max[index])); 
+			}
+		}else{
+			std::cout << "The value is: " << val[index] << std::endl;
+			f = (std::stof(val[index])); 
+		}
+	}else{
+		f = (std::stof(val[index]));
+	}
+	return f;
+
+}
+
+void Dnp3HelicsApplication::handle_MIM(Ptr<Socket> socket) {
+  Address from;
+  Ptr<Packet> packet;
+  Address SourceAddr;
+  socket->GetSockName(SourceAddr);
+    while ((packet = socket->RecvFrom (from)))
+    {
+     //save_data(socket, packet, from);
+      if(mitm_flag == true) {
+        //save_data(socket, packet, from);
+        //NS_LOG_INFO ("MIMServer::HandleRead >>> destAddr: " << destAddr);
+          if(false){ //m_attack_on) {
+              if(m_attackType == 1) {
+                  //cout << "MIMServer::HandleRead >>> Attack is ON. Routing process is terminated by Man in the middle" << endl;
+                  NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Routing process is terminated by Man in the middle");
+              }else if(m_attackType == 2) {
+		      NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
+		      uint32_t size = packet->GetSize();
+		      
+		      uint8_t *temp = new uint8_t[size];
+		      packet->CopyData(temp, size);
+		      NS_LOG_INFO ("MIMServer::HandleRead >>> MIM IP" << SourceAddr ); //<< " Forwarding packet to " << destAddr);
+		      Bytes buf((unsigned char*) temp, (unsigned char*)temp+size);	   
+		      Ptr<Packet> testPack = packet->Copy();
+                      uint32_t size2 = testPack->GetSize();
+		      uint8_t *temp2 = new uint8_t[size2];
+		      testPack->CopyData(temp2, size2);
+		      Bytes buf2((unsigned char*) temp2, (unsigned char*)temp2+size2);
+
+		      Bytes emptyData;
+		      Ptr<Packet> packet_mitm;
+		      NS_LOG_INFO("End of setup before if statement");
+		      if(buf.size() >= Lpdu::HEADER_SIZE) {
+			      NS_LOG_INFO("After if statement");
+			      int start1 = buf[0];
+			      NS_LOG_INFO("Getting the first item of buf");
+			      AppSeqNum_t seq = buf[11] & 0x0f;
+			      NS_LOG_INFO (seq);
+			      if((start1 == 0x05) && (0x64)) {
+				      uint16_t dest = buf[5] << 0x08 | buf[4]; //To check
+				      uint16_t src = buf[7] << 0x08 | buf[6]; //To check
+				      NS_LOG_INFO("After I set the src and dst");
+				      Lpdu::UserData data;
+				      NS_LOG_INFO("After the data is set " << src << " " << dest);
+				      data.dest = dest;
+				      data.src = src;
+				      NS_LOG_INFO("========================\n");
+				      if (m_isMaster) {
+					      NS_LOG_INFO("Am I the master?");
+				      } else {
+					      NS_LOG_INFO("transmitting 0 data!!!!!!!!!!!!!!!!!");
+					      std::vector<uint8_t> mapping;
+					      for (int k = 0; k < size2; k++){
+						      mapping.push_back(temp2[k]);
+					      }
+					      bool one_point = true;
+					      if(one_point && ((testPack->GetSize() == 274) || (testPack->GetSize() >= 195))) {
+						      std::vector<string> unique_id;
+						      for(map<string, float>::iterator iter = analog_points.begin(); iter != analog_points.end(); iter++ ) {
+							      unique_id.push_back((*iter).first); //token);
+						      }
+						      for (int i = 0; i < unique_id.size(); i++){
+							      std::cout << "ID: " << unique_id[i] << std::endl;
+						      }
+						      std::cout << "Number of labels found " << unique_id.size() << std::endl;
+						      int size_temp = buf.size();
+						      Bytes buf_temp;
+
+						      std::string delimiter = ",";
+						      std::vector<std::string> val = get_val_vector (delimiter, m_attack_point_val);
+						      std::vector<std::string> val_min = get_val_vector (delimiter, m_attack_min);
+						      std::vector<std::string> val_max = get_val_vector (delimiter, m_attack_max);
+                                                      std::vector<std::string> nodes = get_val_vector (delimiter, node_id);
+						      std::vector<std::string> points = get_val_vector (delimiter, point_id);
+						      std::vector<std::string> nodesPoints;
+						      std::cout << "node_id " << node_id << std::endl;
+						      
+						      for (int xx = 0; xx < nodes.size(); xx++){
+							      nodesPoints.push_back(nodes[xx] + "$"+ points[xx]);
+						      }
+						      
+						      
+						      
+						      int ID_point = 0;
+						      for (int qq = 0; qq < nodesPoints.size(); qq++){
+							      std::cout << "Searching for point " << nodesPoints[qq]  << " qq = " << qq<< std::endl;
+							      std::cout << "Number of points " << nodesPoints.size() << std::endl;
+							      for (int i = 0; i < unique_id.size(); i++){
+								      if(unique_id[i].find(nodesPoints[qq]) != std::string::npos){  
+									      std::cout << "Found point " << nodesPoints[qq] << " : " << unique_id[i] << std::endl;
+									      ID_point = i;
+								      }
+							      }
+							      int ind1 = 0;
+							      int ind2 = 0;
+							      four = start_byte(temp2, testPack);
+							      std::cout << "After the start bytes" << std::endl;
+							      float f = get_val(val, val_min, val_max, qq); 
+							      std::cout << "After the get_val" << std::endl;
+							      char *cc = (char *) &f;
+							      int d = 0;
+							      for (int i= 0; i < buf2.size(); i ++){
+								      if (i>9){
+									      if (i > 19){
+										      if (temp2[i] != 0x01 and ind2 < 16){
+											      ind1 += 1;
+										      }
+										      if(temp2[i] == 0x01){
+											      four += 1;
+										      }
+										      if(ind2 == 0){
+											      ind1 = 0;
+										      }
+										      
+									      }
+									      if (ind2 < 18){
+										      ind2 += 1;
+									      }else{
+										      ind2 = 0;
+									      }
+								      }
+								      if (ind2 == 0 and i > 19){
+									      std::cout << "Found data crc check " << ind1 << " ID of point " << ID_point << std::endl;
+								      }
+								      
+								      if (( four > 0 ) && (four == ID_point) && (ind2 <= 18) && (i>19) && temp2[i] != 0x01){
+									      temp2[i] = cc[d]; 
+									      d += 1;
+								      }
+							      }
+						      }
+						      for(int i = 0; i < buf2.size(); i++){
+							      appendUINT8(buf_temp, temp2[i]); 
+						      }
+						      calc_crc(buf_temp, temp2, testPack);
+						      
+						      int point_num = 0;
+						      for(int i = 0; i < buf.size(); i++){
+							      std::cout << (int)temp2[i] << ", ";
+							      if ((int)temp2[i] == 1 && point_num < 16){
+								      point_num = i;
+							      }
+						      }
+						      std::cout << std::endl;
+						      Ptr<Packet> newPack = Create<Packet>(temp2, testPack->GetSize());
+						      send_directly(newPack);
+						      std::cout << "I have found start at " << point_num << std::endl;
+					      }else if(one_point){
+						      std::cout << "The temp[12] = " << (int)temp2[12] << " packet size: " << testPack->GetSize() << " the last byte is " << (int)temp2[-1] << std::endl;
+						      for (int i = 0; i < buf.size(); i++){
+							      std::cout << (int)temp2[i] << ",";
+						      }
+						      std::cout << std::endl;
+						      send_directly(packet);
+					      }
+				      }
+			      }
+		      }
+	      }else if(m_attackType == 3) {
+		      NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
+		      uint32_t size = packet->GetSize();
+		      uint8_t *temp = new uint8_t[size];
+		      packet->CopyData(temp, size);
+		      NS_LOG_INFO ("MIMServer::HandleRead >>> MIM IP" << SourceAddr ); //<< " Forwarding packet to " << destAddr);
+		      Bytes buf((unsigned char*) temp, (unsigned char*)temp+size);
+		       Ptr<Packet> testPack = packet->Copy();
+		       uint32_t size2 = testPack->GetSize();
+		       uint8_t *temp2 = new uint8_t[size2];
+		       testPack->CopyData(temp2, size2);
+		       Bytes buf2((unsigned char*) temp2, (unsigned char*)temp2+size2);
+                       Bytes emptyData;
+		       Ptr<Packet> packet_mitm;
+		       NS_LOG_INFO("End of setup before if statement");
+		       
+		       if(buf.size() >= Lpdu::HEADER_SIZE) {
+			       NS_LOG_INFO("After if statement");
+			       int start1 = buf[0];
+			       NS_LOG_INFO("Getting the first item of buf");
+			       AppSeqNum_t seq = buf[11] & 0x0f;
+			       NS_LOG_INFO (seq);
+			       if((start1 == 0x05) && (0x64)) {
+				       uint16_t dest = buf[5] << 0x08 | buf[4]; //To check
+				       uint16_t src = buf[7] << 0x08 | buf[6]; //To check
+				       NS_LOG_INFO("After I set the src and dst");
+				       Lpdu::UserData data;
+				       NS_LOG_INFO("After the data is set " << src << " " << dest);
+				       data.dest = dest;
+				       data.src = src;
+				       NS_LOG_INFO("========================\n");
+				       if (m_isMaster) {
+					       NS_LOG_INFO("Am I the master?");
+				       }else{
+					       std::string delimiter = ",";
+					       std::vector<std::string> val = get_val_vector (delimiter, m_attack_point_val);
+					       std::vector<std::string> val_min;
+					       std::vector<std::string> val_max;
+					       std::vector<std::string> nodes = get_val_vector (delimiter, node_id);
+					       std::vector<std::string> points = get_val_vector (delimiter, point_id);
+					       std::vector<std::string> nodesPoints;
+					       std::cout << "node_id " << node_id << " " << nodes.size() << " " << points.size() << std::endl;
+					       for (int xx = 0; xx < nodes.size(); xx++){
+						       nodesPoints.push_back(nodes[xx] + "$"+ points[xx]);
+					       }
+					       std::vector<string> unique_id_bin;
+					       std::cout << "nodesPoints.size() " << nodesPoints.size() << std::endl;
+					       for(map<string, short unsigned int>::iterator iter = bin_points.begin(); iter != bin_points.end(); iter++ ) {
+						       unique_id_bin.push_back((*iter).first); //token);
+					       }
+					       
+					       std::vector<string> unique_id_an;
+					       for(map<string, float>::iterator iter = analog_points.begin(); iter != analog_points.end(); iter ++){
+						       unique_id_an.push_back((*iter).first);
+					       }
+					       
+					       std::cout << unique_id_bin.size() << endl;
+					       int ID_point = 0;
+					       bool bin = false;
+					       bool analog = false;
+					       for (int qq = 0; qq < nodesPoints.size(); qq++){
+						       std::cout << "Searching for point " << nodesPoints[qq]  << " qq = " << qq<< std::endl;
+						       std::cout << "Number of points " << nodesPoints.size() << std::endl;
+						       for (int i = 0; i < unique_id_bin.size(); i++){
+							       std::cout << "ID: " << unique_id_bin[i] << " : " << i << std::endl;
+							       if(unique_id_bin[i].find(nodesPoints[qq]) != std::string::npos){  
+								       std::cout << "Found Binary point " << nodesPoints[qq] << " : " << unique_id_bin[i] << " : " << i << std::endl;
+								       ID_point = i;
+								       bin = true;
+							       }
+						       }
+						       for (int i = 0; i < unique_id_an.size(); i++){
+							       std::cout << "ID: " << unique_id_an[i] << " : " << i << std::endl;
+							       if (unique_id_an[i].find(nodesPoints[qq]) != std::string::npos){
+								       std::cout << "Found Analog point " << nodesPoints[qq] << " : " << unique_id_an[i] << " : " << i << std::endl;
+								       ID_point = i;
+								       analog = true;
+							       }
+						       }
+						       if (val[qq].find("TRIP") != std::string::npos){
+							       ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::TRIP, ID_point);
+							       m_p->direct_operate(false,ao);
+						       }else if (val[qq].find("CLOSE") != std::string::npos){
+							       ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::CLOSE, ID_point);
+							       m_p->direct_operate(false, ao);
+						       }else if (val[qq].find("LATCH_ON") != std::string::npos){
+							       ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::LATCH_ON, ID_point);
+							       m_p->direct_operate(false, ao);
+						       }else if (val[qq].find("LATCH_OFF") != std::string::npos){
+							       ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::LATCH_OFF, ID_point);
+							       m_p->direct_operate(false, ao);
+						       }
+					       }
+					        send_directly(packet);
+				       }
+			       }
+		       }
+	      }else if (m_attackType == 4){
+		      NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
+		      uint32_t size = packet->GetSize();
+		      
+		      uint8_t *temp = new uint8_t[size];
+		      packet->CopyData(temp, size);
+		      std::cout << "HandleRead MIM intersepted " << temp << std::endl;
+		      Bytes buf((unsigned char*) temp, (unsigned char*)temp+size);
+		      Bytes emptyData;
+		      Ptr<Packet> packet_mitm;
+		      if(buf.size() >= Lpdu::HEADER_SIZE) {
+			      int start1 = buf[0];
+			      AppSeqNum_t seq = buf[11] & 0x0f;
+			      NS_LOG_INFO (seq);
+			      if((start1 == 0x05) && (0x64)) {
+				      uint16_t dest = buf[5] << 0x08 | buf[4]; //To check
+				      uint16_t src = buf[7] << 0x08 | buf[6]; //To check
+				      Lpdu::UserData data;
+				      data.dest = dest;
+				      data.src = src;
+				      std::cout << "Dest: " << data.dest << " src: " << data.src << std::endl;
+				      if (m_isMaster) {
+					      NS_LOG_INFO("Am I the master----------------Insider");
+				      } else {
+					      NS_LOG_UNCOND("sending false data to the controller");
+					      NS_LOG_UNCOND("SENDING TO MICROGRIDS");
+					      NS_LOG_UNCOND ("DNP3Application::send_control_analog");
+					      std::string delimiter = ",";
+					      std::vector<std::string> val = get_val_vector (delimiter, m_attack_point_val);
+					      std::vector<std::string> val_min = get_val_vector (delimiter, m_attack_min);
+					      std::vector<std::string> val_max = get_val_vector (delimiter, m_attack_max);
+					      std::vector<std::string> nodes = get_val_vector (delimiter, node_id);
+					      std::vector<std::string> points = get_val_vector (delimiter, point_id);
+					      std::vector<std::string> nodesPoints;
+					      std::cout << "node_id " << node_id << std::endl;
+					      
+					      for (int xx = 0; xx < nodes.size(); xx++){
+						      nodesPoints.push_back(nodes[xx] + "$"+ points[xx]);
+					      }
+					      std::vector<string> unique_id;
+					      for(map<string, float>::iterator iter = analog_points.begin(); iter != analog_points.end(); iter++ ) {
+						      unique_id.push_back((*iter).first); //token);
+					      }
+					      int ID_point = 0;
+					      for (int qq = 0; qq < nodesPoints.size(); qq++){
+						      std::cout << "Searching for point " << nodesPoints[qq]  << " qq = " << qq<< std::endl;
+						      std::cout << "Number of points " << nodesPoints.size() << std::endl;
+						      for (int i = 0; i < unique_id.size(); i++){
+							      if(unique_id[i].find(nodesPoints[qq]) != std::string::npos){  
+								      std::cout << "Found point " << nodesPoints[qq] << " : " << unique_id[i] << std::endl;
+								      ID_point = i;
+							      }
+						      }
+						      float f = get_val(val, val_min, val_max, qq);
+						      std::cout << "f = " << f << std::endl; 
+						      Bit32AnalogOutput ao(f*1000, ID_point);
+						      m_p->direct_operate(false,ao);
+					      }
+					      send_directly(packet);
+				      }
+			      }
+		      }
+	      }
+	      else {
+                      NS_LOG_INFO ("You input a wrong value.");
+              }
+          } else {
+                send_directly(packet);
+            }
+
+      } else {
+          NS_LOG_INFO ("MIMServer::HandleRead >>> Man in the middle node is the final destination.");
+      }
+    }
+}
+
+void Dnp3HelicsApplication::send_directly(Ptr<Packet> p)
+{
+  //NS_LOG_INFO ("MIMServer::HandleRead >>> Bypassing to destination: " << destAddr);
+  // call to the trace sinks before the packet is actually sent,
+  // so that tags added to the packet can be sent as well
+  m_txTrace (p);
+  int delay_ns = (int) (m_rand_delay_ns->GetValue (m_jitterMinNs, m_jitterMaxNs) + 0.5);
+
+  if (Ipv4Address::IsMatchingType (m_remoteAddress))
+    {
+        //cout << "Remote addr: " << remote_addr << " remote port" << remote_port << endl;
+      InetSocketAddress address = InetSocketAddress(Ipv4Address::ConvertFrom(m_remoteAddress), m_remotelPort);
+      if (m_enableTcp) {
+        int (Socket::*fp)(Ptr<Packet>, uint32_t)  = &Socket::Send;
+        Simulator::Schedule(NanoSeconds (delay_ns), fp, m_socket, p, 0); //virtual method
+      } else {
+        int (Socket::*fp)(Ptr<Packet>, uint32_t, const Address&) = &Socket::SendTo;
+        Simulator::Schedule(NanoSeconds (delay_ns), fp, m_socket, p, 0, address); //virtual method
+      }
+    }
+  else if (Ipv6Address::IsMatchingType (m_remoteAddress))
+    {
+      Inet6SocketAddress address = Inet6SocketAddress(Ipv6Address::ConvertFrom(m_remoteAddress), m_remotelPort);
+      if (m_enableTcp) {
+        int (Socket::*fp)(Ptr<Packet>, uint32_t)  = &Socket::Send;
+        Simulator::Schedule(NanoSeconds (delay_ns), fp, m_socket, p, 0); //virtual method
+      } else {
+        int (Socket::*fp)(Ptr<Packet>, uint32_t, const Address&) = &Socket::SendTo;
+        Simulator::Schedule(NanoSeconds (delay_ns), fp, m_socket, p, 0, address); //virtual method
+      }
+    }
+}
+
+void
+Dnp3HelicsApplication::SetEndpointName (const std::string &name, bool is_global)
+{
+  NS_LOG_FUNCTION (this << name << is_global);
+  SetName(name);
+  if (is_global) {
+    m_endpoint_id = helics_federate->registerGlobalEndpoint (name);
+  }
+  else {
+    m_endpoint_id = helics_federate->registerEndpoint (name);
+  }
+  using std::placeholders::_1;
+  using std::placeholders::_2;
+  std::function<void(helics::Endpoint,helics::Time)> func;
+  func = std::bind (&Dnp3HelicsApplication::EndpointCallback, this, _1, _2);
+  helics_federate->setMessageNotificationCallback(m_endpoint_id, func);
+}
+
+void 
+Dnp3HelicsApplication::EndpointCallback (helics::Endpoint id, helics::Time time)
+{
+  NS_LOG_FUNCTION (this << m_name << id.getName() << time);
+  DoEndpoint (id, time);
+}
+ 
+void 
+Dnp3HelicsApplication::DoEndpoint (helics::Endpoint id, helics::Time time)
+{
+  NS_LOG_FUNCTION (this << id.getName() << time);
+  auto message = helics_federate->getMessage(id);
+  DoEndpoint (id, time, std::move (message));
+}
+
+void
+Dnp3HelicsApplication::DoEndpoint (helics::Endpoint id, helics::Time time, std::unique_ptr<helics::Message> message)
+{
+  NS_LOG_FUNCTION (this << id.getName() << time << message->to_string());
+
+  // parse data
+  std::string text = message->data.to_string();
+  // if you want to check raw message for debugging, uncomment the following line. It can mess output due to its volume.
+  // NS_LOG_INFO("Raw message:" << text);
+  std::istringstream tifs(text);
+  Json::Reader datareader;
+  Json::Value parsedObject;
+  datareader.parse(tifs, parsedObject);
+  // NS_LOG_INFO("Message as JSON object:" << parsedObject);
+  std::string delim = "$";
+
+  // The first Helics message may contain GridLAB-D federate name in the root of JSON value.
+  Json::Value root = parsedObject.isMember(m_gld_federate_name)? parsedObject[m_gld_federate_name]: parsedObject;
+  for (auto const& id : root.getMemberNames())
+  {
+    for (auto const& variable : root[id].getMemberNames())
+    {
+      /// FIXME: check data type of variable and parse value accordingly
+      auto value = root[id][variable].asString();
+      if (variable=="status" || variable=="switchA" || variable=="switchB" || variable=="switchC" ||
+        variable=="phase_A_state" || variable=="phase_B_state" || variable=="phase_C_state") {
+        // binary (OPEN, CLOSED)
+        Store(id + delim + variable, value);
+      }
+      /// TODO: Add more variables to handle data properly
+      //else if (value == "xxx") {
+      //  ...
+      //}
+      else if (variable=="voltage_A" || variable=="voltage_B" || variable=="voltage_C" ||
+        variable=="current_out_A" || variable=="current_out_B" || variable=="current_out_C" ||
+        variable=="current_in_A" || variable=="current_in_B" || variable=="current_in_C" ||
+        variable=="VA_Out") {
+        // complex number
+        float real,imag;
+        std::istringstream v_text_stream(value);
+        v_text_stream >> real >> imag;
+        // add .real and .imag to variable name as suffix
+        Store(id + delim + variable + ".real", std::to_string(real));
+        Store(id + delim + variable + ".imag", std::to_string(imag));
+      }
+      else if (variable=="Pref" || variable=="Qref" || variable=="V_In" || 
+        variable=="tap_A" || variable=="tap_B" || variable=="tap_C" || 
+        variable=="capacitor_A" || variable=="capacitor_B" || variable=="capacitor_C") {
+        // real number
+        float real;
+        std::istringstream v_text_stream(value);
+        v_text_stream >> real;
+        Store(id + delim + variable, std::to_string(real));
+      }
+      else {
+        // Please check the data
+        NS_LOG_WARN("Unknown variable name " << variable);
+        Store(id + delim + variable, value);
+      }
+      // NS_LOG_INFO("Updated! " +variable + " : " + value);
+    }
+  }
+}
+
+void
+Dnp3HelicsApplication::DoMessage (std::string target_endpoint, const std::string content, const std::string content_type)
+{
+  NS_LOG_FUNCTION (this << target_endpoint << content);
+
+  // Endpoint naming convention: {gridlabd-federate-name}/{group}_{gridlabd-object}${property}
+  // variable 
+  std::string property_delimiter = "$";
+  std::vector<std::string> tokens = split(target_endpoint, property_delimiter);
+
+  std::string property_name = tokens[1];
+
+  tokens = split(tokens[0], "/");
+  std::string gld_obj = tokens[1];
+  
+  std::string new_target_endpoint = toEndpointName(target_endpoint);
+  if (endsWith(new_target_endpoint, ".imag") || endsWith(new_target_endpoint,".real")) {
+    // if property is complex number, remove suffix
+    new_target_endpoint = new_target_endpoint.substr(0, new_target_endpoint.length() - 5);
+    property_name = property_name.substr(0, property_name.length() - 5);
+  }
+  
+
+  // Create a helics message
+  auto msg = std::make_unique<helics::Message>();
+  std::string json_content;
+
+  // Data of helics messsage should be a JSON string as follows:
+  // {gridlabd-object-name:{property-name-1:value-1,...,property-name-n:value-n}}
+  if (content_type == "int") {
+    json_content = "{\"" + gld_obj + "\":{\"" + property_name + "\":" + content + "}}";
+  }
+  else if (content_type == "string") {
+    json_content = "{\"" + gld_obj + "\":{\"" + property_name + "\":\"" + content + "\"}}";
+  }
+  else {
+    /// TODO: Add more type handling JSON content if needed
+    json_content = content;
+  }
+  msg->data = json_content;
+  msg->dest = m_gld_federate_name + "/" + new_target_endpoint;
+  msg->time = helics::Time::epsilon();
+
+  DoRead(std::move(msg));
+}
+
+void
+Dnp3HelicsApplication::DoRead (std::unique_ptr<helics::Message> message)
+{
+  NS_LOG_FUNCTION (this << message->to_string());
+  NS_LOG_INFO ("sending message " << message->to_string() + " to " + message->dest);
+  // Send message
+  helics_federate->sendMessage (m_endpoint_id, message->dest, message->data.data(), message->data.size());
+  // helics_federate->sendMessage(m_endpoint_id, std::move(message));
+}
+
+
+} // Namespace ns3
