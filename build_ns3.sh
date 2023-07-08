@@ -18,4 +18,13 @@ cp -r ../../PUSH/NATIG/patch/fncs/ src
 cp -r ../../PUSH/NATIG/patch/dnp3/ src
 cp -r ../../PUSH/NATIG/patch/applications/* src/applications/
 cp -r ../../PUSH/NATIG/patch/internet/* src/internet/
+if [ "$1" == "5G" ]; then
+    echo "installing 5G"
+    cd contrib
+    git clone https://gitlab.com/cttc-lena/nr.git
+    cd nr
+    git checkout 5g-lena-v1.2.y
+    cd ../../
+    cp -r ../../PUSH/NATIG/patch/nr/* contrib/nr/
+fi
 sudo ./make.sh
