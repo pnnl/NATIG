@@ -17,9 +17,8 @@ NOTE: The default docker container does not come with 5G enabled
 
 To enable 5G capabilities:
 1. request access to https://gitlab.com/cttc-lena/nr
-2. clone the nr repo in the contrib folder of ns-3-dev folder
-3. checkout the branch labeled 5g-lena-v1.2.y
-5. Some updates that need to be done to the code before it can be compiled:
+2. run ``` ./build_ns3.sh 5G ``` from the NATIG folder
+3. Some updates that need to be done to the code before it can be compiled:
    - the nr-gnb-net-device.cc in the model folder needs the following function:   
      ```
      std::vector<uint16_t>
@@ -36,52 +35,9 @@ To enable 5G capabilities:
      ```
      
      NOTE: dont forget to add **std::vector<uint16_t> GetCellIds () const** to nr-gnb-net-device.h
-   - the nr-net-device.cc in the model folder needs the following function:
-     ```
-      Ptr<Queue<Packet>>
-      NrNetDevice::GetQueue (void) const
-      {
-	  NS_LOG_FUNCTION_NOARGS ();
-	 return 0;
-      }
-     ```
-     NOTE: dont forget to add **Ptr<Queue<Packet\>\> GetQueue (void) const** to nr-net-device.h
-   - In nr-point-to-point-epc-helper.cc in the helper folder replace the DoAddX2Interface function with the following:
-     ```
-     void
-     NrPointToPointEpcHelper::DoAddX2Interface (const Ptr<EpcX2> &gnb1X2, const Ptr<NetDevice> &gnb1NetDev,
-                                           const Ipv4Address &gnb1X2Address,
-                                           const Ptr<EpcX2> &gnb2X2, const Ptr<NetDevice> &gnb2NetDev,
-                                           const Ipv4Address &gnb2X2Address) const
-     {
-       NS_LOG_FUNCTION (this);
-       Ptr<NrGnbNetDevice> gnb1NetDevice = gnb1NetDev->GetObject<NrGnbNetDevice> ();
-       Ptr<NrGnbNetDevice> gnb2NetDevice = gnb2NetDev->GetObject<NrGnbNetDevice> ();
-       uint16_t gnb1CellId = gnb1NetDevice->GetCellId ();
-       uint16_t gnb2CellId = gnb2NetDevice->GetCellId ();
-
-       NS_ABORT_IF (gnb1NetDevice == nullptr);
-       NS_ABORT_IF (gnb2NetDevice == nullptr);
-
-       NS_LOG_LOGIC ("NrGnbNetDevice #1 = " << gnb1NetDev << " - CellId = " << gnb1CellId);
-       NS_LOG_LOGIC ("NrGnbNetDevice #2 = " << gnb2NetDev << " - CellId = " << gnb2CellId);
-
-       std::vector<short unsigned int> gnb1 = gnb1NetDevice->GetCellIds();
-       std::vector<short unsigned int> gnb2 = gnb2NetDevice->GetCellIds();
-
-       gnb1X2->AddX2Interface (gnb1CellId, gnb1X2Address, gnb2, gnb2X2Address);
-       gnb2X2->AddX2Interface (gnb2CellId, gnb2X2Address, gnb1, gnb1X2Address);
-
-       gnb1NetDevice->GetRrc ()->AddX2Neighbour (gnb2.at(0));
-       gnb2NetDevice->GetRrc ()->AddX2Neighbour (gnb1.at(0));
-     }
-     ```
-   - Replace line 946 of the nr-helper.cc class in the helper folder by:
-     ```
-      m_epcHelper->AddEnb (n, dev, dev->GetCellIds ());
-     ```
-7. return to the main ns-3-dev folder
-8. run sudo ./make.sh
+  
+4. return to the main ns-3-dev folder
+5. run sudo ./make.sh
 
 
 Once the setup is done you can start to run the code
