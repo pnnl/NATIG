@@ -170,44 +170,25 @@ RUN cd ${RD2C} \
    && ./configure --with-helics=/usr/local --prefix=$GLD_INSTALL --with-fncs=/rd2c --enable-silent-rules 'CFLAGS=-g -O2 -w' 'CXXFLAGS=-g -O2 -w -std=c++14' 'LDFLAGS=-g -O2 -w' \
    && make \
    && make install 
-#    && cd /tmp \
-#    && /bin/rm -r ${RD2C}/gridlab-d
 
 
 # ----------------------------------------------------
 # INSTALL NS-3
 # ----------------------------------------------------	
 
-# RUN cd ${RD2C} \
-#    && git clone https://github.com/open-source-parsers/jsoncpp.git \
-#    && cd jsoncpp \
-#    && mkdir -p build/debug \
-#    && cd build/debug \
-#    && cmake -DCMAKE_BUILD_TYPE=debug -DJSONCPP_LIB_BUILD_STATIC=ON-DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../.. \
-#    && make ; make install
 
 RUN apt-get update && apt-get install -y libjsoncpp-dev
 
-# RUN pip install zmq
 
 ENV LDFLAGS="-ljsoncpp -L/usr/local/include/jsoncpp/"
 RUN cd $RD2C \
-    && git clone https://stash.pnnl.gov/scm/hagen/ns-3-dev.git \
-	&& cd ns-3-dev \
-    && git checkout OceaneBranch \
-    && cp -r helics-backup contrib/helics \
-    && cp -r nr-backup contrib/nr \
-    && sudo ./make.sh 
-    # && git clone https://stash.pnnl.gov/scm/hagen/helics-ns3.git contrib/helics \
-	# && cd contrib/helics \
-	# && git checkout dev-dnp3 \
-    # && cd - \
-	# && ./waf configure --with-helics=/usr/local --with-fncs=/rd2c --with-czmq=/rd2c --with-zmq=/rd2c --disable-werror --enable-examples --enable-tests \
-    # && ./waf build 
+    && mkdir PUSH \
+    && cd PUSH \
+    && git clone git@github.com:pnnl/NATIG.git \
+    && cd NATIG \
+    && ./build_ns3.sh  
 
 RUN cd $RD2C \
-    #&& git clone https://stash.pnnl.gov/scm/hagen/cps_modeling.git \
-    #&& cd cps_modeling \
     && git clone https://github.com/pnnl/NATIG.git \
     && cd NATIG \
     && cp -r integration $RD2C \
@@ -217,8 +198,6 @@ RUN apt-get update && apt-get install -y procps
 # ----------------------------------------------------
 # INSTALL Java
 # ----------------------------------------------------
-#RUN apt-get install -y software-properties-common 
-    # && add-apt-repository ppa:webupd8team/java
 
 RUN apt update \
      && mkdir -p /usr/share/man/man1 \
