@@ -184,7 +184,7 @@ ENV LDFLAGS="-ljsoncpp -L/usr/local/include/jsoncpp/"
 RUN cd $RD2C \
     && mkdir PUSH \
     && cd PUSH \
-    && git clone git@github.com:pnnl/NATIG.git \
+    && git clone https://github.com/pnnl/NATIG.git \
     && cd NATIG \
     && ./build_ns3.sh  
 

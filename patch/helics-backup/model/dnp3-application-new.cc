@@ -856,7 +856,7 @@ void Dnp3ApplicationNew::periodic_poll(int count)
 
         if(running) {
             m_p->poll(Master::INTEGRITY);
-            Simulator::Schedule(MilliSeconds(4000), &Dnp3ApplicationNew::periodic_poll, this, ++count); //virtual method
+            Simulator::Schedule(MilliSeconds(count), &Dnp3ApplicationNew::periodic_poll, this, count); //virtual method
         }
 //    }
 }
