@@ -5,8 +5,7 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
 ## How to get started
 1. Have docker installed
 2. clone the NATIG repo
-3. Make sure you have access to the NS3 stash repo at: https://stash.pnnl.gov/projects/HAGEN/repos/ns-3-dev/browse
-4. run the following commands:
+3. run the following commands:
    - cd NATIG
    - ./buildimage.sh 
    - Once the docker finishes building successfully, run: ./rundocker.sh
@@ -17,7 +16,7 @@ NOTE: The default docker container does not come with 5G enabled
 
 To enable 5G capabilities:
 1. request access to https://gitlab.com/cttc-lena/nr
-2. run ``` ./build_ns3.sh 5G ``` from the NATIG folder
+2. run ``` ./build_ns3.sh 5G ``` from the NATIG folder in the PUSH folder
 3. Some updates that need to be done to the code before it can be compiled:
    - the nr-gnb-net-device.cc in the model folder needs the following function:   
      ```
