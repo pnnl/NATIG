@@ -40,6 +40,7 @@
 #include "ns3/flow-monitor-module.h"
 //#include "ns3/gtk-config-store.h"
 #include "ns3/csma-module.h"
+#include "ns3/mpi-interface.h"
 
 //NR libraries
 #include "ns3/buildings-module.h"
@@ -175,10 +176,42 @@ void Throughput (){
 	Ptr<Ipv4FlowClassifier> classifier=DynamicCast<Ipv4FlowClassifier>(flowHelper.GetClassifier());
 	
 	std::stringstream netStatsOut;
-	
+        std::stringstream netStatsOut2;	
 	
 	string proto;
 	map< FlowId, FlowMonitor::FlowStats > stats = flowMonitor->GetFlowStats();
+	std::vector <Ptr<FlowProbe>> xx = flowMonitor->GetAllProbes();
+	for (int i = 0; i < xx.size(); i ++){
+            map< FlowId, FlowProbe::FlowStats > probstats = xx[i]->GetStats();
+	    for (map< FlowId, FlowProbe::FlowStats>::iterator
+			flow=probstats.begin(); flow!=probstats.end(); flow++)
+	    {
+		Ipv4FlowClassifier::FiveTuple  t = classifier->FindFlow(flow->first);
+		switch(t.protocol)
+		{
+			case(6):
+				proto = "TCP";
+				break;
+			case(17):
+				proto = "UDP";
+				break;
+			default:
+				exit(1);
+		}
+
+		netStatsOut2 << Simulator::Now ().GetSeconds () << " " <<  flow->first << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << flow->second.bytes << " " << flow->second.packets << " " << flow->second.delayFromFirstProbeSum  << endl;
+
+
+		FILE * pFile;
+		pFile = fopen ("/rd2c/integration/control/TP-Prob.txt","a");
+		if (pFile!=NULL)
+		{
+			fprintf(pFile, netStatsOut2.str().c_str());
+			fclose (pFile);
+		}
+
+	    }
+	}
 	for (map< FlowId, FlowMonitor::FlowStats>::iterator
 			flow=stats.begin(); flow!=stats.end(); flow++)
 	{
@@ -277,6 +310,11 @@ main (int argc, char *argv[])
   cmd.Parse(argc, argv);
 
   Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue (999999999));
+  GlobalValue::Bind("SimulatorImplementationType", StringValue("ns3::RealtimeSimulatorImpl"));
+  MpiInterface::Enable(&argc, &argv);
+
+  uint32_t systemId = MpiInterface::GetSystemId();
+  uint32_t systemCount = MpiInterface::GetSize();
 
   LogComponentEnable("Dnp3Application", LOG_LEVEL_INFO);
   LogComponentEnable ("Dnp3SimulatorImpl", LOG_LEVEL_INFO); 
@@ -290,11 +328,15 @@ main (int argc, char *argv[])
   readMicroGridConfig(helicsConfigFileName, helicsConfigObject);
   readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
 
-  HelicsHelper helicsHelper(6000);
-  std::cout << "Calling Calling Message Federate Constructor" << std::endl;
+  
+  std::string name = "ns3"; //+std::to_string(systemId);
+  HelicsHelper helicsHelper(name, 6000);
+  std::cout << "Calling Calling Message Federate Constructor" << std::endl; 
+  //if (systemId == 1){
   helicsHelper.SetupApplicationFederate();
-
+  //}
   std::string fedName = helics_federate->getName();
+  
 
    simTime = Seconds(std::stof(configObject["Simulation"][0]["SimTime"].asString()));
    float start = std::stof(configObject["Simulation"][0]["StartTime"].asString());
@@ -316,7 +358,7 @@ main (int argc, char *argv[])
   enbNodes.Create (numNodePairs);
   ueNodes.Create (numNodePairs);
 
-  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+  /*Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   for (uint16_t i = 0; i < numNodePairs*2; i++)
   {
 	  positionAlloc->Add (Vector (distance * i, 0, 10));
@@ -325,7 +367,59 @@ main (int argc, char *argv[])
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.SetPositionAllocator(positionAlloc);
   mobility.Install(enbNodes);
-  mobility.Install(ueNodes);
+  mobility.Install(ueNodes);*/
+  MobilityHelper mobility;
+  Ptr<ListPositionAllocator> apPositionAlloc = CreateObject<ListPositionAllocator> ();
+  Ptr<ListPositionAllocator> staPositionAlloc = CreateObject<ListPositionAllocator> ();
+  int32_t yValue = 0.0;
+  double gNbHeight = 10;
+  double ueHeight = 1.5;
+
+  for (uint32_t i = 1; i <= numNodePairs; ++i)
+    {
+      // 2.0, -2.0, 6.0, -6.0, 10.0, -10.0, ....
+      if (i % 2 != 0)
+        {
+          yValue = static_cast<int> (i) * 30;
+        }
+      else
+        {
+          yValue = -yValue;
+        }
+
+      apPositionAlloc->Add (Vector (0.0, yValue, gNbHeight));
+
+
+      // 1.0, -1.0, 3.0, -3.0, 5.0, -5.0, ...
+      double xValue = 0.0;
+      for (uint32_t j = 1; j <= numNodePairs; ++j)
+        {
+          if (j % 2 != 0)
+            {
+              xValue = j;
+            }
+          else
+            {
+              xValue = -xValue;
+            }
+
+          if (yValue > 0)
+            {
+              staPositionAlloc->Add (Vector (xValue, 10, ueHeight));
+            }
+          else
+            {
+              staPositionAlloc->Add (Vector (xValue, -10, ueHeight));
+            }
+        }
+    }
+
+  mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  mobility.SetPositionAllocator (apPositionAlloc);
+  mobility.Install (enbNodes);
+
+  mobility.SetPositionAllocator (staPositionAlloc);
+  mobility.Install (ueNodes);
 
   Ptr<NrPointToPointEpcHelper> epcHelper = CreateObject<NrPointToPointEpcHelper> ();
   Ptr<IdealBeamformingHelper> idealBeamformingHelper = CreateObject<IdealBeamformingHelper>();
@@ -605,9 +699,9 @@ main (int argc, char *argv[])
 	  if (configObject["DDoS"][0]["NodeType"][0].asString().find("CC") != std::string::npos){
               botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), remoteHostContainer.Get(0)); 
 	  }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-              botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), ueNodes.Get(2));
+              botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), ueNodes.Get(0));
 	  }else{
-	      botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), MIM.Get(2)); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
+	      botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), MIM.Get(0)); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
 	  }
   }
   
@@ -625,9 +719,10 @@ main (int argc, char *argv[])
   uint16_t master_port = 40000;
   ApplicationContainer dnpOutstationApp, dnpMasterApp;
   std::vector<uint16_t> mimPort;
-
+  //if (systemId == 0){
   for (i = 0;i < configObject["microgrid"].size();i++)
       {
+	    //if (systemId == i){
             mimPort.push_back(master_port);
             auto ep_name = configObject["microgrid"][i]["name"].asString();
             std::cout << "Microgrid network node: " << ep_name << " " << subNodes.GetN() << " " << configObject["microgrid"][i].size() << " " << i << std::endl;
@@ -653,7 +748,6 @@ main (int argc, char *argv[])
 	     
 	     Ptr<Dnp3ApplicationNew> master = dnp3Master.Install (remoteHost, std::string(cc_name+ep_name));
 	     dnpMasterApp.Add(master);
-	     
 	     Dnp3ApplicationHelperNew dnp3Outstation ("ns3::UdpSocketFactory", InetSocketAddress (inter.GetAddress(i), port)); //star.GetSpokeIpv4Address (i), port));
 	     dnp3Outstation.SetAttribute("LocalPort", UintegerValue(port));
 	     dnp3Outstation.SetAttribute("RemoteAddress", AddressValue(remoteHostAddr)); //star.GetHubIpv4Address(i)));
@@ -667,17 +761,18 @@ main (int argc, char *argv[])
 	     
 	     Ptr<Dnp3ApplicationNew> slave = dnp3Outstation.Install (tempnode1, std::string(ep_name));
 	     dnpOutstationApp.Add(slave);
-	     Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, master, 0);
+	     Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, master, std::stoi(configObject["Simulation"][0]["PollReqFreq"].asString()));
 	     Simulator::Schedule(MilliSeconds(3005), &Dnp3ApplicationNew::send_control_analog, master, 
-			           Dnp3ApplicationNew::DIRECT, 0, -16);
+             			           Dnp3ApplicationNew::DIRECT, 0, -16);
 	     master_port += 1;
-	     
+	    //}
       }
-  
+  //}
   fedName = helics_federate->getName();
   std::cout << "Federate name: " << helics_federate->getName().c_str() << std::endl;
   int ep_count = helics_federate->getEndpointCount();
   for(int i=0; i < ep_count; i++){
+          //if (systemId == i){
 	  helics::Endpoint ep = helics_federate->getEndpoint(i);
 	  std::string epName = ep.getName();
 	  std::string ep_info = ep.getInfo();
@@ -686,10 +781,13 @@ main (int argc, char *argv[])
 		  epName.erase(pos, fedName.length()+1);
 	  }
 	  std::cout << "Endpoint name: " << epName << std::endl;
+	  //}
   }
+  //}
 
   if (includeMIM == 1){
 	  for (int x = 0; x < val.size(); x++){ //std::stoi(configObject["MIM"][0]["NumberAttackers"].asString()); x++){
+		  //if (systemId == x){
 		  int MIM_ID = std::stoi(val[x]) + 1; //x+1;
 		  auto ep_name = configObject["MIM"][MIM_ID]["name"].asString();
 		  Ptr<Node> tempnode = MIM.Get(MIM_ID-1); //star.GetSpokeNode (MIM_ID-1);
@@ -746,7 +844,7 @@ main (int argc, char *argv[])
 		   ApplicationContainer dnpMIMApp(mim);
 		   dnpMIMApp.Start (Seconds (start));
 		   dnpMIMApp.Stop (simTime);
-		   
+		  //}
 	  }
     }
     dnpMasterApp.Start (Seconds (start));
@@ -754,13 +852,12 @@ main (int argc, char *argv[])
     dnpOutstationApp.Start (Seconds (start));
     dnpOutstationApp.Stop (simTime);
 
-
     int BOT_START = std::stof(configObject["DDoS"][0]["Start"].asString());;
     int BOT_STOP = std::stof(configObject["DDoS"][0]["End"].asString());;
     std::string str_on_time = configObject["DDoS"][0]["TimeOn"].asString();
     std::string str_off_time = configObject["DDoS"][0]["TimeOff"].asString();
     int TCP_SINK_PORT = 9000;
-    int UDP_SINK_PORT = 9001;
+    int UDP_SINK_PORT = mimPort[2]; //-500;
     int MAX_BULK_BYTES = std::stof(configObject["DDoS"][0]["PacketSize"].asString()); //20971520000;
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
 
@@ -769,10 +866,10 @@ main (int argc, char *argv[])
     if (DDoS){
 	    OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(remoteHostAddr, UDP_SINK_PORT)));
 	    if (configObject["DDoS"][0]["NodeType"][0].asString().find("MIM") != std::string::npos){
-                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter_MIM.GetAddress(2), UDP_SINK_PORT))); 
+                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter_MIM.GetAddress(0), UDP_SINK_PORT))); 
 		onoff = onoff1;
 	    }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter.GetAddress(2), UDP_SINK_PORT)));
+                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter.GetAddress(0), UDP_SINK_PORT)));
 		onoff = onoff1;
 	    }
 	    onoff.SetConstantRate(DataRate(DDOS_RATE));
@@ -788,32 +885,43 @@ main (int argc, char *argv[])
 	    }
 	    
 	    
-	    PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
-			    Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
-            ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost);
-	    if (configObject["DDoS"][0]["NodeType"][0].asString().find("MIM") != std::string::npos){
-	        UDPSinkApp = UDPsink.Install(MIM.Get(2)); 
-	    }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-                UDPSinkApp = UDPsink.Install(ueNodes.Get(2));
-	    }
-	    UDPSinkApp.Start(Seconds(0.0));
-	    UDPSinkApp.Stop(Seconds(BOT_STOP));
+	    //PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
+            //			    Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
+            //ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost);
+	    //if (configObject["DDoS"][0]["NodeType"][0].asString().find("MIM") != std::string::npos){
+	    //    UDPSinkApp = UDPsink.Install(MIM.Get(2)); 
+	    //}else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
+            //    UDPSinkApp = UDPsink.Install(ueNodes.Get(2));
+	    //}
+	    //UDPSinkApp.Start(Seconds(0.0));
+	    //UDPSinkApp.Stop(Seconds(BOT_STOP));
     }
-    
-    flowMonitor = flowHelper.InstallAll();
-    flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.001));
-    flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.001));
-    flowMonitor->SetAttribute("PacketSizeBinWidth", DoubleValue(20));
+
     int mon = std::stoi(configObject["Simulation"][0]["MonitorPerf"].asString());
-    if (mon){
-        Simulator::Schedule (Seconds (0.2), &Throughput);
+    NodeContainer endpointNodes;
+    endpointNodes.Add (remoteHost);
+    for (int i = 0; i < ueNodes.GetN(); i++){
+        endpointNodes.Add (ueNodes.Get (i));
+    }
+    for (int i = 0; i < MIM.GetN(); i++){
+        endpointNodes.Add (MIM.Get (i));
+    }
+    for (int i = 0; i < subNodes.GetN(); i++){
+        endpointNodes.Add (subNodes.Get (i));
+    }
+    if (mon && systemId == 0){
+        flowMonitor = flowHelper.Install(endpointNodes); //All();
+        flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.001));
+        flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.001));
+        flowMonitor->SetAttribute("PacketSizeBinWidth", DoubleValue(20));
+        Simulator::Schedule (Seconds (0.2), &Throughput); //, ncP2P_nodes);
     }
     if (DDoS){
 	    p2ph.EnablePcapAll (pcapFileDir+"p2p-DDoS", false);
     }else{
 	    p2ph.EnablePcapAll (pcapFileDir+"p2p", false);
     }
-    enablePcapAllBaseTime("radics-exercise2-utility1-1day", remoteHostContainer, ncP2P_nodes);
+   //enablePcapAllBaseTime("radics-exercise2-utility1-1day", remoteHostContainer, ncP2P_nodes);
 
 
 
@@ -824,5 +932,6 @@ main (int argc, char *argv[])
   config.ConfigureAttributes();*/
 
   Simulator::Destroy ();
+  MpiInterface::Disable();
   return 0;
 }

@@ -72,7 +72,8 @@ modelName="ns3-helics-grid-dnp3-5G"
 
 ns3Model="${ns3Scratch}/${modelName}"
 configDir="${ROOT_PATH}/config/"
-helicsConfig="${configDir}/ns_config.json"
+helicsConfig="${configDir}/gridlabd_config.json" 
+# ns_config.json"
 microGridConfig="${configDir}/grid.json"
 topologyConfig="${configDir}/topology.json"
 pcapFileDir="${OUT_DIR}/"
@@ -86,8 +87,9 @@ if test -e $ns3OutFile
 
 cd ${ns3Dir} && \
 cp ${ROOT_PATH}/${modelName}.cc ${ns3Model}.cc && \
+sudo ./make.sh && \
   #./waf --run "scratch/${modelName}" >> ${ns3OutFile} 2>&1 & \
-  ./waf --run "scratch/${modelName} --helicsConfig=${helicsConfig} --microGridConfig=${microGridConfig} --topologyConfig=${topologyConfig} --pointFileDir=${configDir} --pcapFileDir=$pcapFileDir" >> ${ns3OutFile} 2>&1 & \
+  mpirun -np 1 ./waf --run "scratch/${modelName} --helicsConfig=${helicsConfig} --microGridConfig=${microGridConfig} --topologyConfig=${topologyConfig} --pointFileDir=${configDir} --pcapFileDir=$pcapFileDir" >> ${ns3OutFile} 2>&1 & \
   cd -
 
 exit 0

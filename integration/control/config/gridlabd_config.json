@@ -5,6 +5,7 @@
     "period": 1,
     "broker": "127.0.0.1:6000",
     "brokerPort": 6000,
+    "broker_rank":0,
     "endpoints": [
         {
             "name": "mg1_node_36$voltage_A",
