@@ -96,7 +96,7 @@ for s in fid.keys():
     #ax.bar_label(rects, padding=3)
     multiplier += 1
 
-ax.set_ylabel('Throughput (KB/s)')
+ax.set_ylabel('Throughput Kbps')
 ax.set_title('Path measured')
 ax.set_xticks(x + width)
 ax.set_xticklabels(all_ID, rotation=45)

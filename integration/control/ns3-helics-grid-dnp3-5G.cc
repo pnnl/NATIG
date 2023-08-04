@@ -271,12 +271,12 @@ main (int argc, char *argv[])
   Json::Value helicsConfigObject;
   Json::Value topologyConfigObject;
 
-  uint16_t numerologyBwp1 = 4;
+  uint16_t numerologyBwp1 = 0; //4;
   double centralFrequencyBand1 = 28e9;
-  double bandwidthBand1 = 100e6;
-  uint16_t numerologyBwp2 = 2;
+  double bandwidthBand1 = 150e6;
+  uint16_t numerologyBwp2 = 2; //2;
   double centralFrequencyBand2 = 28.2e9;
-  double bandwidthBand2 = 100e6;
+  double bandwidthBand2 = 150e6;
   double totalTxPower = 40;
   int numBots = 4;
 
@@ -341,7 +341,7 @@ main (int argc, char *argv[])
    simTime = Seconds(std::stof(configObject["Simulation"][0]["SimTime"].asString()));
    float start = std::stof(configObject["Simulation"][0]["StartTime"].asString());
    includeMIM = std::stoi(configObject["Simulation"][0]["includeMIM"].asString());
-
+   numBots = std::stoi(configObject["DDoS"][0]["NumberOfBots"].asString());
 
  /* Dnp3SimulatorImpl *hb=new Dnp3SimulatorImpl();
   Ptr<Dnp3SimulatorImpl> hb2(hb);
@@ -857,7 +857,7 @@ main (int argc, char *argv[])
     std::string str_on_time = configObject["DDoS"][0]["TimeOn"].asString();
     std::string str_off_time = configObject["DDoS"][0]["TimeOff"].asString();
     int TCP_SINK_PORT = 9000;
-    int UDP_SINK_PORT = mimPort[2]; //-500;
+    int UDP_SINK_PORT = mimPort[0] - 1;
     int MAX_BULK_BYTES = std::stof(configObject["DDoS"][0]["PacketSize"].asString()); //20971520000;
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
 
@@ -885,16 +885,16 @@ main (int argc, char *argv[])
 	    }
 	    
 	    
-	    //PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
-            //			    Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
-            //ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost);
-	    //if (configObject["DDoS"][0]["NodeType"][0].asString().find("MIM") != std::string::npos){
-	    //    UDPSinkApp = UDPsink.Install(MIM.Get(2)); 
-	    //}else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-            //    UDPSinkApp = UDPsink.Install(ueNodes.Get(2));
-	    //}
-	    //UDPSinkApp.Start(Seconds(0.0));
-	    //UDPSinkApp.Stop(Seconds(BOT_STOP));
+	    PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
+            			    Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
+            ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost);
+	    if (configObject["DDoS"][0]["NodeType"][0].asString().find("MIM") != std::string::npos){
+	        UDPSinkApp = UDPsink.Install(MIM.Get(0)); 
+	    }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
+                UDPSinkApp = UDPsink.Install(ueNodes.Get(0));
+	    }
+	    UDPSinkApp.Start(Seconds(0.0));
+	    UDPSinkApp.Stop(Seconds(BOT_STOP));
     }
 
     int mon = std::stoi(configObject["Simulation"][0]["MonitorPerf"].asString());

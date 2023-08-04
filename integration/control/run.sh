@@ -32,7 +32,7 @@ fi
 #cd -
 
 cd ${ROOT_PATH} && \
-helics_broker --federates=2 --port=6000 --loglevel=${helicsLOGlevel} >> ${helicsOutFile} 2>&1 & \
+helics_broker --slowresponding --federates=2 --port=6000 --loglevel=${helicsLOGlevel} >> ${helicsOutFile} 2>&1 & \
 #helics_app tracer test.txt --config-file endpoints.txt --loglevel 7 --timedelta 1 >> tracer.txt 2>&1 & \
 cd -
 

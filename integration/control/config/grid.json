@@ -218,14 +218,14 @@
     ],
     "DDoS":[
 	    {
-              "NumberOfBots":40,
-	      "Active":0,
+              "NumberOfBots":100,
+	      "Active":1,
 	      "Start":4,
 	      "End":30,
-	      "TimeOn":3.0,
-	      "TimeOff":1.0,
-	      "PacketSize":100000,
-	      "Rate":"20480kb/s",
+	      "TimeOn":2.0,
+	      "TimeOff":0.0,
+	      "PacketSize":100000000,
+	      "Rate":"2048kb/s",
 	      "NodeType":["UE"],
 	      "NodeID":[0]
 	    }

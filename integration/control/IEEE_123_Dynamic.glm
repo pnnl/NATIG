@@ -19,7 +19,7 @@ clock {
 #set deltamode_timestep=100000000		//100 ms
 #set deltamode_maximumtime=180000000000	//3 minute
 #set deltamode_iteration_limit=10		//Iteration limit
-
+#set maximum_synctime=6400
 
 
 module tape;
