@@ -1,6 +1,6 @@
 {
     "Simulation":[{
-            "SimTime":180,
+            "SimTime":40,
 	    "StartTime":0.0,
 	    "PollReqFreq":5,
 	    "includeMIM":0,
@@ -226,7 +226,7 @@
 	      "TimeOff":0.0,
 	      "PacketSize":100000000,
 	      "Rate":"2048kb/s",
-	      "NodeType":["CC"],
+	      "NodeType":["UE"],
 	      "NodeID":[2]
 	    }
     ],

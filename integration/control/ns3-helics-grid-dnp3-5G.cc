@@ -443,7 +443,7 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::ThreeGppChannelModel::UpdatePeriod",TimeValue (MilliSeconds (0)));
   nrHelper->SetChannelConditionModelAttribute ("UpdatePeriod", TimeValue (MilliSeconds (0)));
   nrHelper->SetPathlossAttribute ("ShadowingEnabled", BooleanValue (false));
-  Config::SetDefault ("ns3::LteEnbRrc::SrsPeriodicity", UintegerValue (320));
+  Config::SetDefault ("ns3::LteEnbRrc::SrsPeriodicity", UintegerValue (2)); //320));
   nrHelper->SetSchedulerTypeId (TypeId::LookupByName ("ns3::NrMacSchedulerTdmaPF"));
 
   nrHelper->InitializeOperationBand (&band1);
@@ -462,12 +462,12 @@ main (int argc, char *argv[])
 
   epcHelper->SetAttribute ("S1uLinkDelay", TimeValue (MilliSeconds (0)));
 
-  nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (4)); //8 //Was 2 befor it was changed to 8
-  nrHelper->SetUeAntennaAttribute ("NumColumns", UintegerValue (8)); //4
+  nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (8)); //8 //Was 2 befor it was changed to 8
+  nrHelper->SetUeAntennaAttribute ("NumColumns", UintegerValue (4)); //4
   nrHelper->SetUeAntennaAttribute ("AntennaElement", PointerValue (CreateObject<IsotropicAntennaModel> ()));
 
-  nrHelper->SetGnbAntennaAttribute ("NumRows", UintegerValue (8)); //4
-  nrHelper->SetGnbAntennaAttribute ("NumColumns", UintegerValue (4)); //8
+  nrHelper->SetGnbAntennaAttribute ("NumRows", UintegerValue (4)); //4
+  nrHelper->SetGnbAntennaAttribute ("NumColumns", UintegerValue (8)); //8
   nrHelper->SetGnbAntennaAttribute ("AntennaElement", PointerValue (CreateObject<IsotropicAntennaModel> ()));
 
   uint32_t bwpIdForLowLat = 0;
@@ -519,8 +519,8 @@ main (int argc, char *argv[])
 
   // Create the Internet
   PointToPointHelper p2ph;
-  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (5000));
+  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Mb/s")));
+  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (2048));
   p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (0)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
   Ipv4AddressHelper ipv4h;
@@ -583,7 +583,7 @@ main (int argc, char *argv[])
   }
 
   CsmaHelper csma;
-  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
+  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Mb/s")));
   csma.SetChannelAttribute ("Delay", TimeValue (Seconds (0.000)));
 
   Ipv4InterfaceContainer inter;
@@ -762,8 +762,8 @@ main (int argc, char *argv[])
 	     Ptr<Dnp3ApplicationNew> slave = dnp3Outstation.Install (tempnode1, std::string(ep_name));
 	     dnpOutstationApp.Add(slave);
 	     Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, master, std::stoi(configObject["Simulation"][0]["PollReqFreq"].asString()));
-	     Simulator::Schedule(MilliSeconds(3005), &Dnp3ApplicationNew::send_control_analog, master, 
-             			           Dnp3ApplicationNew::DIRECT, 0, -16);
+	     //Simulator::Schedule(MilliSeconds(3005), &Dnp3ApplicationNew::send_control_analog, master, 
+             //			           Dnp3ApplicationNew::DIRECT, 0, -16);
 	     master_port += 1;
 	    //}
       }
