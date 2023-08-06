@@ -24,7 +24,7 @@ for i in file_list:
     data = np.array(data)
     data = data[:-1]
     t = {}
-    for j in range(11616): #int(len(data))): 
+    for j in range(4224): #int(len(data))): 
         temp = data[j].split(" (")
         temp2 = data[j].split(") ")
         tt = temp2[-1]
@@ -53,9 +53,9 @@ for i in file_list:
         temp_av = np.array(t[j])
         for d in range(len(t[j][0])):
             if d == 2:
-                av.append(sum(temp_av[:,d])/sum(temp_av[:,1]))
+                av.append(sum(temp_av[:,d])/sum(temp_av[:,0]))
             else:
-                av.append(sum(temp_av[:,d])/len(temp_av[:,d]))
+                av.append(sum(temp_av[:,d])) #/len(temp_av[:,d]))
         t[j] = np.array(av)
     TP_per_path = {}
     for j in t.keys():
@@ -118,12 +118,12 @@ multiplier = 0
 fig, ax = plt.subplots()
 kk = sorted(list(TP_dict.keys()))
 kk = kk[::-1]
-t = kk[1]
-kk[1] = kk[2]
-kk[2] = t
-t = kk[-1]
-kk[-1] = kk[-2]
-kk[-2] = t
+#t = kk[1]
+#kk[1] = kk[2]
+#kk[2] = t
+#t = kk[-1]
+#kk[-1] = kk[-2]
+#kk[-2] = t
 for s in kk:
     offset = width * multiplier
     lab = s.replace(".txt", "")
