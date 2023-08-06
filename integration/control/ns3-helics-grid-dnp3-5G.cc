@@ -462,7 +462,7 @@ main (int argc, char *argv[])
 
   epcHelper->SetAttribute ("S1uLinkDelay", TimeValue (MilliSeconds (0)));
 
-  nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (8)); //4 //Was 2 befor it was changed to 8
+  nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (2)); //8 //Was 2 befor it was changed to 8
   nrHelper->SetUeAntennaAttribute ("NumColumns", UintegerValue (4)); //4
   nrHelper->SetUeAntennaAttribute ("AntennaElement", PointerValue (CreateObject<IsotropicAntennaModel> ()));
 
@@ -699,9 +699,9 @@ main (int argc, char *argv[])
 	  if (configObject["DDoS"][0]["NodeType"][0].asString().find("CC") != std::string::npos){
               botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), remoteHostContainer.Get(0)); 
 	  }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-              botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), ueNodes.Get(0));
+              botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), ueNodes.Get(2));
 	  }else{
-	      botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), MIM.Get(0)); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
+	      botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), MIM.Get(2)); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
 	  }
   }
   
@@ -866,10 +866,10 @@ main (int argc, char *argv[])
     if (DDoS){
 	    OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(remoteHostAddr, UDP_SINK_PORT)));
 	    if (configObject["DDoS"][0]["NodeType"][0].asString().find("MIM") != std::string::npos){
-                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter_MIM.GetAddress(0), UDP_SINK_PORT))); 
+                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter_MIM.GetAddress(2), UDP_SINK_PORT))); 
 		onoff = onoff1;
 	    }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter.GetAddress(0), UDP_SINK_PORT)));
+                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter.GetAddress(2), UDP_SINK_PORT)));
 		onoff = onoff1;
 	    }
 	    onoff.SetConstantRate(DataRate(DDOS_RATE));
@@ -889,9 +889,9 @@ main (int argc, char *argv[])
             			    Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
             ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost);
 	    if (configObject["DDoS"][0]["NodeType"][0].asString().find("MIM") != std::string::npos){
-	        UDPSinkApp = UDPsink.Install(MIM.Get(0)); 
+	        UDPSinkApp = UDPsink.Install(MIM.Get(2)); 
 	    }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-                UDPSinkApp = UDPsink.Install(ueNodes.Get(0));
+                UDPSinkApp = UDPsink.Install(ueNodes.Get(2));
 	    }
 	    UDPSinkApp.Start(Seconds(0.0));
 	    UDPSinkApp.Stop(Seconds(BOT_STOP));

@@ -24,7 +24,7 @@ for i in file_list:
     data = np.array(data)
     data = data[:-1]
     t = {}
-    for j in range(int(len(data)/2)): 
+    for j in range(11616): #int(len(data))): 
         temp = data[j].split(" (")
         temp2 = data[j].split(") ")
         tt = temp2[-1]
@@ -90,8 +90,8 @@ for i in file_list:
             p = p[-1]
             tt = tt[-1].split(".")
             ID = "CC --> MG"+str(int(float(tt[1])-17)) 
-            if ID not in all_ID:
-                all_ID.append(ID)
+            #if ID not in all_ID:
+            #    all_ID.append(ID)
         elif "UDP 172." in j:
             tt = j.split(".")
             p = j.split("-->")
@@ -99,7 +99,7 @@ for i in file_list:
             ID = "MG"+str(int(float(tt[1])-17))+" --> CC"
             if ID not in all_ID:
                 all_ID.append(ID)
-        TP_dict[i][ID] = TP_per_path[j][0] #/(TP_per_path[j][-1]/1000000000)
+            TP_dict[i][ID] = TP_per_path[j][0] #/(TP_per_path[j][-1]/1000000000)
 print(TP_dict)
 tt = {}
 for i in TP_dict.keys():
@@ -113,13 +113,17 @@ TP_dict = tt
 print(TP_dict)
 
 x = np.arange(len(all_ID))  # the label locations
-width = 0.2  # the width of the bars
+width = 0.1  # the width of the bars
 multiplier = 0
 fig, ax = plt.subplots()
 kk = sorted(list(TP_dict.keys()))
-t = kk[0]
-kk[0] = kk[-1]
-kk[-1] = t
+kk = kk[::-1]
+t = kk[1]
+kk[1] = kk[2]
+kk[2] = t
+t = kk[-1]
+kk[-1] = kk[-2]
+kk[-2] = t
 for s in kk:
     offset = width * multiplier
     lab = s.replace(".txt", "")

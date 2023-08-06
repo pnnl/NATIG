@@ -15,7 +15,7 @@ for i in list_files:
     data = data[:-1]
     dict_fin = {}
     seen = []
-    for j in range(len(data)):
+    for j in range(792): #len(data)):
         temp = data[j].split(" (")
         temp2 = data[j].split(") ")
         tt = temp[0] + " " + temp2[-1]

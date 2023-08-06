@@ -218,7 +218,7 @@
     ],
     "DDoS":[
 	    {
-              "NumberOfBots":100,
+              "NumberOfBots":50,
 	      "Active":1,
 	      "Start":4,
 	      "End":30,
@@ -226,8 +226,8 @@
 	      "TimeOff":0.0,
 	      "PacketSize":100000000,
 	      "Rate":"2048kb/s",
-	      "NodeType":["UE"],
-	      "NodeID":[0]
+	      "NodeType":["CC"],
+	      "NodeID":[2]
 	    }
     ],
     "MIM": [
