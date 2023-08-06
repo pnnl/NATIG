@@ -462,12 +462,12 @@ main (int argc, char *argv[])
 
   epcHelper->SetAttribute ("S1uLinkDelay", TimeValue (MilliSeconds (0)));
 
-  nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (2)); //8 //Was 2 befor it was changed to 8
-  nrHelper->SetUeAntennaAttribute ("NumColumns", UintegerValue (4)); //4
+  nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (4)); //8 //Was 2 befor it was changed to 8
+  nrHelper->SetUeAntennaAttribute ("NumColumns", UintegerValue (8)); //4
   nrHelper->SetUeAntennaAttribute ("AntennaElement", PointerValue (CreateObject<IsotropicAntennaModel> ()));
 
-  nrHelper->SetGnbAntennaAttribute ("NumRows", UintegerValue (4)); //8
-  nrHelper->SetGnbAntennaAttribute ("NumColumns", UintegerValue (8)); //8
+  nrHelper->SetGnbAntennaAttribute ("NumRows", UintegerValue (8)); //4
+  nrHelper->SetGnbAntennaAttribute ("NumColumns", UintegerValue (4)); //8
   nrHelper->SetGnbAntennaAttribute ("AntennaElement", PointerValue (CreateObject<IsotropicAntennaModel> ()));
 
   uint32_t bwpIdForLowLat = 0;
