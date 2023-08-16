@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # ==== set root and output 
+export OMPI_ALLOW_RUN_AS_ROOT=1
+export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 ROOT_PATH="/rd2c/integration/control"
 OUT_DIR="${ROOT_PATH}/output"
 if test ! -d ${OUT_DIR}
@@ -39,7 +41,7 @@ cd -
 # ===== starting GridLAB-D ===== 
 gldDir="${ROOT_PATH}"
 gldOutFile="${OUT_DIR}/gridlabd.log"
-gldModelFile="${gldDir}/IEEE_123_Dynamic.glm"
+gldModelFile="${gldDir}/ieee8500.glm"
 if test -e $gldOutFile
 then
   echo "$gldOutFile exists. Deleting..."

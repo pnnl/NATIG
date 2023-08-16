@@ -70,6 +70,12 @@ Existing error: When using a mesh topology with wifi, we do run into the ressour
 5. 4G
 6. 5G
 
+### IEEE models (working)
+1. 123-node bus model
+2. 9500-node bus model (Current it is called using ieee8500.glm, but it is the ieee9500 model)
+
+NOTE: to automatically generate the input json files use the get\_config.py from the graph folder. If you want to change the glm file that is used either replace the content of ieee8500.glm with the content of your glm file or replace in the python from the name of the glm file that is passed in by the name of the glm file that you want to use
+
 ## Configuration files
 
 1. Location: integration/control/config

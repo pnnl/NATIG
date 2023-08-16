@@ -24,7 +24,7 @@ for i in file_list:
     data = np.array(data)
     data = data[:-1]
     t = {}
-    for j in range(4224): #int(len(data))): 
+    for j in range(int(len(data))): 
         temp = data[j].split(" (")
         temp2 = data[j].split(") ")
         tt = temp2[-1]
@@ -55,7 +55,7 @@ for i in file_list:
             if d == 2:
                 av.append(sum(temp_av[:,d])/sum(temp_av[:,0]))
             else:
-                av.append(sum(temp_av[:,d])) #/len(temp_av[:,d]))
+                av.append(sum(temp_av[:,d])/len(temp_av[:,d]))
         t[j] = np.array(av)
     TP_per_path = {}
     for j in t.keys():

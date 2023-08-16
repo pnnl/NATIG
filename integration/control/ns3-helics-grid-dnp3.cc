@@ -193,7 +193,7 @@ main (int argc, char *argv[])
 
   PointToPointHelper p2p;
   p2p.SetDeviceAttribute ("DataRate", StringValue (topologyConfigObject["Channel"][0]["dataRate"].asString()));
-  p2p.SetChannelAttribute ("Delay", StringValue (topologyConfigObject["Channel"][0]["P2Pdelay"].asString()));
+  //p2p.SetChannelAttribute ("Delay", StringValue (topologyConfigObject["Channel"][0]["P2Pdelay"].asString()));
 
   CsmaHelper csma2;
   csma2.SetChannelAttribute("Delay", TimeValue (NanoSeconds (std::stoi(topologyConfigObject["Channel"][0]["CSMAdelay"].asString()))));
@@ -470,7 +470,7 @@ main (int argc, char *argv[])
 
     Ptr<Dnp3ApplicationNew> slave = dnp3Outstation.Install (tempnode1, std::string(ep_name));
     dnpOutstationApp.Add(slave);
-    Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, master, 0);
+    Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, master, std::stoi(configObject["Simulation"][0]["PollReqFreq"].asString()));
     // Simulator::Schedule(MilliSeconds(2005), &Dnp3HelicsApplication::send_control_binary, master,
     //   Dnp3HelicsApplication::DIRECT, 0, ControlOutputRelayBlock::CLOSE);
       // Dnp3HelicsApplication::DIRECT, 0, ControlOutputRelayBlock::TRIP);

@@ -25,7 +25,7 @@ for i in list_files:
             dict_fin[addr] = []
         #preventing duplicates
         if temp2[0] not in seen:
-            dict_fin[addr].append(float(tt.split(" ")[2])) #((float(tt.split(" ")[-4])*float(tt.split(" ")[-2]))/float(tt.split(" ")[5]))*1000000000)
+            dict_fin[addr].append(float(tt.split(" ")[-1])) #((float(tt.split(" ")[-4])*float(tt.split(" ")[-2]))/float(tt.split(" ")[5]))*1000000000)
             seen.append(temp2[0])
     print(i)
     ID_arr = []
@@ -41,7 +41,7 @@ for i in list_files:
             ID = "CC/"+str(int(p))+" --> MG"+str(int(float(tt[1])-17))
             x = []
             for s in range(1,len(dict_fin[j])):
-                x.append((float(dict_fin[j][s]))) #-float(dict_fin[j][s-1]))/0.4)
+                x.append((float(dict_fin[j][s]))) # -float(dict_fin[j][s-1]))/0.4)
             val = sum(x)/len(x)
             if val == 0:
                 val = float(dict_fin[j][0])

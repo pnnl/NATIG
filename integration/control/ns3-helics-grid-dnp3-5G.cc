@@ -329,8 +329,8 @@ main (int argc, char *argv[])
   readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
 
   
-  std::string name = "ns3"; //+std::to_string(systemId);
-  HelicsHelper helicsHelper(name, 6000);
+  //std::string name = "ns3"; //+std::to_string(systemId);
+  HelicsHelper helicsHelper(6000);
   std::cout << "Calling Calling Message Federate Constructor" << std::endl; 
   //if (systemId == 1){
   helicsHelper.SetupApplicationFederate();
@@ -374,7 +374,7 @@ main (int argc, char *argv[])
   int32_t yValue = 0.0;
   double gNbHeight = 10;
   double ueHeight = 1.5;
-
+  double xValue = 0.0;
   for (uint32_t i = 1; i <= numNodePairs; ++i)
     {
       // 2.0, -2.0, 6.0, -6.0, 10.0, -10.0, ....
@@ -391,8 +391,8 @@ main (int argc, char *argv[])
 
 
       // 1.0, -1.0, 3.0, -3.0, 5.0, -5.0, ...
-      double xValue = 0.0;
-      for (uint32_t j = 1; j <= numNodePairs; ++j)
+      //double xValue = 0.0;
+      for (uint32_t j = i; j <= i+int(numNodePairs/numNodePairs); ++j)
         {
           if (j % 2 != 0)
             {
@@ -443,7 +443,7 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::ThreeGppChannelModel::UpdatePeriod",TimeValue (MilliSeconds (0)));
   nrHelper->SetChannelConditionModelAttribute ("UpdatePeriod", TimeValue (MilliSeconds (0)));
   nrHelper->SetPathlossAttribute ("ShadowingEnabled", BooleanValue (false));
-  Config::SetDefault ("ns3::LteEnbRrc::SrsPeriodicity", UintegerValue (2)); //320));
+  Config::SetDefault ("ns3::LteEnbRrc::SrsPeriodicity", UintegerValue (std::stoi(topologyConfigObject["5GSetup"][0]["Srs"].asString()))); //320));
   nrHelper->SetSchedulerTypeId (TypeId::LookupByName ("ns3::NrMacSchedulerTdmaPF"));
 
   nrHelper->InitializeOperationBand (&band1);
@@ -460,7 +460,7 @@ main (int argc, char *argv[])
 
   idealBeamformingHelper->SetAttribute ("BeamformingMethod", TypeIdValue (DirectPathBeamforming::GetTypeId ()));
 
-  epcHelper->SetAttribute ("S1uLinkDelay", TimeValue (MilliSeconds (0)));
+  epcHelper->SetAttribute ("S1uLinkDelay", TimeValue (MilliSeconds(std::stoi(topologyConfigObject["5GSetup"][0]["S1uLinkDelay"].asString())))); //MilliSeconds (0)));
 
   nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (8)); //8 //Was 2 befor it was changed to 8
   nrHelper->SetUeAntennaAttribute ("NumColumns", UintegerValue (4)); //4
@@ -518,10 +518,16 @@ main (int argc, char *argv[])
   internet.Install (remoteHostContainer);
 
   // Create the Internet
+  //Point to point for bots:
+  PointToPointHelper p2ph2;
+  p2ph2.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("200Mb/s")));
+  p2ph2.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
+
+  //Valid traffic point to point
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Mb/s")));
-  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (2048));
-  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (0)));
+  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (5000));
+  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
@@ -624,6 +630,32 @@ main (int argc, char *argv[])
     ncP2P_nodes.Add(subNodes.Get(i));
   }
 
+  NetDeviceContainer botDeviceContainer[numBots];
+  for (int i = 0; i < numBots; ++i)
+  {
+	  if (configObject["DDoS"][0]["NodeType"][0].asString().find("CC") != std::string::npos){
+              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), remoteHostContainer.Get(0));
+	  }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
+              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), ueNodes.Get(int(i%MIM.GetN())));
+	  }else{
+	      botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), MIM.Get(int(i%MIM.GetN()))); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
+	  }
+  }
+
+  internet.Install(botNodes);
+  Ipv4AddressHelper ipv4_n;
+  ipv4_n.SetBase("30.0.0.0", "255.255.255.252");
+
+  for (int j = 0; j < numBots; ++j)
+  {
+	  ipv4_n.Assign(botDeviceContainer[j]);
+	  ipv4_n.NewNetwork();
+	  /*Ptr<Ipv4StaticRouting> botRouting = ipv4RoutingHelper.GetStaticRouting (botDeviceContainer[j].Get(0)->GetNode()->GetObject<Ipv4>());
+	  botRouting->AddNetworkRouteTo(botDeviceContainer[j].Get(1)->GetNode()->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.255.255.252"), 2);
+          Ptr<Ipv4StaticRouting> victimeStaticRouting = ipv4RoutingHelper.GetStaticRouting (botDeviceContainer[j].Get(1)->GetNode()->GetObject<Ipv4> ());
+          victimeStaticRouting->AddNetworkRouteTo (botDeviceContainer[j].Get(0)->GetNode()->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.255.255.252"), 2);*/
+  }
+
   //Ptr<Node> ueNodeZero = ueNodes.Get (0);
   //Ptr<Ipv4> ipv4 = ueNodeZero->GetObject<Ipv4> (); 
 
@@ -693,27 +725,6 @@ main (int argc, char *argv[])
 	  
   }
 
-  NetDeviceContainer botDeviceContainer[numBots];
-  for (int i = 0; i < numBots; ++i)
-  {
-	  if (configObject["DDoS"][0]["NodeType"][0].asString().find("CC") != std::string::npos){
-              botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), remoteHostContainer.Get(0)); 
-	  }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-              botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), ueNodes.Get(2));
-	  }else{
-	      botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), MIM.Get(2)); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
-	  }
-  }
-  
-  internet.Install(botNodes);
-  Ipv4AddressHelper ipv4_n;
-  ipv4_n.SetBase("30.0.0.0", "255.255.255.252");
-  
-  for (int j = 0; j < numBots; ++j)
-  {
-	  ipv4_n.Assign(botDeviceContainer[j]);
-	  ipv4_n.NewNetwork();
-  }
 
   uint16_t port = 20000;
   uint16_t master_port = 40000;
@@ -852,51 +863,85 @@ main (int argc, char *argv[])
     dnpOutstationApp.Start (Seconds (start));
     dnpOutstationApp.Stop (simTime);
 
+    std::cout << "Setting up Bots" << std::endl;
     int BOT_START = std::stof(configObject["DDoS"][0]["Start"].asString());;
     int BOT_STOP = std::stof(configObject["DDoS"][0]["End"].asString());;
     std::string str_on_time = configObject["DDoS"][0]["TimeOn"].asString();
     std::string str_off_time = configObject["DDoS"][0]["TimeOff"].asString();
     int TCP_SINK_PORT = 9000;
-    int UDP_SINK_PORT = mimPort[0] - 1;
+    int UDP_SINK_PORT = mimPort[2]-10;
     int MAX_BULK_BYTES = std::stof(configObject["DDoS"][0]["PacketSize"].asString()); //20971520000;
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
 
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
     
     if (DDoS){
-	    OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(remoteHostAddr, UDP_SINK_PORT)));
 	    if (configObject["DDoS"][0]["NodeType"][0].asString().find("MIM") != std::string::npos){
-                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter_MIM.GetAddress(2), UDP_SINK_PORT))); 
-		onoff = onoff1;
-	    }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-                OnOffHelper onoff1("ns3::UdpSocketFactory", Address(InetSocketAddress(inter.GetAddress(2), UDP_SINK_PORT)));
-		onoff = onoff1;
-	    }
-	    onoff.SetConstantRate(DataRate(DDOS_RATE));
-	    onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
-	    onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_off_time+"]"));
-	    
-	    ApplicationContainer onOffApp[numBots];
-	    for (int k = 0; k < numBots; ++k)
-	    {
+
+	        ApplicationContainer onOffApp[numBots];
+	        for (int k = 0; k < numBots; ++k)
+                {
+		    int x = int(k%MIM.GetN());
+		    OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(inter_MIM.GetAddress(int(x)), UDP_SINK_PORT)));
+                    onoff.SetConstantRate(DataRate(DDOS_RATE));
+                    onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=10]"));
+                    onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
 		    onOffApp[k] = onoff.Install(botNodes.Get(k));
 		    onOffApp[k].Start(Seconds(BOT_START));
 		    onOffApp[k].Stop(Seconds(BOT_STOP));
+	         }	
+	    }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
+	    
+	        ApplicationContainer onOffApp[numBots];
+	        for (int k = 0; k < numBots; ++k)
+	        {
+		    int x = int(k%MIM.GetN());
+		    OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(inter.GetAddress(int(x)), UDP_SINK_PORT)));
+                    onoff.SetConstantRate(DataRate(DDOS_RATE));
+                    onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=10]"));
+                    onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+		    onOffApp[k] = onoff.Install(botNodes.Get(k));
+		    onOffApp[k].Start(Seconds(BOT_START));
+		    onOffApp[k].Stop(Seconds(BOT_STOP));
+	        }
+	    }else{
+	    
+	        ApplicationContainer onOffApp[numBots];
+	        for (int k = 0; k < numBots; ++k)
+	        {
+		    OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(remoteHostAddr, UDP_SINK_PORT)));
+                    onoff.SetConstantRate(DataRate(DDOS_RATE));
+                    onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=10]"));
+                    onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+		    onOffApp[k] = onoff.Install(botNodes.Get(k));
+		    onOffApp[k].Start(Seconds(BOT_START));
+		    onOffApp[k].Stop(Seconds(BOT_STOP));
+	        }
 	    }
 	    
 	    
 	    PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
             			    Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
-            ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost);
+            ApplicationContainer UDPSinkApp;
 	    if (configObject["DDoS"][0]["NodeType"][0].asString().find("MIM") != std::string::npos){
-	        UDPSinkApp = UDPsink.Install(MIM.Get(2)); 
+		for (int k = 0; k < MIM.GetN(); k++){
+	            UDPSinkApp = UDPsink.Install(MIM.Get(k));
+	            UDPSinkApp.Start(Seconds(0.0));
+	            UDPSinkApp.Stop(Seconds(BOT_STOP));
+		}	
 	    }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-                UDPSinkApp = UDPsink.Install(ueNodes.Get(2));
+		for (int k = 0; k < ueNodes.GetN(); k++){
+                    UDPSinkApp = UDPsink.Install(ueNodes.Get(k));
+		    UDPSinkApp.Start(Seconds(0.0));
+	            UDPSinkApp.Stop(Seconds(BOT_STOP));
+		}
+	    }else {
+                UDPSinkApp = UDPsink.Install(remoteHost);
+		UDPSinkApp.Start(Seconds(0.0));
+	        UDPSinkApp.Stop(Seconds(BOT_STOP));
 	    }
-	    UDPSinkApp.Start(Seconds(0.0));
-	    UDPSinkApp.Stop(Seconds(BOT_STOP));
     }
-
+    std::cout << "Done Setting up the bots " << std::endl;
     int mon = std::stoi(configObject["Simulation"][0]["MonitorPerf"].asString());
     NodeContainer endpointNodes;
     endpointNodes.Add (remoteHost);
@@ -922,10 +967,11 @@ main (int argc, char *argv[])
 	    p2ph.EnablePcapAll (pcapFileDir+"p2p", false);
     }
    //enablePcapAllBaseTime("radics-exercise2-utility1-1day", remoteHostContainer, ncP2P_nodes);
-
+   std::cout << "Before Stop command" << std::endl; 
 
 
   Simulator::Stop (simTime);
+  //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
   Simulator::Run ();
 
   /*GtkConfigStore config;

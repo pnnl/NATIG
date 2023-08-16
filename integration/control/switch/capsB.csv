@@ -1,0 +1,16 @@
+# file...... switch/capsB.csv
+# date...... Tue Aug 15 02:50:47 2023
+# user...... (null)
+# host...... (null)
+# group..... class=capacitor
+# property.. switchB
+# limit..... 0
+# interval.. 15
+# timestamp,CapBank0,CapBank1,CapBank2,CapBank3
+2001-08-01 13:00:00 PDT,OPEN,OPEN,OPEN,CLOSED
+2001-08-01 13:00:20 PDT,OPEN,OPEN,OPEN,CLOSED
+2001-08-01 13:00:40 PDT,OPEN,OPEN,OPEN,CLOSED
+2001-08-01 13:01:00 PDT,OPEN,OPEN,OPEN,CLOSED
+2001-08-01 13:01:20 PDT,OPEN,OPEN,OPEN,CLOSED
+2001-08-01 13:01:40 PDT,OPEN,OPEN,OPEN,CLOSED
+2001-08-01 13:02:00 PDT,OPEN,OPEN,OPEN,CLOSED

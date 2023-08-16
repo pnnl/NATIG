@@ -4,7 +4,7 @@ import glm
 import json
 import os
 
-list_files = glob.glob("../ieee9500*.glm")
+list_files = glob.glob("../ieee8500.glm")
 
 l1 = glm.load(list_files[0])
 
@@ -12,7 +12,7 @@ l2 = {}
 l2["name"] = "GLD"
 l2["loglevel"] = 1
 l2["coreType"] = "zmq"
-l2["period"] = 1
+l2["period"] = 10
 l2["slow_responding"] = "True"
 l2["broker"] = "127.0.0.1:6000"
 l2["brokerPort"] = 6000
@@ -45,6 +45,18 @@ for i in l1["objects"]:
             if not found:
                 microgrids["SS_"+str(len(microgrids.keys()))] = [i["attributes"]["from"], i["attributes"]["to"]]
 
+
+num_group = 4 #len(list(microgrids.keys()))
+tt = {}
+kk = sorted(list(microgrids.keys()))
+print("Size of keys: "+str(len(kk)))
+for i in range(0,len(kk)):
+    if "SS_"+str(i%num_group) not in tt.keys():
+        tt["SS_"+str(i%num_group)] = []
+    for x in microgrids[kk[i]]:
+        tt["SS_"+str(i%num_group)].append(x)
+microgrids = tt
+
 res_micro = {}
 for i in microgrids.keys():
     for c in microgrids[i]:
@@ -57,42 +69,62 @@ types_ = {}
 for i in l1["objects"]:
     if i["name"] not in types.keys():
         types[i["name"]] = []
-    if i["attributes"]["name"] not in types[i["name"]]:
-        types[i["name"]].append(i["attributes"]["name"])
+    if "name" in i["attributes"].keys():
+        if i["attributes"]["name"] not in types[i["name"]]:
+            types[i["name"]].append(i["attributes"]["name"])
 
+points = {}
 for i in l1["objects"]:
-    if i["attributes"]["name"] in res_micro.keys() and ("switch" in i["name"] or "inverters" in i["name"] or "node" in i["name"]):
-        att = []
-        for xx in types.keys():
-            for ww in types[xx]:
-                if i["attributes"]["name"] in ww:
-                    if res_micro[i["attributes"]["name"]] not in types_.keys():
-                        types_[res_micro[i["attributes"]["name"]]] = {}
-                    if xx not in types_[res_micro[i["attributes"]["name"]]].keys():
-                        types_[res_micro[i["attributes"]["name"]]][xx] = []
-                    if ww not in types_[res_micro[i["attributes"]["name"]]][xx]:
-                        types_[res_micro[i["attributes"]["name"]]][xx].append(ww)
-        for xx in list(i["attributes"].keys())[1:]: 
-            ss = {}
-            ss["name"] = res_micro[i["attributes"]["name"]]+"_"+i["attributes"]["name"]+"$"+xx
-            ss["type"] = "string"
-            ss["global"] = "false"
-            ss["info"] = "{\""+i["attributes"]["name"]+"\":\""+xx+"\"}"
-            att.append(xx)
-            if res_micro[i["attributes"]["name"]] not in res.keys():
-                res[res_micro[i["attributes"]["name"]]] = []
-            res[res_micro[i["attributes"]["name"]]].append(ss)
-        if res_micro[i["attributes"]["name"]] not in rr.keys():
-            rr[res_micro[i["attributes"]["name"]]] = {}
-        rr[res_micro[i["attributes"]["name"]]][i["attributes"]["name"]] = att
+    if "name" in i["attributes"].keys():
+        if i["attributes"]["name"] in res_micro.keys() and ("switch" in i["name"] or "inverters" in i["name"] or "node" in i["name"]):
+            att = []
+            for xx in types.keys():
+                for ww in types[xx]:
+                    if i["attributes"]["name"] in ww:
+                        if res_micro[i["attributes"]["name"]] not in types_.keys():
+                            types_[res_micro[i["attributes"]["name"]]] = {}
+                        if xx not in types_[res_micro[i["attributes"]["name"]]].keys():
+                            types_[res_micro[i["attributes"]["name"]]][xx] = []
+                        if ww not in types_[res_micro[i["attributes"]["name"]]][xx]:
+                            types_[res_micro[i["attributes"]["name"]]][xx].append(ww)
+            for xx in list(i["attributes"].keys())[1:]: 
+                point_type = "ANALOG"
+                if not "voltage" in xx and not "current" in xx and not "Pref" in xx and not "Qref" in xx:
+                    point_type = "BINARY"
+                if "flags" not in xx:
+                    ss = {}
+                    ss["name"] = res_micro[i["attributes"]["name"]]+"_"+i["attributes"]["name"]+"$"+xx
+                    ss["type"] = "string"
+                    ss["global"] = False
+                    ss["info"] = "{\""+i["attributes"]["name"]+"\":\""+xx+"\"}"
+                    att.append(xx)
+                    if res_micro[i["attributes"]["name"]] not in res.keys():
+                        res[res_micro[i["attributes"]["name"]]] = []
+                    res[res_micro[i["attributes"]["name"]]].append(ss)
+                    if res_micro[i["attributes"]["name"]] not in points.keys():
+                        points[res_micro[i["attributes"]["name"]]] = ""
+                    if "ANALOG" in point_type:
+                        points[res_micro[i["attributes"]["name"]]] += point_type +","+i["attributes"]["name"] + "$" + xx + ".real,0\n"
+                        points[res_micro[i["attributes"]["name"]]] += point_type +","+i["attributes"]["name"] + "$" + xx + ".imag,0\n"
+                    else:
+                        points[res_micro[i["attributes"]["name"]]] += point_type +","+i["attributes"]["name"] + "$" + xx + ",0\n"
+            if res_micro[i["attributes"]["name"]] not in rr.keys():
+                rr[res_micro[i["attributes"]["name"]]] = {}
+            rr[res_micro[i["attributes"]["name"]]][i["attributes"]["name"]] = att
+
+
+for i in sorted(list(points.keys())):
+    f = open("../test_conf/points_"+i+".csv", "w")
+    f.write(points[i])
+    f.close()
 
 grid = {}
 grid["Simulation"] = [{}]
-grid["Simulation"][0]["SimTime"] = 180
+grid["Simulation"][0]["SimTime"] = 35
 grid["Simulation"][0]["StartTime"] = 0.0
 grid["Simulation"][0]["PollReqFreq"] = 5
 grid["Simulation"][0]["includeMIM"] = 0
-grid["Simulation"][0]["UseDynTop"] = 1
+grid["Simulation"][0]["UseDynTop"] = 0
 grid["Simulation"][0]["MonitorPerf"] = 1
 grid["microgrid"] = []
 for c in sorted(list(types_.keys())):
@@ -124,12 +156,12 @@ count = 0
 for c in sorted(list(types_.keys())):
     t = {}
     t["name"] = "MIM"+str(count)
-    t["attack_val"] = "NA"
+    t["attack_val"] = "TRIP"
     t["real_val"] = "NA"
-    t["node_id"] = "NA"
-    t["point_id"] = "NA"
-    t["scenario_id"] = "NA"
-    t["attack_type"] = "NA"
+    t["node_id"] = "microgrid_switch1"
+    t["point_id"] = "status"
+    t["scenario_id"] = "b"
+    t["attack_type"] = "3"
     t["Start"] = 120
     t["End"] = 180
     grid["MIM"].append(t)
@@ -145,9 +177,15 @@ for x in sorted(list(res.keys())):
     w = {}
     w["name"] = x
     w["type"] = "string"
-    w["global"] = "false"
+    w["global"] = False
     w["destination"] = "ns3/"+x
-    w["info"] = rr[x]
+    ss = "{"
+    for zz in rr[x].keys():
+        ss += "\"" + zz + "\":[\""
+        for aa in rr[x][zz][:-1]:
+            ss += aa + "\",\""
+        ss += rr[x][zz][-1] + "\"],"
+    w["info"] = ss[:-1]+"}"
     l2["endpoints"].append(w)
 
 
