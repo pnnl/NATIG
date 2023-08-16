@@ -76,6 +76,11 @@ Existing error: When using a mesh topology with wifi, we do run into the ressour
 
 NOTE: to automatically generate the input json files use the get\_config.py from the graph folder. If you want to change the glm file that is used either replace the content of ieee8500.glm with the content of your glm file or replace in the python from the name of the glm file that is passed in by the name of the glm file that you want to use
 
+#### How to generate config json file
+1. go to graph folder
+2. run ``` python get_config.py <Number of Microgrids> ```
+3. the number of Microgrids is the number of Microgrids you want your model to have. Currently only tested even number of Microgrids. 
+
 ## Configuration files
 
 1. Location: integration/control/config
