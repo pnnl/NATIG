@@ -8,7 +8,8 @@
                         "jitterMax": 100,
                         "WifiPropagationDelay": "ConstantSpeedPropagationDelayModel",
                         "WifiRate": "DsssRate1Mbps",
-                        "WifiStandard": "80211b"
+                        "WifiStandard": "80211b",
+                        "P2PRate": "250Mb/s"
                 }
         ],
         "Gridlayout": [
@@ -27,9 +28,13 @@
                         "S1uLinkDelay": 1,
                         "N1Delay": 0.01,
                         "N2Delay": 0.01,
-                        "Srs": 320,
-                        "numUE": 4,
-                        "numEnb": 4,
+                        "Srs": 10,
+                        "UeRow": 6.0,
+                        "UeCol": 10,
+                        "GnBRow": 10,
+                        "GnBCol": 6.0,
+                        "numUE": 10,
+                        "numEnb": 10,
                         "scenario": "UMi-StreetCayon",
                         "txPower": 40
                 }
@@ -74,13 +79,85 @@
                 {
                         "name": 3,
                         "connections": [
-                                0
+                                4
                         ],
                         "UseCSMA": 0,
                         "MTU": 1500,
                         "UseWifi": 1,
                         "x": 11,
                         "y": 12,
+                        "error": "0.001"
+                },
+                {
+                        "name": 4,
+                        "connections": [
+                                5
+                        ],
+                        "UseCSMA": 0,
+                        "MTU": 1500,
+                        "UseWifi": 1,
+                        "x": 6,
+                        "y": 70,
+                        "error": "0.001"
+                },
+                {
+                        "name": 5,
+                        "connections": [
+                                6
+                        ],
+                        "UseCSMA": 0,
+                        "MTU": 1500,
+                        "UseWifi": 1,
+                        "x": 13,
+                        "y": 20,
+                        "error": "0.001"
+                },
+                {
+                        "name": 6,
+                        "connections": [
+                                7
+                        ],
+                        "UseCSMA": 0,
+                        "MTU": 1500,
+                        "UseWifi": 1,
+                        "x": 8,
+                        "y": 80,
+                        "error": "0.001"
+                },
+                {
+                        "name": 7,
+                        "connections": [
+                                8
+                        ],
+                        "UseCSMA": 0,
+                        "MTU": 1500,
+                        "UseWifi": 1,
+                        "x": 15,
+                        "y": 28,
+                        "error": "0.001"
+                },
+                {
+                        "name": 8,
+                        "connections": [
+                                9
+                        ],
+                        "UseCSMA": 0,
+                        "MTU": 1500,
+                        "UseWifi": 1,
+                        "x": 10,
+                        "y": 90,
+                        "error": "0.001"
+                },
+                {
+                        "name": 9,
+                        "connections": [
+                                0
+                        ],
+                        "UseCSMA": 0,
+                        "MTU": 1500,
+                        "UseWifi": 1,
+                        "x": 17,
+                        "y": 36,
                         "error": "0.001"
                 }
         ]

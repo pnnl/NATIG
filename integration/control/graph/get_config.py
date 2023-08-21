@@ -3,6 +3,7 @@ import glob
 import glm
 import json
 import os
+import sys
 
 list_files = glob.glob("../ieee8500.glm")
 
@@ -46,7 +47,7 @@ for i in l1["objects"]:
                 microgrids["SS_"+str(len(microgrids.keys()))] = [i["attributes"]["from"], i["attributes"]["to"]]
 
 
-num_group = 4 #len(list(microgrids.keys()))
+num_group = int(sys.argv[1]) #len(list(microgrids.keys()))
 tt = {}
 kk = sorted(list(microgrids.keys()))
 print("Size of keys: "+str(len(kk)))
@@ -205,6 +206,7 @@ topology["Channel"][0]["jitterMax"] = 100
 topology["Channel"][0]["WifiPropagationDelay"] = "ConstantSpeedPropagationDelayModel"
 topology["Channel"][0]["WifiRate"] = "DsssRate1Mbps"
 topology["Channel"][0]["WifiStandard"] = "80211b"
+topology["Channel"][0]["P2PRate"] = "250Mb/s" 
 topology["Gridlayout"] = [{}]
 topology["Gridlayout"][0]["MinX"] = 0
 topology["Gridlayout"][0]["MinY"] = 0
@@ -217,9 +219,27 @@ topology["5GSetup"] = [{}]
 topology["5GSetup"][0]["S1uLinkDelay"] = 1
 topology["5GSetup"][0]["N1Delay"] = 0.01
 topology["5GSetup"][0]["N2Delay"] = 0.01
-topology["5GSetup"][0]["Srs"] = 320
-topology["5GSetup"][0]["numUE"] = len(list(types_.keys()))
-topology["5GSetup"][0]["numEnb"] = len(list(types_.keys()))
+qw = len(list(types_.keys()))
+xxw = 5
+if qw > 160:
+    xxw = 320
+elif qw > 80:
+    xxw = 160
+elif qw > 40:
+    xxw = 80
+elif qw > 20:
+    xxw = 40
+elif qw > 10:
+    xxw = 20
+elif qw > 5:
+    xxw = 10
+topology["5GSetup"][0]["Srs"] = xxw
+topology["5GSetup"][0]["UeRow"] = qw/2 + 1
+topology["5GSetup"][0]["UeCol"] = qw
+topology["5GSetup"][0]["GnBRow"] = qw
+topology["5GSetup"][0]["GnBCol"] = qw/2 + 1
+topology["5GSetup"][0]["numUE"] = qw
+topology["5GSetup"][0]["numEnb"] = qw
 topology["5GSetup"][0]["scenario"] = "UMi-StreetCayon"
 topology["5GSetup"][0]["txPower"] = 40
 topology["Node"] = []

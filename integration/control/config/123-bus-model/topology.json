@@ -8,7 +8,8 @@
 	     "jitterMax": 100,
 	     "WifiPropagationDelay": "ConstantSpeedPropagationDelayModel",
 	     "WifiRate": "DsssRate1Mbps",
-	     "WifiStandard": "80211b" 
+	     "WifiStandard": "80211b",
+	     "P2PRate": "100Mb/s" 
 	    }
     ],
     "Gridlayout": [
@@ -28,6 +29,10 @@
 	   "N1Delay": 0.01,
 	   "N2Delay": 0.01,
 	   "Srs": 5,
+	   "UeRow":8,
+	   "UeCol":4,
+	   "GnBRow":4,
+	   "GnBCol":8,
 	   "numUE": 4,
 	   "numEnb":4,
 	   "scenario":"UMi-StreetCanyon",

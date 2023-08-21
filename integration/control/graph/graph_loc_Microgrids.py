@@ -13,22 +13,23 @@ yvalue = 0
 xValue = 0.0
 for i in range(1,num+1):
     if i%2:
-        yvalue = i*30
+        yvalue = i*5
     else:
-        yvalue = -yvalue
+        yvalue = int(yvalue*1.5)
     GnB.append([0, yvalue])
     for j in range(i, i+1):
         if j % 2 != 0:
             xValue = j
         else:
             xValue = -xValue
-        if yvalue > 0:
+        if yvalue % 2 == 0:
             UE.append([xValue, 10])
         else:
-            UE.append([xValue, -10])
+            UE.append([xValue, 0.0])
 
 UE = np.array(UE)
 GnB = np.array(GnB)
+
 colors = ["pink", "blue", "red", "green", "violet", "lightgreen", "orange", "lightblue", "black", "pink", "cyan", "tan", "lightblue", "firebrick", "gold", "magenta", "forestgreen", "coral", "c", "moccasin", "pink", "blue", "red", "green", "violet", "lightgreen", "orange", "lightblue", "black", "pink", "cyan", "tan", "lightblue", "firebrick", "gold","magenta"]
 fig, ax = plt.subplots()
 for i in range(len(UE)):

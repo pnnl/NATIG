@@ -375,42 +375,46 @@ main (int argc, char *argv[])
   double gNbHeight = 10;
   double ueHeight = 1.5;
   double xValue = 0.0;
-  for (uint32_t i = 1; i <= numNodePairs; ++i)
+  double minBigBoxX = -10.0;
+  double minBigBoxY = -15.0;
+  double maxBigBoxX = 110.0;
+  double maxBigBoxY =  35.0;
+
+  for (uint8_t j = 0; j < int(numNodePairs/2); j++)
     {
-      // 2.0, -2.0, 6.0, -6.0, 10.0, -10.0, ....
-      if (i % 2 != 0)
+      double minSmallBoxY = minBigBoxY + j * (maxBigBoxY - minBigBoxY) / 2;
+
+      for (uint8_t i = j; i < j+2; i++)
         {
-          yValue = static_cast<int> (i) * 30;
+          double minSmallBoxX = minBigBoxX + i * (maxBigBoxX - minBigBoxX) / 6;
+          Ptr<UniformRandomVariable> ueRandomVarX = CreateObject<UniformRandomVariable> ();
+
+          double minX = minSmallBoxX;
+          double maxX = minSmallBoxX + (maxBigBoxX - minBigBoxX) / 2 - 0.0001;
+          double minY = minSmallBoxY;
+          double maxY = minSmallBoxY + (maxBigBoxY - minBigBoxY) / int(numNodePairs/2) - 0.0001;
+
+          Ptr<RandomBoxPositionAllocator> ueRandomRectPosAlloc = CreateObject<RandomBoxPositionAllocator> ();
+          ueRandomVarX->SetAttribute ("Min", DoubleValue (minX));
+          ueRandomVarX->SetAttribute ("Max", DoubleValue (maxX));
+          ueRandomRectPosAlloc->SetX (ueRandomVarX);
+          Ptr<UniformRandomVariable> ueRandomVarY = CreateObject<UniformRandomVariable> ();
+          ueRandomVarY->SetAttribute ("Min", DoubleValue (minY));
+          ueRandomVarY->SetAttribute ("Max", DoubleValue (maxY));
+          ueRandomRectPosAlloc->SetY (ueRandomVarY);
+          Ptr<ConstantRandomVariable> ueRandomVarZ = CreateObject<ConstantRandomVariable> ();
+          ueRandomVarZ->SetAttribute ("Constant", DoubleValue (ueHeight));
+          ueRandomRectPosAlloc->SetZ (ueRandomVarZ);
+
+	  staPositionAlloc->Add(Vector(ueRandomVarX->GetValue(minX,maxX), ueRandomVarY->GetValue(minY,maxY), ueHeight));
+
         }
-      else
+    }
+  for (uint8_t j = 0; j < 2; j++)
+    {
+      for (uint8_t i = 0; i < int(numNodePairs/2); i++)
         {
-          yValue = -yValue;
-        }
-
-      apPositionAlloc->Add (Vector (0.0, yValue, gNbHeight));
-
-
-      // 1.0, -1.0, 3.0, -3.0, 5.0, -5.0, ...
-      //double xValue = 0.0;
-      for (uint32_t j = i; j <= i+int(numNodePairs/numNodePairs); ++j)
-        {
-          if (j % 2 != 0)
-            {
-              xValue = j;
-            }
-          else
-            {
-              xValue = -xValue;
-            }
-
-          if (yValue > 0)
-            {
-              staPositionAlloc->Add (Vector (xValue, 10, ueHeight));
-            }
-          else
-            {
-              staPositionAlloc->Add (Vector (xValue, -10, ueHeight));
-            }
+          apPositionAlloc->Add (Vector ( i * 20, j * 20, gNbHeight));
         }
     }
 
@@ -462,12 +466,12 @@ main (int argc, char *argv[])
 
   epcHelper->SetAttribute ("S1uLinkDelay", TimeValue (MilliSeconds(std::stoi(topologyConfigObject["5GSetup"][0]["S1uLinkDelay"].asString())))); //MilliSeconds (0)));
 
-  nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (8)); //8 //Was 2 befor it was changed to 8
-  nrHelper->SetUeAntennaAttribute ("NumColumns", UintegerValue (4)); //4
+  nrHelper->SetUeAntennaAttribute ("NumRows", UintegerValue (std::stoi(topologyConfigObject["5GSetup"][0]["UeRow"].asString()))); //8 
+  nrHelper->SetUeAntennaAttribute ("NumColumns", UintegerValue (std::stoi(topologyConfigObject["5GSetup"][0]["UeCol"].asString()))); //4
   nrHelper->SetUeAntennaAttribute ("AntennaElement", PointerValue (CreateObject<IsotropicAntennaModel> ()));
 
-  nrHelper->SetGnbAntennaAttribute ("NumRows", UintegerValue (4)); //4
-  nrHelper->SetGnbAntennaAttribute ("NumColumns", UintegerValue (8)); //8
+  nrHelper->SetGnbAntennaAttribute ("NumRows", UintegerValue (std::stoi(topologyConfigObject["5GSetup"][0]["GnBRow"].asString()))); //4
+  nrHelper->SetGnbAntennaAttribute ("NumColumns", UintegerValue (std::stoi(topologyConfigObject["5GSetup"][0]["GnBCol"].asString()))); //8
   nrHelper->SetGnbAntennaAttribute ("AntennaElement", PointerValue (CreateObject<IsotropicAntennaModel> ()));
 
   uint32_t bwpIdForLowLat = 0;
@@ -525,7 +529,7 @@ main (int argc, char *argv[])
 
   //Valid traffic point to point
   PointToPointHelper p2ph;
-  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Mb/s")));
+  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate (topologyConfigObject["Channel"][0]["P2PRate"].asString()))); //"100Mb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (5000));
   p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
