@@ -29,6 +29,7 @@ cp -r ../PUSH/NATIG/patch/dnp3/ src
 cp -r ../PUSH/NATIG/patch/applications/* src/applications/
 cp -r ../PUSH/NATIG/patch/internet/* src/internet/
 cp -r ../PUSH/NATIG/patch/lte/* src/lte/
+cp -r ../PUSH/NATIG/path/point-to-point-layout/* src/point-to-point-layout/
 sudo ./make.sh
 if [ "$1" == "5G" ]; then
     echo "installing 5G"
