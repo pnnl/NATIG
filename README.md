@@ -118,3 +118,14 @@ NOTE: to change the helics broker's port, the run.sh, the gridlabd\_config.json 
 1. Insider attack
 2. DDoS attack on base network
 3. 5G attack vectors, example attack at the SDN level, attacks on slice configurations, etc.
+
+
+### Reference
+```
+@article{bel2023co,
+  title={Co-Simulation Framework For Network Attack Generation and Monitoring},
+  author={Bel, Oceane and Kim, Joonseok and Hofer, William J and Maharjan, Manisha and Purohit, Sumit and Niddodi, Shwetha},
+  journal={arXiv preprint arXiv:2307.09633},
+  year={2023}
+}
+```
