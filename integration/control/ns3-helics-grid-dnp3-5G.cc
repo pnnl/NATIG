@@ -271,11 +271,11 @@ main (int argc, char *argv[])
   Json::Value helicsConfigObject;
   Json::Value topologyConfigObject;
 
-  uint16_t numerologyBwp1 = 0; //4;
-  double centralFrequencyBand1 = 28e9;
+  uint16_t numerologyBwp1 = 4; //4;
+  double centralFrequencyBand1 = 28e9; //28e9;
   double bandwidthBand1 = 150e6;
   uint16_t numerologyBwp2 = 2; //2;
-  double centralFrequencyBand2 = 28.2e9;
+  double centralFrequencyBand2 = 28.2e9; //28.2e9;
   double bandwidthBand2 = 150e6;
   double totalTxPower = 40;
   int numBots = 4;
@@ -303,18 +303,16 @@ main (int argc, char *argv[])
   cmd.AddValue("pcapFileDir", "PCAP output file path", pcapFileDir);
   cmd.Parse (argc, argv);
 
-  //ConfigStore inputConfig;
-  //inputConfig.ConfigureDefaults ();
 
   // parse again so you can override default values from the command line
   cmd.Parse(argc, argv);
 
   Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue (999999999));
   GlobalValue::Bind("SimulatorImplementationType", StringValue("ns3::RealtimeSimulatorImpl"));
-  MpiInterface::Enable(&argc, &argv);
+  //MpiInterface::Enable(&argc, &argv);
 
-  uint32_t systemId = MpiInterface::GetSystemId();
-  uint32_t systemCount = MpiInterface::GetSize();
+  //uint32_t systemId = MpiInterface::GetSystemId();
+  //uint32_t systemCount = MpiInterface::GetSize();
 
   LogComponentEnable("Dnp3Application", LOG_LEVEL_INFO);
   LogComponentEnable ("Dnp3SimulatorImpl", LOG_LEVEL_INFO); 
@@ -329,12 +327,9 @@ main (int argc, char *argv[])
   readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
 
   
-  //std::string name = "ns3"; //+std::to_string(systemId);
   HelicsHelper helicsHelper(6000);
   std::cout << "Calling Calling Message Federate Constructor" << std::endl; 
-  //if (systemId == 1){
   helicsHelper.SetupApplicationFederate();
-  //}
   std::string fedName = helics_federate->getName();
   
 
@@ -342,6 +337,13 @@ main (int argc, char *argv[])
    float start = std::stof(configObject["Simulation"][0]["StartTime"].asString());
    includeMIM = std::stoi(configObject["Simulation"][0]["includeMIM"].asString());
    numBots = std::stoi(configObject["DDoS"][0]["NumberOfBots"].asString());
+   totalTxPower = std::stoi(topologyConfigObject["5GSetup"][0]["txPower"].asString());
+   centralFrequencyBand1 = std::stod(topologyConfigObject["5GSetup"][0]["CentFreq1"].asString());
+   centralFrequencyBand2 = std::stod(topologyConfigObject["5GSetup"][0]["CentFreq2"].asString());
+   bandwidthBand1 = std::stod(topologyConfigObject["5GSetup"][0]["Band1"].asString());
+   bandwidthBand2 = std::stod(topologyConfigObject["5GSetup"][0]["Band2"].asString());
+   numerologyBwp1 = std::stoi(topologyConfigObject["5GSetup"][0]["num1"].asString());
+   numerologyBwp2 = std::stoi(topologyConfigObject["5GSetup"][0]["num2"].asString());
 
  /* Dnp3SimulatorImpl *hb=new Dnp3SimulatorImpl();
   Ptr<Dnp3SimulatorImpl> hb2(hb);
@@ -525,13 +527,13 @@ main (int argc, char *argv[])
   //Point to point for bots:
   PointToPointHelper p2ph2;
   p2ph2.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("200Mb/s")));
-  p2ph2.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
+  p2ph2.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (1)));
 
   //Valid traffic point to point
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate (topologyConfigObject["Channel"][0]["P2PRate"].asString()))); //"100Mb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (5000));
-  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
+  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (1)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
@@ -958,7 +960,7 @@ main (int argc, char *argv[])
     for (int i = 0; i < subNodes.GetN(); i++){
         endpointNodes.Add (subNodes.Get (i));
     }
-    if (mon && systemId == 0){
+    if (mon) { // && systemId == 0){
         flowMonitor = flowHelper.Install(endpointNodes); //All();
         flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.001));
         flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.001));
@@ -982,6 +984,6 @@ main (int argc, char *argv[])
   config.ConfigureAttributes();*/
 
   Simulator::Destroy ();
-  MpiInterface::Disable();
+  //MpiInterface::Disable();
   return 0;
 }

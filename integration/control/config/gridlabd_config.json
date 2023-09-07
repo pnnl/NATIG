@@ -2,7 +2,7 @@
         "name": "GLD",
         "loglevel": 1,
         "coreType": "zmq",
-        "period": 10,
+        "period": 1,
         "slow_responding": "True",
         "broker": "127.0.0.1:6000",
         "brokerPort": 6000,

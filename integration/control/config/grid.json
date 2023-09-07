@@ -6506,7 +6506,7 @@
         "DDoS": [
                 {
                         "NumberOfBots": 50,
-                        "Active": 0,
+                        "Active": 1,
                         "Start": 1,
                         "End": 11,
                         "TimeOn": 10.0,
