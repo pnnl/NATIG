@@ -50,7 +50,16 @@ Once the setup is done you can start to run the code
 5. Save the changes
 6. run ./run.sh
 
-   
+
+### How to run it on research computing
+
+Currently tested node that works:
+
+1. Junction
+
+Step 1: move the RC folder outside of the repository folder. 
+Step 2: go to the RC folder and run ./make.sh
+ 
 
 ## Available configurations
 

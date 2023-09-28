@@ -1,0 +1,200 @@
+# -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
+
+import os
+
+from waflib import Options
+
+
+def options(opt):
+    opt.add_option('--with-zmq',
+                   help=('Installation prefix for ZMQ'),
+                   dest='with_zmq', default='/usr/local')
+    opt.add_option('--disable-zmq',
+                   help=('Disable ZMQ Integration'),
+                   dest='disable_zmq', default=False, action="store_true")
+
+    opt.add_option('--with-czmq',
+                   help=('Installation prefix for CZMQ'),
+                   dest='with_czmq', default='/usr/local')
+    opt.add_option('--disable-czmq',
+                   help=('Disable CZMQ Integration'),
+                   dest='disable_czmq', default=False, action="store_true")
+
+    opt.add_option('--with-fncs',
+                   help=('Installation prefix for FNCS'),
+                   dest='with_fncs', default='/usr/local')
+    opt.add_option('--disable-fncs',
+                   help=('Disable FNCS Integration'),
+                   dest='disable_fncs', default=False, action="store_true")
+
+def configure(conf):
+    if Options.options.disable_zmq:
+        conf.report_optional_feature("zmq", "ZMQ Integration", False,
+                                     "disabled by user request")
+        return
+        
+    if Options.options.disable_czmq:
+        conf.report_optional_feature("czmq", "CZMQ Integration", False,
+                                     "disabled by user request")
+        return
+        
+    if Options.options.disable_fncs:
+        conf.report_optional_feature("fncs", "FNCS Integration", False,
+                                     "disabled by user request")
+        return
+        
+    if Options.options.with_zmq:
+        if os.path.isdir(Options.options.with_zmq):
+            conf.msg("Checking for libzmq.so location", ("%s (given)" % Options.options.with_zmq))
+            conf.env['WITH_ZMQ'] = os.path.abspath(Options.options.with_zmq)
+
+    if Options.options.with_czmq:
+        if os.path.isdir(Options.options.with_czmq):
+            conf.msg("Checking for libczmq.so location", ("%s (given)" % Options.options.with_czmq))
+            conf.env['WITH_CZMQ'] = os.path.abspath(Options.options.with_czmq)
+
+    if Options.options.with_fncs:
+        if os.path.isdir(Options.options.with_fncs):
+            conf.msg("Checking for libfncs.so location", ("%s (given)" % Options.options.with_fncs))
+            conf.env['WITH_FNCS'] = os.path.abspath(Options.options.with_fncs)
+
+    if not conf.env['WITH_ZMQ']:
+        conf.msg("Checking for ZMQ location", False)
+        conf.report_optional_feature("zmq", "ZMQ Integration", False,
+                                     "zmq not enabled (see option --with-zmq)")
+
+    if not conf.env['WITH_CZMQ']:
+        conf.msg("Checking for CZMQ location", False)
+        conf.report_optional_feature("czmq", "CZMQ Integration", False,
+                                     "czmq not enabled (see option --with-czmq)")
+
+    if not conf.env['WITH_FNCS']:
+        conf.msg("Checking for FNCS location", False)
+        conf.report_optional_feature("fncs", "FNCS Integration", False,
+                                     "fncs not enabled (see option --with-fncs)")
+
+    if (not conf.env['WITH_ZMQ']
+            or not conf.env['WITH_CZMQ']
+            or not conf.env['WITH_FNCS']):
+        # Add this module to the list of modules that won't be built
+        # if they are enabled.
+        conf.env['MODULES_NOT_BUILT'].append('fncs')
+        return
+
+    zmq_test_code = '''
+#include<zmq.h>
+int main()
+{
+  void *context = zmq_ctx_new();
+  (void)zmq_term(context);
+  return 0;
+}
+'''
+
+    czmq_test_code = '''
+#include <czmq.h>
+int main (void)
+{
+    zsock_t *push = zsock_new_push ("inproc://example");
+    zsock_t *pull = zsock_new_pull ("inproc://example");
+
+    zstr_send (push, "Hello, World");
+
+    char *string = zstr_recv (pull);
+    zstr_free (&string);
+
+    zsock_destroy (&pull);
+    zsock_destroy (&push);
+    return 0;
+}
+'''
+
+    fncs_test_code = '''
+#include<fncs.hpp>
+int main()
+{
+  fncs::initialize();
+  fncs::finalize();
+  return 0;
+}
+'''
+
+    for tmp in ['lib', 'ns']:
+        libdir = os.path.abspath(os.path.join(conf.env['WITH_ZMQ'],tmp))
+        if os.path.isdir(libdir):
+            conf.env.append_value('NS3_MODULE_PATH',libdir)
+            conf.env['LIBPATH_ZMQ'] = [libdir]
+
+    for tmp in ['lib', 'ns']:
+        libdir = os.path.abspath(os.path.join(conf.env['WITH_CZMQ'],tmp))
+        if os.path.isdir(libdir):
+            conf.env.append_value('NS3_MODULE_PATH',libdir)
+            conf.env['LIBPATH_CZMQ'] = [libdir]
+
+    for tmp in ['lib', 'ns']:
+        libdir = os.path.abspath(os.path.join(conf.env['WITH_FNCS'],tmp))
+        if os.path.isdir(libdir):
+            conf.env.append_value('NS3_MODULE_PATH',libdir)
+            conf.env['LIBPATH_FNCS'] = [libdir]
+
+    conf.env['INCLUDES_ZMQ'] = [os.path.abspath(os.path.join(conf.env['WITH_ZMQ'],'include'))]
+    conf.env['LIB_ZMQ'] = ['zmq']
+    conf.env['DEFINES_ZMQ'] = ['ZMQ']
+    conf.env['ZMQ'] = conf.check_nonfatal(fragment=zmq_test_code, use='ZMQ',
+                                              msg="Checking for library zmq")
+    conf.report_optional_feature("zmq", "ZMQ Integration",
+                                  conf.env['ZMQ'], "zmq library not found")
+
+    conf.env['INCLUDES_CZMQ'] = [os.path.abspath(os.path.join(conf.env['WITH_CZMQ'],'include'))]
+    conf.env['LIB_CZMQ'] = ['czmq']
+    conf.env['DEFINES_CZMQ'] = ['CZMQ']
+    conf.env['CXXFLAGS_CZMQ'] = ['-Wno-error']
+    conf.env['CZMQ'] = conf.check_nonfatal(fragment=czmq_test_code, use='CZMQ ZMQ',
+                                              msg="Checking for library czmq")
+    conf.report_optional_feature("czmq", "CZMQ Integration",
+                                  conf.env['CZMQ'], "czmq library not found")
+
+    conf.env['INCLUDES_FNCS'] = [os.path.abspath(os.path.join(conf.env['WITH_FNCS'],'include'))]
+    conf.env['LIB_FNCS'] = ['fncs']
+    conf.env['DEFINES_FNCS'] = ['FNCS']
+    conf.env['FNCS'] = conf.check_nonfatal(fragment=fncs_test_code,
+                                           use='FNCS CZMQ ZMQ',
+                                           msg="Checking for library fncs")
+    conf.report_optional_feature("fncs", "FNCS Integration",
+                                  conf.env['FNCS'], "fncs library not found")
+
+    if not conf.env['ZMQ'] or not conf.env['CZMQ'] or not conf.env['FNCS']:
+        # Add this module to the list of modules that won't be built
+        # if they are enabled.
+        conf.env['MODULES_NOT_BUILT'].append('fncs')
+
+def build(bld):
+    # Don't do anything for this module if click should not be built.
+    if 'fncs' in bld.env['MODULES_NOT_BUILT']:
+        return
+
+    module = bld.create_ns3_module('fncs', ['core', 'applications'])
+    module.source = [
+        'model/fncs-simulator-impl.cc',
+        ]
+
+    #module_test = bld.create_ns3_module_test_library('fncs')
+    #module_test.source = [
+    #    'test/fncs-test-suite.cc',
+    #    ]
+
+    if bld.env['FNCS'] and bld.env['CZMQ'] and bld.env['ZMQ']:
+        module.use.extend(['FNCS', 'CZMQ', 'ZMQ'])
+        #module_test.use.extend(['FNCS', 'CZMQ', 'ZMQ'])
+
+    headers = bld(features='ns3header')
+    headers.module = 'fncs'
+    headers.source = [
+        'model/fncs-simulator-impl.h',
+        ]
+
+    if bld.env.ENABLE_EXAMPLES:
+        bld.recurse('examples')
+
+    # bld.ns3_python_bindings()
+
