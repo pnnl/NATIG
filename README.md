@@ -63,6 +63,8 @@ Step 2: go to the RC folder and run ./make.sh
 
 Step 3: WIP note make sure that all hard coded links are changed to the location of your code. _Will be fixed soon_ 
 
+Command to run the simulation: ` sbatch --exclusive run.sh _location of RC folder_ `
+
 ## Available configurations
 
 NOTE: using the configuration files, a user can create a ring topology that uses wifi as a connection type, for example. Currently with th eexception of 5G and 4G a user can mix and match any connection types with any topologies.
