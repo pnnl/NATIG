@@ -1,0 +1,20 @@
+# -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
+# Copyright (c) 2017-2019, Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC.  See the top-level NOTICE for additional details. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+def build(bld):
+    obj = bld.create_ns3_program('ns3-filter', ['helics', 'core', 'point-to-point', 'csma', 'internet', 'applications'])
+    obj.source = 'ns3-filter.cc'
+
+    obj = bld.create_ns3_program('fed-filter', ['helics'])
+    obj.source = 'fed-filter.cc'
+
+    obj = bld.create_ns3_program('ns3-sndrcv', ['helics', 'core', 'point-to-point', 'csma', 'internet', 'applications'])
+    obj.source = 'ns3-sndrcv.cc'
+
+    obj = bld.create_ns3_program('fed-sndrcv', ['helics'])
+    obj.source = 'fed-sndrcv.cc'
+
+    obj = bld.create_ns3_program('fed-pubsub', ['helics'])
+    obj.source = 'fed-pubsub.cc'
