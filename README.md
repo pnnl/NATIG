@@ -58,8 +58,10 @@ Currently tested node that works:
 1. Junction
 
 Step 1: move the RC folder outside of the repository folder. 
+
 Step 2: go to the RC folder and run ./make.sh
- 
+
+Step 3: WIP note make sure that all hard coded links are changed to the location of your code. _Will be fixed soon_ 
 
 ## Available configurations
 
