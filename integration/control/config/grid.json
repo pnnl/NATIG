@@ -6,7 +6,7 @@
                         "PollReqFreq": 5,
                         "includeMIM": 0,
                         "UseDynTop": 0,
-                        "MonitorPerf": 1
+                        "MonitorPerf": 0
                 }
         ],
         "microgrid": [
@@ -253,6 +253,9 @@
                                 "sx1108410b",
                                 "sx3195327a",
                                 "sx3142049c"
+                        ],
+			"diesel_dg":[
+                            "dg_diesel620"
                         ]
                 },
                 {
@@ -554,6 +557,9 @@
                                 "x3122848c",
                                 "sx2897770c",
                                 "x2897770c"
+                        ],
+			"diesel_dg":[
+                           "dg_microturb-1"
                         ]
                 },
                 {
@@ -940,6 +946,9 @@
                                 "x2897771b",
                                 "sx3215203a",
                                 "sx2692660a"
+                        ],
+			"diesel_dg":[
+                            "dg_microturb-2"
                         ]
                 },
                 {
@@ -1381,6 +1390,9 @@
                                 "x2916625b",
                                 "x3104113a",
                                 "x2804256b"
+                        ],
+			"diesel_dg":[
+                            "dg_microturb-3"
                         ]
                 },
                 {
@@ -1925,6 +1937,9 @@
                                 "x2000915c",
                                 "sx2822858b",
                                 "x2822858b"
+                        ],
+			"diesel_dg":[
+                           "dg_steamgen1"
                         ]
                 },
                 {
@@ -2597,6 +2612,9 @@
                                 "x3102286b",
                                 "x3160117b",
                                 "x2973163b"
+                        ],
+			"diesel_dg":[
+                            "dg_microturb-4"
                         ]
                 },
                 {
@@ -3311,6 +3329,9 @@
                                 "x2001013b",
                                 "sx3104114b",
                                 "x3104114b"
+                        ],
+			"diesel_dg":[
+                            "dg_lngengine100"
                         ]
                 },
                 {
@@ -4165,7 +4186,10 @@
                                 "sx2804255b",
                                 "x2804255b",
                                 "x3645811c"
-                        ]
+                        ],
+			"diesel_dg":[
+                           "dg_diesel590"
+                       ]
                 },
                 {
                         "name": "SS_8",
@@ -5202,7 +5226,10 @@
                                 "sx2973162b",
                                 "x2973162b",
                                 "sx2876814a"
-                        ]
+                        ],
+			"diesel_dg":[
+                            "dg_lngengine1800"
+                       ]
                 },
                 {
                         "name": "SS_9",
@@ -6505,16 +6532,16 @@
         ],
         "DDoS": [
                 {
-                        "NumberOfBots": 50,
-                        "Active": 1,
-                        "Start": 1,
-                        "End": 11,
+                        "NumberOfBots": 4,
+                        "Active": 0,
+                        "Start": 10,
+                        "End": 20,
                         "TimeOn": 10.0,
                         "TimeOff": 0.0,
                         "PacketSize": 100000,
                         "Rate": "600000kb/s",
                         "NodeType": [
-                                "MIM"
+                                "UE"
                         ],
                         "NodeID": [
                                 2

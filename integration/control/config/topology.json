@@ -9,7 +9,7 @@
                         "WifiPropagationDelay": "ConstantSpeedPropagationDelayModel",
                         "WifiRate": "DsssRate1Mbps",
                         "WifiStandard": "80211b",
-                        "P2PRate": "350Mb/s"
+                        "P2PRate": "50Mb/s"
                 }
         ],
         "Gridlayout": [
@@ -19,26 +19,29 @@
                         "DeltaX": 5000,
                         "DeltaY": 5000,
                         "GridWidth": 5,
+			"distance": 20,
+			"GnBH": 10.0,
+			"UEH": 1.5,
                         "LayoutType": "RowFirst",
                         "SetPos": 1
                 }
         ],
         "5GSetup": [
                 {
-                        "S1uLinkDelay": 1,
+                        "S1uLinkDelay": 5,
                         "N1Delay": 0.01,
                         "N2Delay": 0.01,
                         "Srs": 10,
-                        "UeRow": 10,
-                        "UeCol": 8,
-                        "GnBRow": 8,
-                        "GnBCol": 10,
+                        "UeRow": 6,
+                        "UeCol": 10,
+                        "GnBRow": 10,
+                        "GnBCol": 6,
                         "numUE": 10,
                         "numEnb": 10,
 			"CentFreq1": 28e9,
 			"CentFreq2": 28.2e9,
-			"Band1": 100e6,
-			"Band2": 100e6,
+			"Band1": 200e6,
+			"Band2": 200e6,
 			"num1": 2,
 			"num2": 0,
                         "scenario": "UMi-StreetCayon",
