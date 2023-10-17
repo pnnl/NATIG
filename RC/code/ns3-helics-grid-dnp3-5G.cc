@@ -82,7 +82,7 @@ Time baseDate("1509418800s");
 
 Ptr<FlowMonitor> flowMonitor;
 FlowMonitorHelper flowHelper;
-
+std::map<FlowId, double> tp_transmitted;
 void readMicroGridConfig(std::string fpath, Json::Value& configobj)
 {
 	    std::ifstream tifs(fpath);
@@ -229,9 +229,12 @@ void Throughput (){
 			default:
 				exit(1);
 		}
-               
-		netStatsOut << Simulator::Now ().GetSeconds () << " " <<  flow->first << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 << " " << flow->second.lostPackets << " " << flow->second.txBytes << " " << flow->second.rxBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
-		
+                if (tp_transmitted.find(flow->first) == tp_transmitted.end()) {
+                    tp_transmitted[flow->first] = 0;
+		}	
+		double rx = (double)flow->second.rxBytes;
+		netStatsOut << Simulator::Now ().GetSeconds () << " " <<  flow->first << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << (rx - tp_transmitted[flow->first])*2 << " " << flow->second.lostPackets << " " << rx - tp_transmitted[flow->first] << " " << flow->second.txBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
+		tp_transmitted[flow->first] = (double)flow->second.rxBytes;
 		
 		FILE * pFile;
 		pFile = fopen (loc2.c_str(),"a");
@@ -362,10 +365,10 @@ main (int argc, char *argv[])
   double gNbHeight = std::stod(topologyConfigObject["Gridlayout"][0]["GnBH"].asString());
   double ueHeight = std::stod(topologyConfigObject["Gridlayout"][0]["UEH"].asString());
   double xValue = std::stod(topologyConfigObject["Gridlayout"][0]["MinX"].asString());
-  double minBigBoxX = -10.0;
-  double minBigBoxY = -15.0;
-  double maxBigBoxX = 110.0;
-  double maxBigBoxY =  35.0;
+  double minBigBoxX = -10.0; //-10.0;
+  double minBigBoxY = -10.0; //-15.0;
+  double maxBigBoxX = 10.0; //110,0;
+  double maxBigBoxY =  10.0; //35.0;
 
   for (uint8_t j = 0; j < int(numNodePairs/2); j++)
     {
@@ -373,7 +376,7 @@ main (int argc, char *argv[])
 
       for (uint8_t i = j; i < j+2; i++)
         {
-          double minSmallBoxX = minBigBoxX + i * (maxBigBoxX - minBigBoxX) / 6;
+          double minSmallBoxX = minBigBoxX + i * (maxBigBoxX - minBigBoxX) / int(numNodePairs/2);
           Ptr<UniformRandomVariable> ueRandomVarX = CreateObject<UniformRandomVariable> ();
 
           double minX = minSmallBoxX;
@@ -512,13 +515,14 @@ main (int argc, char *argv[])
   //Point to point for bots:
   PointToPointHelper p2ph2;
   p2ph2.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("400Mb/s")));
+  p2ph2.SetDeviceAttribute ("Mtu", UintegerValue (5000));
   p2ph2.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (1)));
 
   //Valid traffic point to point
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate (topologyConfigObject["Channel"][0]["P2PRate"].asString()))); //"100Mb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (5000));
-  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (10)));
+  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (1)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
@@ -871,11 +875,11 @@ main (int argc, char *argv[])
                 {
 	            std::string enamestring = "Bots" + std::to_string(k);
                     auto ep_name = configObject["microgrid"][k%MIM.GetN()]["name"].asString();
-                    Dnp3ApplicationHelperNew dnp3bots ("ns3::UdpSocketFactory", InetSocketAddress (botNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), UDP_SINK_PORT));  
+                    Dnp3ApplicationHelperNew dnp3bots ("ns3::UdpSocketFactory", InetSocketAddress (botNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), mimPort[(k+4)%MIM.GetN()]));  
 
-                    dnp3bots.SetAttribute("LocalPort", UintegerValue(UDP_SINK_PORT));
-                    dnp3bots.SetAttribute("RemoteAddress", AddressValue(MIM.Get(k%MIM.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal()));//star.GetSpokeIpv4Address (i)));
-                    dnp3bots.SetAttribute("RemotePort", UintegerValue(port));
+                    dnp3bots.SetAttribute("LocalPort", UintegerValue(mimPort[(k+4)%MIM.GetN()])); //port));
+                    dnp3bots.SetAttribute("RemoteAddress", AddressValue(ueNodes.Get((k+4)%MIM.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal()));//star.GetSpokeIpv4Address (i)));
+                    dnp3bots.SetAttribute("RemotePort", UintegerValue(mimPort[(k+4)%MIM.GetN()])); //port));
                     dnp3bots.SetAttribute("JitterMinNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMin"].asString())));
                     dnp3bots.SetAttribute("JitterMaxNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMax"].asString())));
                     dnp3bots.SetAttribute("isMaster", BooleanValue (true));
@@ -883,17 +887,37 @@ main (int argc, char *argv[])
                     dnp3bots.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
                     dnp3bots.SetAttribute("MasterDeviceAddress", UintegerValue(1));
                     dnp3bots.SetAttribute("StationDeviceAddress", UintegerValue(i+2));
-                    dnp3bots.SetAttribute("IntegrityPollInterval", UintegerValue(10));
+                    dnp3bots.SetAttribute("IntegrityPollInterval", UintegerValue(1));
                     dnp3bots.SetAttribute("EnableTCP", BooleanValue (false));
 
 
 		    Ptr<Dnp3ApplicationNew> bots = dnp3bots.Install (botNodes.Get(k), enamestring);
 
-		    Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, bots, 0.01);
+		    
+		    Dnp3ApplicationHelperNew dnp3Outstation ("ns3::UdpSocketFactory", InetSocketAddress (ueNodes.Get((k+4)%MIM.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), mimPort[(k+4)%MIM.GetN()])); //star.GetSpokeIpv4Address (i), port));
+                    dnp3Outstation.SetAttribute("LocalPort", UintegerValue(mimPort[(k+4)%MIM.GetN()]));
+                    dnp3Outstation.SetAttribute("RemoteAddress", AddressValue(botNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal())); //star.GetHubIpv4Address(i)));
+                    dnp3Outstation.SetAttribute("RemotePort", UintegerValue(mimPort[(k+4)%MIM.GetN()]));
+                    dnp3Outstation.SetAttribute("isMaster", BooleanValue (false));
+                    dnp3Outstation.SetAttribute("Name", StringValue ("Victim"+ep_name));
+                    dnp3Outstation.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
+                    dnp3Outstation.SetAttribute("MasterDeviceAddress", UintegerValue(1));
+                    dnp3Outstation.SetAttribute("StationDeviceAddress", UintegerValue(i+2));
+                    dnp3Outstation.SetAttribute("EnableTCP", BooleanValue (false));
+
+                    Ptr<Dnp3ApplicationNew> slave = dnp3Outstation.Install (ueNodes.Get((k+4)%MIM.GetN()), std::string("Victim"+ep_name));
+		    
+		    Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, bots, 1);
+                    //Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, bots, 1);
 
 		    ApplicationContainer dnpBotsApp(bots);
                     dnpBotsApp.Start (Seconds (BOT_START));
                     dnpBotsApp.Stop (Seconds (BOT_STOP));
+                    
+		    ApplicationContainer dnpVictim(slave);
+		    dnpVictim.Start (Seconds (BOT_START));
+                    dnpVictim.Stop (Seconds (BOT_STOP));
+
 		}	
     }
     std::cout << "Done Setting up the bots " << std::endl;
@@ -909,17 +933,17 @@ main (int argc, char *argv[])
     for (int i = 0; i < subNodes.GetN(); i++){
         endpointNodes.Add (subNodes.Get (i));
     }
-        flowMonitor = flowHelper.Install(endpointNodes); //All();
-        flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.001));
-        flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.001));
-        flowMonitor->SetAttribute("PacketSizeBinWidth", DoubleValue(20));
-        Simulator::Schedule (Seconds (0.2), &Throughput); //, ncP2P_nodes);
+    flowMonitor = flowHelper.Install(endpointNodes); //All();
+    flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.001));
+    flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.001));
+    flowMonitor->SetAttribute("PacketSizeBinWidth", DoubleValue(20));
+    Simulator::Schedule (Seconds (0.2), &Throughput); //, ncP2P_nodes);
     if (mon) {  
-    if (DDoS){
+        if (DDoS){
 	    p2ph.EnablePcapAll (pcapFileDir+"p2p-DDoS", false);
-    }else{
+        }else{
 	    p2ph.EnablePcapAll (pcapFileDir+"p2p", false);
-    }
+        }
     }
    //enablePcapAllBaseTime("radics-exercise2-utility1-1day", remoteHostContainer, ncP2P_nodes);
    std::cout << "Before Stop command" << std::endl; 
