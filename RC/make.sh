@@ -176,7 +176,7 @@ if [ "$1" == "5G" ]; then
     cd ../../
     cp -r ../PUSH/NATIG/RC/code/nr/* contrib/nr/
 fi
-./make ${RD2C}
+./make.sh ${RD2C}
 cd ../
 cp -r PUSH/NATIG/integration/ .
 cd integration/control/
