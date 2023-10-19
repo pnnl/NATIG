@@ -65,19 +65,14 @@ RUN cd /opt \
 WORKDIR /rd2c
 
 ENV RD2C=/rd2c
-ENV FNCS_INSTALL=${RD2C}
 ENV GLD_INSTALL=${RD2C}
 ENV GLPATH=/rd2c/share/gridlabd/:/rd2c/lib/gridlabd/
 ENV CZMQ_VERSION 4.2.0
 ENV ZMQ_VERSION 4.3.1
 ENV TEMP_DIR=/tmp/source
 
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${FNCS_INSTALL}/lib
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${RD2C}/lib
 
-ENV FNCS_LOG_FILE=yes
-ENV FNCS_LOG_STDOUT=yes
-ENV FNCS_LOG_TRACE=yes
-ENV FNCS_LOG_LEVEL=DEBUG1
 
 ENV PYHELICS_INSTALL=/usr/local
 
@@ -90,19 +85,19 @@ RUN cd ${RD2C} \
     && wget --no-check-certificate http://github.com/zeromq/libzmq/releases/download/v${ZMQ_VERSION}/zeromq-${ZMQ_VERSION}.tar.gz \
     && tar -xzf zeromq-${ZMQ_VERSION}.tar.gz \
     && cd ${RD2C}/zeromq-${ZMQ_VERSION} \
-    && ./configure --prefix=${FNCS_INSTALL} \
+    && ./configure --prefix=${RD2C} \
     && make \
     && make install 
 
-ENV CFLAGS=-I${FNCS_INSTALL}/include
-ENV LDFLAGS=-L${FNCS_INSTALL}/lib
-ENV PKG_CONFIG_PATH=${FNCS_INSTALL}/lib/pkgconfig
+ENV CFLAGS=-I${RD2C}/include
+ENV LDFLAGS=-L${RD2C}/lib
+ENV PKG_CONFIG_PATH=${RD2C}/lib/pkgconfig
 
 RUN cd ${RD2C} \
     && wget --no-check-certificate https://github.com/zeromq/czmq/releases/download/v${CZMQ_VERSION}/czmq-${CZMQ_VERSION}.tar.gz \
     && tar -xzf czmq-${CZMQ_VERSION}.tar.gz \
     && cd ${RD2C}/czmq-${CZMQ_VERSION} \
-    && ./configure --prefix=${FNCS_INSTALL} \
+    && ./configure --prefix=${RD2C} \
     && make \
     && make install 
 
@@ -110,21 +105,7 @@ ENV CLFAGS=
 ENV LDFLAGS=
 ENV PKG_CONFIG_PATH=
 
-# ----------------------------------------------------
-# INSTALL FNCS
-# ----------------------------------------------------
 
-RUN cd ${RD2C} \
-    && git config --global http.sslverify false \
-    && git clone -b develop --single-branch https://github.com/GRIDAPPSD/fncs.git \
-    && cd fncs \
-    && ./configure --prefix=${FNCS_INSTALL} --with-zmq=${FNCS_INSTALL} \
-    && make \
-    && make install \
-    && cd python \
-    && python setup.py sdist \
-    && pip install dist/fncs-2.0.1.tar.gz \
-    && pip3 install dist/fncs-2.0.1.tar.gz 
 
 # ----------------------------------------------------
 # INSTALL Helics
@@ -167,7 +148,7 @@ RUN cd ${RD2C} \
    && make install \
    && cd ${RD2C}/gridlab-d \
    && autoreconf -if \
-   && ./configure --with-helics=/usr/local --prefix=$GLD_INSTALL --with-fncs=/rd2c --enable-silent-rules 'CFLAGS=-g -O2 -w' 'CXXFLAGS=-g -O2 -w -std=c++14' 'LDFLAGS=-g -O2 -w' \
+   && ./configure --with-helics=/usr/local --prefix=$GLD_INSTALL --enable-silent-rules 'CFLAGS=-g -O2 -w' 'CXXFLAGS=-g -O2 -w -std=c++14' 'LDFLAGS=-g -O2 -w' \
    && make \
    && make install 
 
