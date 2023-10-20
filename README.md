@@ -9,6 +9,9 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
    - cd NATIG
    - ./buildimage.sh 
    - Once the docker finishes building successfully, run: ./rundocker.sh
+   - If you are using MINGW64 (such as gitbash) on windows, please edit the rundocker.sh: ```the input device is not a TTY.  If you are using mintty, try prefixing the command with 'winpty' ```
+
+     
 
 
 NOTE: The default docker container does not come with 5G enabled
