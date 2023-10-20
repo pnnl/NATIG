@@ -1,1 +1,1 @@
-docker exec -it cps bash
+winpty docker exec -it natigbase_container bash

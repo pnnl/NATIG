@@ -1,1 +1,1 @@
-docker run -it --rm --name=cps_clean rd2c:dev_clean bash
+winpty docker run -it --rm -d --name=natigbase_container pnnl/natig:natigbase bash
