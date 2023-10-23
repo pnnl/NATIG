@@ -21,7 +21,7 @@ To enable 5G capabilities:
 1. request access to https://gitlab.com/cttc-lena/nr
 2. run ``` ./build_ns3.sh 5G ``` from the NATIG folder in the PUSH folder
 3. Some updates that need to be done to the code before it can be compiled:
-   - the nr-gnb-net-device.cc in the model folder needs the following function:   
+   - the nr/model/nr-gnb-net-device.cc in the model folder needs the following function:   
      ```
      std::vector<uint16_t>
      NrGnbNetDevice::GetCellIds () const
