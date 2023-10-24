@@ -9,6 +9,9 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
    - cd NATIG
    - ./buildimage.sh 
    - Once the docker finishes building successfully, run: ./rundocker.sh
+   - If you are using MINGW64 (such as gitbash) on windows, please edit the rundocker.sh: ```the input device is not a TTY.  If you are using mintty, try prefixing the command with 'winpty' ```
+
+     
 
 
 NOTE: The default docker container does not come with 5G enabled
@@ -18,7 +21,7 @@ To enable 5G capabilities:
 1. request access to https://gitlab.com/cttc-lena/nr
 2. run ``` ./build_ns3.sh 5G ``` from the NATIG folder in the PUSH folder
 3. Some updates that need to be done to the code before it can be compiled:
-   - the nr-gnb-net-device.cc in the model folder needs the following function:   
+   - the ns-3-dev/contrib/nr/model/nr-gnb-net-device.cc in the model folder needs the following function:   
      ```
      std::vector<uint16_t>
      NrGnbNetDevice::GetCellIds () const
