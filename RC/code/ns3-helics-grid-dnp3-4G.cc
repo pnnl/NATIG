@@ -336,6 +336,9 @@ main (int argc, char *argv[])
    distance = std::stod(topologyConfigObject["Gridlayout"][0]["distance"].asString());
    Config::SetDefault("ns3::LteUePhy::EnableUplinkPowerControl", BooleanValue(true));
    Config::SetDefault("ns3::LteEnbPhy::TxPower", DoubleValue(std::stoi(topologyConfigObject["5GSetup"][0]["txPower"].asString())));
+   Config::SetDefault("ns3::LteEnbRrc::DefaultTransmissionMode", UintegerValue(1));
+   Config::SetDefault("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue(false));
+   Config::SetDefault("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue(false));
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
@@ -344,10 +347,14 @@ main (int argc, char *argv[])
   lteHelper->SetAttribute ("PathlossModel",StringValue ("ns3::FriisPropagationLossModel"));
   lteHelper->SetSpectrumChannelType ("ns3::MultiModelSpectrumChannel");
   lteHelper->SetFfrAlgorithmType("ns3::LteFrNoOpAlgorithm");
-  uint8_t bandwidth = 50;
+  uint8_t bandwidth = 100;
   lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(bandwidth));
   lteHelper->SetEnbDeviceAttribute("UlBandwidth", UintegerValue(bandwidth));
-
+  lteHelper->SetHandoverAlgorithmType("ns3::A3RsrpHandoverAlgorithm");
+  lteHelper->SetHandoverAlgorithmAttribute("Hysteresis",
+                                         DoubleValue(6.0));
+  lteHelper->SetHandoverAlgorithmAttribute("TimeToTrigger",
+                                         TimeValue(MilliSeconds(4.0)));
 
 
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
@@ -396,8 +403,8 @@ main (int argc, char *argv[])
   double xValue = std::stod(topologyConfigObject["Gridlayout"][0]["MinX"].asString());
   double minBigBoxX = -10.0; //-10.0;
   double minBigBoxY = -10.0; //-15.0;
-  double maxBigBoxX = 80.0; //50;
-  double maxBigBoxY =  80.0; //20;
+  double maxBigBoxX = 20.0; //50;
+  double maxBigBoxY =  10.0; //20;
 
   for (uint8_t j = 0; j < int(numNodePairs/2); j++)
     {

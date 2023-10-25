@@ -67,6 +67,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <chrono>
+
 
 using namespace ns3;
 
@@ -233,9 +235,11 @@ void Throughput (){
                     tp_transmitted[flow->first] = 0;
 		}	
 		double rx = (double)flow->second.rxBytes;
-		netStatsOut << Simulator::Now ().GetSeconds () << " " <<  flow->first << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 << " " << flow->second.lostPackets << " " << rx - tp_transmitted[flow->first] << " " << flow->second.txBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
+                netStatsOut << Simulator::Now ().GetSeconds () << " " <<  flow->first << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 << " " << flow->second.lostPackets << " " << rx - tp_transmitted[flow->first] << " " << flow->second.txBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
+
 		tp_transmitted[flow->first] = (double)flow->second.rxBytes;
-		
+
+
 		FILE * pFile;
 		pFile = fopen (loc2.c_str(),"a");
 		if (pFile!=NULL)
@@ -367,8 +371,8 @@ main (int argc, char *argv[])
   double xValue = std::stod(topologyConfigObject["Gridlayout"][0]["MinX"].asString());
   double minBigBoxX = -10.0; //-10.0;
   double minBigBoxY = -10.0; //-15.0;
-  double maxBigBoxX = 20.0; //110,0;
-  double maxBigBoxY =  10.0; //35.0;
+  double maxBigBoxX = 20.0; //20.0; //110,0;
+  double maxBigBoxY =  10.0; //10.0; //35.0;
 
   for (uint8_t j = 0; j < int(numNodePairs/2); j++)
     {
@@ -421,6 +425,8 @@ main (int argc, char *argv[])
   Ptr<NrHelper> nrHelper = CreateObject<NrHelper> ();
   nrHelper->Initialize ();
 
+  Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (false));
+
   nrHelper->SetBeamformingHelper (idealBeamformingHelper);
   nrHelper->SetEpcHelper (epcHelper);
 
@@ -434,9 +440,10 @@ main (int argc, char *argv[])
   OperationBandInfo band1 = ccBwpCreator.CreateOperationBandContiguousCc (bandConf1);
   OperationBandInfo band2 = ccBwpCreator.CreateOperationBandContiguousCc (bandConf2);
 
-  Config::SetDefault ("ns3::ThreeGppChannelModel::UpdatePeriod",TimeValue (MilliSeconds (0)));
-  nrHelper->SetChannelConditionModelAttribute ("UpdatePeriod", TimeValue (MilliSeconds (0)));
+  Config::SetDefault ("ns3::ThreeGppChannelModel::UpdatePeriod",TimeValue (MilliSeconds (1)));
+  nrHelper->SetChannelConditionModelAttribute ("UpdatePeriod", TimeValue (MilliSeconds (1)));
   nrHelper->SetPathlossAttribute ("ShadowingEnabled", BooleanValue (false));
+  
   Config::SetDefault ("ns3::LteEnbRrc::SrsPeriodicity", UintegerValue (std::stoi(topologyConfigObject["5GSetup"][0]["Srs"].asString()))); //320));
   nrHelper->SetSchedulerTypeId (TypeId::LookupByName ("ns3::NrMacSchedulerTdmaPF"));
 
@@ -871,7 +878,7 @@ main (int argc, char *argv[])
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
     
     if (DDoS){
-        for (int k = 0; k < numBots; ++k)
+        /*for (int k = 0; k < numBots; ++k)
                 {
 	            std::string enamestring = "Bots" + std::to_string(k);
                     auto ep_name = configObject["microgrid"][k%MIM.GetN()]["name"].asString();
@@ -918,7 +925,26 @@ main (int argc, char *argv[])
 		    dnpVictim.Start (Seconds (BOT_START));
                     dnpVictim.Stop (Seconds (BOT_STOP));
 
-		}	
+		    }*/
+	    for (int k = 0; k < botNodes.GetN(); ++k)
+            {
+	        OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(ueNodes.Get((k)%MIM.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), UDP_SINK_PORT)));
+                onoff.SetConstantRate(DataRate(DDOS_RATE));
+                onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
+                onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_off_time+"]"));
+                ApplicationContainer onOffApp[botNodes.GetN()];
+
+                onOffApp[k] = onoff.Install(botNodes.Get(k));
+                onOffApp[k].Start(Seconds(BOT_START));
+                onOffApp[k].Stop(Seconds(BOT_STOP));
+            
+
+	        PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
+                             Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
+                ApplicationContainer UDPSinkApp = UDPsink.Install(ueNodes.Get((k)%MIM.GetN()));
+                UDPSinkApp.Start(Seconds(0.0));
+                UDPSinkApp.Stop(Seconds(BOT_STOP));
+	    }
     }
     std::cout << "Done Setting up the bots " << std::endl;
     int mon = std::stoi(configObject["Simulation"][0]["MonitorPerf"].asString());
