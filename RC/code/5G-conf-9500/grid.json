@@ -3,7 +3,7 @@
                 {
                         "SimTime": 35,
                         "StartTime": 0.0,
-                        "PollReqFreq": 30,
+                        "PollReqFreq": 7,
                         "includeMIM": 0,
                         "UseDynTop": 0,
                         "MonitorPerf": 0
@@ -6533,13 +6533,13 @@
         "DDoS": [
                 {
                         "NumberOfBots": 4,
-                        "Active": 0,
+                        "Active": 1,
                         "Start": 10,
                         "End": 20,
                         "TimeOn": 10.0,
                         "TimeOff": 0.0,
-                        "PacketSize": 100000,
-                        "Rate": "600000kb/s",
+                        "PacketSize": 104857600,
+                        "Rate": "100Mb/s",
                         "NodeType": [
                                 "UE"
                         ],

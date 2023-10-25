@@ -374,7 +374,7 @@ main (int argc, char *argv[])
   double maxBigBoxX = 20.0; //20.0; //110,0;
   double maxBigBoxY =  10.0; //10.0; //35.0;
 
-  for (uint8_t j = 0; j < int(numNodePairs/2); j++)
+/*  for (uint8_t j = 0; j < int(numNodePairs/2); j++)
     {
       double minSmallBoxY = minBigBoxY + j * (maxBigBoxY - minBigBoxY) / 2;
 
@@ -410,13 +410,20 @@ main (int argc, char *argv[])
         {
           apPositionAlloc->Add (Vector ( i * distance, j * distance, gNbHeight));
         }
-    }
+    }*/
 
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  mobility.SetPositionAllocator (apPositionAlloc);
+  //mobility.SetPositionAllocator (apPositionAlloc);
+  mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
+                                    "MinX", DoubleValue (0.0),
+                                    "MinY", DoubleValue (0.0),
+                                    "DeltaX", DoubleValue (10.0),
+                                    "DeltaY", DoubleValue (10.0),
+                                    "GridWidth", UintegerValue (10),
+                                    "LayoutType", StringValue ("RowFirst"));
   mobility.Install (enbNodes);
 
-  mobility.SetPositionAllocator (staPositionAlloc);
+  //mobility.SetPositionAllocator (staPositionAlloc);
   mobility.Install (ueNodes);
 
   Ptr<NrPointToPointEpcHelper> epcHelper = CreateObject<NrPointToPointEpcHelper> ();
@@ -425,14 +432,13 @@ main (int argc, char *argv[])
   Ptr<NrHelper> nrHelper = CreateObject<NrHelper> ();
   nrHelper->Initialize ();
 
-  Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (false));
 
   nrHelper->SetBeamformingHelper (idealBeamformingHelper);
   nrHelper->SetEpcHelper (epcHelper);
 
   BandwidthPartInfoPtrVector allBwps;
   CcBwpCreator ccBwpCreator;
-  const uint8_t numCcPerBand = 2;
+  const uint8_t numCcPerBand = 1;
 
   CcBwpCreator::SimpleOperationBandConf bandConf1 (centralFrequencyBand1, bandwidthBand1, numCcPerBand, BandwidthPartInfo::UMi_StreetCanyon);
   CcBwpCreator::SimpleOperationBandConf bandConf2 (centralFrequencyBand2, bandwidthBand2, numCcPerBand, BandwidthPartInfo::UMi_StreetCanyon);
@@ -440,8 +446,8 @@ main (int argc, char *argv[])
   OperationBandInfo band1 = ccBwpCreator.CreateOperationBandContiguousCc (bandConf1);
   OperationBandInfo band2 = ccBwpCreator.CreateOperationBandContiguousCc (bandConf2);
 
-  Config::SetDefault ("ns3::ThreeGppChannelModel::UpdatePeriod",TimeValue (MilliSeconds (1)));
-  nrHelper->SetChannelConditionModelAttribute ("UpdatePeriod", TimeValue (MilliSeconds (1)));
+  Config::SetDefault ("ns3::ThreeGppChannelModel::UpdatePeriod",TimeValue (MilliSeconds (0)));
+  nrHelper->SetChannelConditionModelAttribute ("UpdatePeriod", TimeValue (MilliSeconds (0)));
   nrHelper->SetPathlossAttribute ("ShadowingEnabled", BooleanValue (false));
   
   Config::SetDefault ("ns3::LteEnbRrc::SrsPeriodicity", UintegerValue (std::stoi(topologyConfigObject["5GSetup"][0]["Srs"].asString()))); //320));
@@ -471,7 +477,7 @@ main (int argc, char *argv[])
   nrHelper->SetGnbAntennaAttribute ("NumColumns", UintegerValue (std::stoi(topologyConfigObject["5GSetup"][0]["GnBCol"].asString()))); //8
   nrHelper->SetGnbAntennaAttribute ("AntennaElement", PointerValue (CreateObject<IsotropicAntennaModel> ()));
 
-  uint32_t bwpIdForLowLat = 0;
+  uint32_t bwpIdForLowLat = 1;
   uint32_t bwpIdForVoice = 1;
 
   nrHelper->SetGnbBwpManagerAlgorithmAttribute ("NGBR_LOW_LAT_EMBB", UintegerValue (bwpIdForLowLat));

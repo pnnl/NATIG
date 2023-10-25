@@ -336,27 +336,33 @@ main (int argc, char *argv[])
    distance = std::stod(topologyConfigObject["Gridlayout"][0]["distance"].asString());
    Config::SetDefault("ns3::LteUePhy::EnableUplinkPowerControl", BooleanValue(true));
    Config::SetDefault("ns3::LteEnbPhy::TxPower", DoubleValue(std::stoi(topologyConfigObject["5GSetup"][0]["txPower"].asString())));
-   Config::SetDefault("ns3::LteEnbRrc::DefaultTransmissionMode", UintegerValue(1));
+   Config::SetDefault("ns3::LteEnbRrc::DefaultTransmissionMode", UintegerValue(2));
    Config::SetDefault("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue(false));
-   Config::SetDefault("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue(false));
+   //Config::SetDefault("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue(false));
+   // ALL SECTORS AND BANDS configuration
+  Config::SetDefault ("ns3::FfMacScheduler::UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
+  Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (40));
+  Config::SetDefault ("ns3::LteUePhy::NoiseFigure", DoubleValue (5.0));
+  Config::SetDefault ("ns3::LteUePhy::EnableRlfDetection", BooleanValue (false));
+  Config::SetDefault ("ns3::LteAmc::AmcModel", EnumValue (LteAmc::PiroEW2010));
+
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
   // use always LOS model
-  lteHelper->SetAttribute ("PathlossModel",StringValue ("ns3::FriisPropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel",StringValue ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel")); //"ns3::FriisPropagationLossModel"));
   lteHelper->SetSpectrumChannelType ("ns3::MultiModelSpectrumChannel");
   lteHelper->SetFfrAlgorithmType("ns3::LteFrNoOpAlgorithm");
   uint8_t bandwidth = 100;
   lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(bandwidth));
   lteHelper->SetEnbDeviceAttribute("UlBandwidth", UintegerValue(bandwidth));
-  lteHelper->SetHandoverAlgorithmType("ns3::A3RsrpHandoverAlgorithm");
-  lteHelper->SetHandoverAlgorithmAttribute("Hysteresis",
-                                         DoubleValue(6.0));
-  lteHelper->SetHandoverAlgorithmAttribute("TimeToTrigger",
-                                         TimeValue(MilliSeconds(4.0)));
-
-
+  //lteHelper->SetHandoverAlgorithmType("ns3::A3RsrpHandoverAlgorithm");
+  //lteHelper->SetHandoverAlgorithmAttribute("Hysteresis",
+  //                                       DoubleValue(6.0));
+  //lteHelper->SetHandoverAlgorithmAttribute("TimeToTrigger",
+  //                                       TimeValue(MilliSeconds(4.0)));
+  //lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
    // Create a single RemoteHost
@@ -401,12 +407,12 @@ main (int argc, char *argv[])
   double gNbHeight = std::stod(topologyConfigObject["Gridlayout"][0]["GnBH"].asString());
   double ueHeight = std::stod(topologyConfigObject["Gridlayout"][0]["UEH"].asString());
   double xValue = std::stod(topologyConfigObject["Gridlayout"][0]["MinX"].asString());
-  double minBigBoxX = -10.0; //-10.0;
-  double minBigBoxY = -10.0; //-15.0;
-  double maxBigBoxX = 20.0; //50;
-  double maxBigBoxY =  10.0; //20;
+  double minBigBoxX = 0.0; //-10.0;
+  double minBigBoxY = 0.0; //-15.0;
+  double maxBigBoxX = 20.0; //20;
+  double maxBigBoxY =  20.0; //10;
 
-  for (uint8_t j = 0; j < int(numNodePairs/2); j++)
+  /*for (uint8_t j = 0; j < int(numNodePairs/2); j++)
     {
       double minSmallBoxY = minBigBoxY + j * (maxBigBoxY - minBigBoxY) / 2;
 
@@ -435,20 +441,31 @@ main (int argc, char *argv[])
           staPositionAlloc->Add(Vector(ueRandomVarX->GetValue(minX,maxX), ueRandomVarY->GetValue(minY,maxY), ueHeight));
 
         }
-    }
-  for (uint8_t j = 0; j < 2; j++)
+    }*/
+  /*for (uint8_t j = 0; j < 2; j++)
     {
-      for (uint8_t i = 0; i < int(numNodePairs/2); i++)
+      for (uint8_t i = 0; i < int(numNodePairs/4); i++)
         {
-          apPositionAlloc->Add (Vector ( i * distance, j * distance, gNbHeight));
+          apPositionAlloc->Add (Vector ( i * (distance + 1), j * distance, gNbHeight));
         }
-    }
+      for (uint8_t i = 0; i < int(numNodePairs/4); i++)
+        {
+          staPositionAlloc->Add (Vector ( i * distance, j * distance, ueHeight));
+        }
+    }*/
 
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  mobility.SetPositionAllocator (apPositionAlloc);
+  //mobility.SetPositionAllocator (apPositionAlloc);
+  mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
+                                    "MinX", DoubleValue (0.0),
+                                    "MinY", DoubleValue (0.0),
+                                    "DeltaX", DoubleValue (30.0),
+                                    "DeltaY", DoubleValue (30.0),
+                                    "GridWidth", UintegerValue (10),
+                                    "LayoutType", StringValue ("RowFirst"));
   mobility.Install (enbNodes);
 
-  mobility.SetPositionAllocator (staPositionAlloc);
+  //mobility.SetPositionAllocator (staPositionAlloc);
   mobility.Install (ueNodes);
   //lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler");
   // Install LTE Devices to the nodes
