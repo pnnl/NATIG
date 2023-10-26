@@ -317,7 +317,7 @@ main (int argc, char *argv[])
   cmd.Parse(argc, argv);
 
   Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue (100*1024*1024));
-  GlobalValue::Bind("SimulatorImplementationType", StringValue("ns3::RealtimeSimulatorImpl"));
+  //GlobalValue::Bind("SimulatorImplementationType", StringValue("ns3::RealtimeSimulatorImpl"));
   //MpiInterface::Enable(&argc, &argv);
 
   //uint32_t systemId = MpiInterface::GetSystemId();
@@ -417,8 +417,8 @@ main (int argc, char *argv[])
   mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
                                     "MinX", DoubleValue (0.0),
                                     "MinY", DoubleValue (0.0),
-                                    "DeltaX", DoubleValue (10.0),
-                                    "DeltaY", DoubleValue (10.0),
+                                    "DeltaX", DoubleValue (50.0),
+                                    "DeltaY", DoubleValue (50.0),
                                     "GridWidth", UintegerValue (10),
                                     "LayoutType", StringValue ("RowFirst"));
   mobility.Install (enbNodes);

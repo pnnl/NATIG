@@ -459,8 +459,8 @@ main (int argc, char *argv[])
   mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
                                     "MinX", DoubleValue (0.0),
                                     "MinY", DoubleValue (0.0),
-                                    "DeltaX", DoubleValue (30.0),
-                                    "DeltaY", DoubleValue (30.0),
+                                    "DeltaX", DoubleValue (60.0),
+                                    "DeltaY", DoubleValue (60.0),
                                     "GridWidth", UintegerValue (10),
                                     "LayoutType", StringValue ("RowFirst"));
   mobility.Install (enbNodes);
