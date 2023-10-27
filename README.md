@@ -54,11 +54,7 @@ Once the setup is done you can start to run the code
 6. run ./run.sh
 
 
-### How to run it on research computing
-
-Currently tested node that works:
-
-1. Junction
+### How to run it on a unix cluster
 
 Step 1: move the RC folder outside of the repository folder. 
 
@@ -66,7 +62,15 @@ Step 2: go to the RC folder and run ./make.sh
 
 Step 3: WIP note make sure that all hard coded links are changed to the location of your code. _Will be fixed soon_ 
 
+Step 4: run the make.sh bash script located in the ns-3-dev folder with the location of the RC folder as an input: ` ./make.sh _location of RC folder_ `
+
+If your system has slurm nodes:
+
 Command to run the simulation: ` sbatch --exclusive run.sh _location of RC folder_ `
+
+If your system does not have slurm nodes:
+
+Command to run the simulation: ` ./run.sh _location of RC folder_ `
 
 ## Available configurations
 
