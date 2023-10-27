@@ -322,7 +322,7 @@ main (int argc, char *argv[])
   readMicroGridConfig(helicsConfigFileName, helicsConfigObject);
   readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
 
-  HelicsHelper helicsHelper(9000);
+  HelicsHelper helicsHelper(6000);
   std::cout << "Calling Calling Message Federate Constructor" << std::endl;
   helicsHelper.SetupApplicationFederate();
 
@@ -341,7 +341,7 @@ main (int argc, char *argv[])
    //Config::SetDefault("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue(false));
    // ALL SECTORS AND BANDS configuration
   Config::SetDefault ("ns3::FfMacScheduler::UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
-  Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (40));
+  Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (60));
   Config::SetDefault ("ns3::LteUePhy::NoiseFigure", DoubleValue (5.0));
   Config::SetDefault ("ns3::LteUePhy::EnableRlfDetection", BooleanValue (false));
   Config::SetDefault ("ns3::LteAmc::AmcModel", EnumValue (LteAmc::PiroEW2010));
@@ -352,8 +352,8 @@ main (int argc, char *argv[])
   lteHelper->SetEpcHelper (epcHelper);
   // use always LOS model
   lteHelper->SetAttribute ("PathlossModel",StringValue ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel")); //"ns3::FriisPropagationLossModel"));
-  lteHelper->SetSpectrumChannelType ("ns3::MultiModelSpectrumChannel");
-  lteHelper->SetFfrAlgorithmType("ns3::LteFrNoOpAlgorithm");
+  //lteHelper->SetSpectrumChannelType ("ns3::MultiModelSpectrumChannel");
+  //lteHelper->SetFfrAlgorithmType("ns3::LteFrNoOpAlgorithm");
   uint8_t bandwidth = 100;
   lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(bandwidth));
   lteHelper->SetEnbDeviceAttribute("UlBandwidth", UintegerValue(bandwidth));
@@ -459,8 +459,8 @@ main (int argc, char *argv[])
   mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
                                     "MinX", DoubleValue (0.0),
                                     "MinY", DoubleValue (0.0),
-                                    "DeltaX", DoubleValue (60.0),
-                                    "DeltaY", DoubleValue (60.0),
+                                    "DeltaX", DoubleValue (20.0),
+                                    "DeltaY", DoubleValue (20.0),
                                     "GridWidth", UintegerValue (10),
                                     "LayoutType", StringValue ("RowFirst"));
   mobility.Install (enbNodes);

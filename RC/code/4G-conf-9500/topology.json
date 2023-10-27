@@ -45,7 +45,7 @@
 			"num1": 2,
 			"num2": 0,
                         "scenario": "UMi-StreetCayon",
-                        "txPower": 40
+                        "txPower": 60
                 }
         ],
         "Node": [

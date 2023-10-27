@@ -3,7 +3,7 @@
                 {
                         "SimTime": 35,
                         "StartTime": 0.0,
-                        "PollReqFreq": 30,
+                        "PollReqFreq": 50,
                         "includeMIM": 0,
                         "UseDynTop": 0,
                         "MonitorPerf": 0

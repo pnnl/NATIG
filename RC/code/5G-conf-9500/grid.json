@@ -6533,7 +6533,7 @@
         "DDoS": [
                 {
                         "NumberOfBots": 4,
-                        "Active": 1,
+                        "Active": 0,
                         "Start": 10,
                         "End": 20,
                         "TimeOn": 10.0,
