@@ -2,7 +2,7 @@
 #SBATCH --time=64:15:00
 
 # ==== set root and output
-export RD2C=/people/belo700/RD2C/workspace
+export RD2C=$1
 export FNCS_INSTALL=${RD2C}
 export PATH=$PATH:${FNCS_INSTALL}/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${FNCS_INSTALL}/lib
