@@ -173,7 +173,8 @@ RUN cd $RD2C \
     && git clone https://github.com/pnnl/NATIG.git \
     && cd NATIG \
     && cp -r integration $RD2C \
-    && cd ${RD2C}/integration 
+    && cp -r RC/code/run.sh ${RD2C}/integration/control \
+    && cp -r RC/code/ns3* ${RD2C}/integration/control
 
 RUN apt-get update && apt-get install -y procps
 # ----------------------------------------------------

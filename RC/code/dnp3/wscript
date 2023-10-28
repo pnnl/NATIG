@@ -2,7 +2,7 @@
 
 def build(bld):
 
-    module = bld.create_ns3_module('dnp3', ['core', 'applications', 'fncs'])
+    module = bld.create_ns3_module('dnp3', ['core', 'applications'])
 
     module.source = [
         'dnplib/app.cpp',
