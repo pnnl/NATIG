@@ -174,7 +174,11 @@ RUN cd $RD2C \
     && cd NATIG \
     && cp -r integration $RD2C \
     && cp -r RC/code/run.sh ${RD2C}/integration/control \
-    && cp -r RC/code/ns3* ${RD2C}/integration/control
+    && cp -r RC/code/ns3* ${RD2C}/integration/control \
+    && cp -r RC/code/dnp3/wscript ${RD2C}/ns-3-dev/src/dnp3/ \
+    && cp -r RC/code/applications/model/fncs-application.* ${RD2C}/ns-3-dev/src/applications/model/ \
+    && cp -r RC/code/dnp3/model/dnp3-application.h ${RD2C}/ns-3-dev/src/dnp3/model/ \
+    && cp -r RC/code/dnp3/model/dnp3-application-Docker.cc ${RD2C}/ns-3-dev/src/model/dnp3-application.cc 
 
 RUN apt-get update && apt-get install -y procps
 # ----------------------------------------------------
