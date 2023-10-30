@@ -224,10 +224,10 @@ void Throughput (){
                 if (tp_transmitted.find(flow->first) == tp_transmitted.end()) {
                     tp_transmitted[flow->first] = 0;
                 }
+		if (int(flow->first) < 21){
                 double rx = (double)flow->second.rxBytes;
                 netStatsOut << Simulator::Now ().GetSeconds () << " " <<  flow->first << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 << " " << flow->second.lostPackets << " " << rx - tp_transmitted[flow->first] << " " << flow->second.txBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
-                tp_transmitted[flow->first] = (double)flow->second.rxBytes;
-
+                tp_transmitted[flow->first] = (double)flow->second.rxBytes;                
                 FILE * pFile;
                 pFile = fopen (loc2.c_str(),"a");
                 if (pFile!=NULL)
@@ -235,6 +235,7 @@ void Throughput (){
                         fprintf(pFile, netStatsOut.str().c_str());
                         fclose (pFile);
                 }
+		}
 
         }
         Simulator::Schedule (Seconds (.5), &Throughput); // Callback every 0.5s
@@ -374,15 +375,15 @@ main (int argc, char *argv[])
   internet.Install (remoteHostContainer);
 
   PointToPointHelper p2ph2;
-  p2ph2.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("400Mb/s")));
-  p2ph2.SetDeviceAttribute ("Mtu", UintegerValue (2500));
-  p2ph2.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (0)));
+  p2ph2.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Mb/s")));
+  //p2ph2.SetDeviceAttribute ("Mtu", UintegerValue (2500));
+  p2ph2.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (1)));
 
   // Create the Internet
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate (topologyConfigObject["Channel"][0]["P2PRate"].asString())));
-  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (2500));
-  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (0)));
+  //p2ph.SetDeviceAttribute ("Mtu", UintegerValue (2500));
+  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (1)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
@@ -501,7 +502,7 @@ main (int argc, char *argv[])
 
   NodeContainer botNodes;
   botNodes.Create(numBots);
-
+  mobility.Install (botNodes);
   //Creating the man in the middle attacker
   NodeContainer MIM;
   MIM.Create(numSSPUE);
@@ -514,12 +515,14 @@ main (int argc, char *argv[])
   std::vector<NodeContainer> csmaSubNodes;
   for (int i = 0; i < subNodes.GetN(); i++){
     std::cout << "Creating the csma nodes" << std::endl;
-    NodeContainer csmaSubNodes_temp (ueNodes.Get(i%ueNodes.GetN()), MIM.Get(i), subNodes.Get(i));
+    //for (int j = 0; j < ueNodes.GetN(); j++){
+    NodeContainer csmaSubNodes_temp (ueNodes.Get(i%ueNodes.GetN()), MIM.Get(i%MIM.GetN()), subNodes.Get(i));
     csmaSubNodes.push_back(csmaSubNodes_temp);
+    //}
   }
 
   CsmaHelper csma;
-  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Mb/s")));
+  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (topologyConfigObject["Channel"][0]["P2PRate"].asString()))); //"100Mb/s")));
   csma.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (0)));
 
   Ipv4InterfaceContainer inter;
@@ -538,6 +541,27 @@ main (int argc, char *argv[])
     inter.Add(interfacesSub.Get(2));
     inter_MIM.Add(interfacesSub.Get(1));
   }
+
+  std::vector<NodeContainer> csmaSubNodes2;
+  for (int i = 0; i < subNodes.GetN(); i++){
+    std::cout << "Creating the csma nodes" << std::endl;
+    for (int j = 0; j < ueNodes.GetN(); j++){
+      if (i != j){
+        NodeContainer csmaSubNodes_temp (ueNodes.Get(i%ueNodes.GetN()), MIM.Get(j%MIM.GetN()), subNodes.Get(i));
+        csmaSubNodes2.push_back(csmaSubNodes_temp);
+      }
+    }
+  }
+  for (int i = 0; i < csmaSubNodes2.size(); i++){
+    NetDeviceContainer internetDevicesSub = csma.Install (csmaSubNodes2[i]);
+
+    //Assign IP Address
+    Ipv4AddressHelper ipv4Sub;
+    std::string address = "172."+std::to_string(17+csmaSubNodes.size()+i)+".0.0";
+    ipv4Sub.SetBase (address.c_str(), "255.255.0.0", "0.0.0.1");
+    Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign (internetDevicesSub);
+  }
+
   std::cout << "The translation table" << std::endl;
   std::cout << addrTrans.str().c_str() << std::endl;
   
@@ -572,9 +596,9 @@ main (int argc, char *argv[])
           if (configObject["DDoS"][0]["NodeType"][0].asString().find("CC") != std::string::npos){
               botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), remoteHostContainer.Get(0));
           }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), ueNodes.Get(int((i+4)%MIM.GetN())));
+              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), ueNodes.Get(int(i%MIM.GetN())));
           }else{
-              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), MIM.Get(int((i+4)%MIM.GetN()))); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
+              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), MIM.Get(int(i%MIM.GetN()))); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
           }
   }
 
@@ -594,20 +618,22 @@ main (int argc, char *argv[])
     remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
   }
 
-  for (int i = 0; i < MIM.GetN(); i++){
-    Ipv4Address addr3_ = MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
+  for (int i = 0; i < ueNodes.GetN(); i++){
+    Ipv4Address addr3_ = MIM.Get(i%MIM.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
     Ptr<Ipv4StaticRouting> ueNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>());
-    ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2+int(i/ueNodes.GetN()));
+    ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i%MIM.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2+int(i/ueNodes.GetN()));
     Ipv4Address addr2_ = ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress (2+int(i/ueNodes.GetN()), 0).GetLocal ();
-    Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
+    Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i%MIM.GetN())->GetObject<Ipv4>());
     for (int j = 0; j < remoteHostContainer.GetN(); j++){
         subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr2_, 1);
     }
+    //for (int j = 0; j < subNodes.GetN(); j++){
     subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), 1);
+    //}
   }
 
   for (int i = 0; i < subNodes.GetN(); i++){
-    Ptr<Ipv4> ipv4_2 = MIM.Get(i)->GetObject<Ipv4>();
+    Ptr<Ipv4> ipv4_2 = MIM.Get(i%MIM.GetN())->GetObject<Ipv4>();
     Ipv4Address addr5_ = ipv4_2->GetAddress(1,0).GetLocal();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
     for (int j = 0; j < remoteHostContainer.GetN(); j++){
@@ -800,14 +826,14 @@ main (int argc, char *argv[])
     std::string str_on_time = configObject["DDoS"][0]["TimeOn"].asString();
     std::string str_off_time = configObject["DDoS"][0]["TimeOff"].asString();
     int TCP_SINK_PORT = 9000;
-    int UDP_SINK_PORT = mimPort[2]-10;
+    int UDP_SINK_PORT = master_port; //mimPort[2]-10;
     int MAX_BULK_BYTES = std::stof(configObject["DDoS"][0]["PacketSize"].asString()); //20971520000;
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
 
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
 
     if (DDoS){
-        for (int k = 0; k < numBots; ++k)
+        /*for (int k = 0; k < numBots; ++k)
                 {
                     std::string enamestring = "Bots" + std::to_string(k);
                     auto ep_name = configObject["microgrid"][k%MIM.GetN()]["name"].asString();
@@ -854,8 +880,72 @@ main (int argc, char *argv[])
                     dnpVictim.Start (Seconds (BOT_START));
                     dnpVictim.Stop (Seconds (BOT_STOP));
 
+                }*/
+	    ApplicationContainer onOffApp[botNodes.GetN()];
+	    for (int k = 0; k < botNodes.GetN(); ++k)
+            {
+		Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (botNodes.Get(k)->GetObject<Ipv4> ());
+		if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
+                remoteHostStaticRouting->AddNetworkRouteTo (inter.GetAddress(k), Ipv4Mask ("255.255.0.0"), ueNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
+		}
+		else if (configObject["DDoS"][0]["endPoint"].asString().find("MIM") != std::string::npos){
+                remoteHostStaticRouting->AddNetworkRouteTo (MIM.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), ueNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
+		}
+		else if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
+                remoteHostStaticRouting->AddNetworkRouteTo (remoteHostAddr, Ipv4Mask ("255.255.0.0"), ueNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
                 }
+
+
+		if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
+		OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(inter.GetAddress(k), UDP_SINK_PORT))); //remoteHostAddr, UDP_SINK_PORT)));
+                onoff.SetConstantRate(DataRate(DDOS_RATE));
+                onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
+                onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_off_time+"]"));
+                onOffApp[k] = onoff.Install(botNodes.Get(k));
+		}
+		else if (configObject["DDoS"][0]["endPoint"].asString().find("MIM") != std::string::npos){
+                OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(MIM.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), UDP_SINK_PORT))); //remoteHostAddr, UDP_SINK_PORT)));
+                onoff.SetConstantRate(DataRate(DDOS_RATE));
+                onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
+                onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_off_time+"]"));
+                onOffApp[k] = onoff.Install(botNodes.Get(k));
+		}
+		else if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
+                OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(remoteHostAddr, UDP_SINK_PORT))); //remoteHostAddr, UDP_SINK_PORT)));
+                onoff.SetConstantRate(DataRate(DDOS_RATE));
+                onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
+                onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_off_time+"]"));
+                onOffApp[k] = onoff.Install(botNodes.Get(k));
+		}
+                onOffApp[k].Start(Seconds(BOT_START));
+                onOffApp[k].Stop(Seconds(BOT_STOP));
+
+                if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
+                        PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
+                             Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
+                        ApplicationContainer UDPSinkApp = UDPsink.Install(subNodes.Get(k)); //remoteHost); 
+                        UDPSinkApp.Start(Seconds(0.0));
+                        UDPSinkApp.Stop(Seconds(BOT_STOP));
+		}
+		else if (configObject["DDoS"][0]["endPoint"].asString().find("MIM") != std::string::npos){
+			PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
+                             Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
+                        ApplicationContainer UDPSinkApp = UDPsink.Install(MIM.Get(k)); //remoteHost); 
+                        UDPSinkApp.Start(Seconds(0.0));
+                        UDPSinkApp.Stop(Seconds(BOT_STOP));
+                
+		}
+            }
+            if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
+                        PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
+                             Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
+                        ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost); 
+                        UDPSinkApp.Start(Seconds(0.0));
+                        UDPSinkApp.Stop(Seconds(BOT_STOP));
+
+            }
     }
+
     std::cout << "Done Setting up the bots " << std::endl;
 
     NodeContainer endpointNodes;

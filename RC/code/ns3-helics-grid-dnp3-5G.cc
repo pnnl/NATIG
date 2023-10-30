@@ -597,7 +597,7 @@ main (int argc, char *argv[])
   }
 
   CsmaHelper csma;
-  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Mb/s")));
+  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate (topologyConfigObject["Channel"][0]["P2PRate"].asString()))); //"100Mb/s")));
   csma.SetChannelAttribute ("Delay", TimeValue (Seconds (0.000)));
 
   Ipv4InterfaceContainer inter;
@@ -615,6 +615,27 @@ main (int argc, char *argv[])
     inter.Add(interfacesSub.Get(2));
     inter_MIM.Add(interfacesSub.Get(1));
   }
+
+  std::vector<NodeContainer> csmaSubNodes2;
+  for (int i = 0; i < subNodes.GetN(); i++){
+    std::cout << "Creating the csma nodes" << std::endl;
+    for (int j = 0; j < ueNodes.GetN(); j++){
+      if (i != j){
+        NodeContainer csmaSubNodes_temp (ueNodes.Get(i%ueNodes.GetN()), MIM.Get(j%MIM.GetN()), subNodes.Get(i));
+        csmaSubNodes2.push_back(csmaSubNodes_temp);
+      }
+    }
+  }
+  for (int i = 0; i < csmaSubNodes2.size(); i++){
+    NetDeviceContainer internetDevicesSub = csma.Install (csmaSubNodes2[i]);
+
+    //Assign IP Address
+    Ipv4AddressHelper ipv4Sub;
+    std::string address = "172."+std::to_string(17+csmaSubNodes.size()+i)+".0.0";
+    ipv4Sub.SetBase (address.c_str(), "255.255.0.0", "0.0.0.1");
+    Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign (internetDevicesSub);
+  }
+
   std::cout << "The translation table" << std::endl;
   std::cout << addrTrans.str().c_str() << std::endl;
 
@@ -932,25 +953,69 @@ main (int argc, char *argv[])
                     dnpVictim.Stop (Seconds (BOT_STOP));
 
 		    }*/
-	    for (int k = 0; k < botNodes.GetN(); ++k)
+	    ApplicationContainer onOffApp[botNodes.GetN()];
+            for (int k = 0; k < botNodes.GetN(); ++k)
             {
-	        OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(ueNodes.Get((k)%MIM.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), UDP_SINK_PORT)));
+                Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (botNodes.Get(k)->GetObject<Ipv4> ());
+                if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
+                remoteHostStaticRouting->AddNetworkRouteTo (inter.GetAddress(k), Ipv4Mask ("255.255.0.0"), ueNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
+                }
+                else if (configObject["DDoS"][0]["endPoint"].asString().find("MIM") != std::string::npos){
+                remoteHostStaticRouting->AddNetworkRouteTo (MIM.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), ueNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
+                }
+                else if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
+                remoteHostStaticRouting->AddNetworkRouteTo (remoteHostAddr, Ipv4Mask ("255.255.0.0"), ueNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
+                }
+
+
+                if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
+                OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(inter.GetAddress(k), UDP_SINK_PORT))); //remoteHostAddr, UDP_SINK_PORT)));
                 onoff.SetConstantRate(DataRate(DDOS_RATE));
                 onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
                 onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_off_time+"]"));
-                ApplicationContainer onOffApp[botNodes.GetN()];
-
                 onOffApp[k] = onoff.Install(botNodes.Get(k));
+                }
+                else if (configObject["DDoS"][0]["endPoint"].asString().find("MIM") != std::string::npos){
+                OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(MIM.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), UDP_SINK_PORT))); //remoteHostAddr, UDP_SINK_PORT)));
+                onoff.SetConstantRate(DataRate(DDOS_RATE));
+                onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
+                onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_off_time+"]"));
+                onOffApp[k] = onoff.Install(botNodes.Get(k));
+                }
+                else if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
+                OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(remoteHostAddr, UDP_SINK_PORT))); //remoteHostAddr, UDP_SINK_PORT)));
+                onoff.SetConstantRate(DataRate(DDOS_RATE));
+                onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
+                onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_off_time+"]"));
+                onOffApp[k] = onoff.Install(botNodes.Get(k));
+                }
                 onOffApp[k].Start(Seconds(BOT_START));
                 onOffApp[k].Stop(Seconds(BOT_STOP));
-            
 
-	        PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
+                if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
+                        PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
                              Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
-                ApplicationContainer UDPSinkApp = UDPsink.Install(ueNodes.Get((k)%MIM.GetN()));
-                UDPSinkApp.Start(Seconds(0.0));
-                UDPSinkApp.Stop(Seconds(BOT_STOP));
-	    }
+                        ApplicationContainer UDPSinkApp = UDPsink.Install(subNodes.Get(k)); //remoteHost);
+                        UDPSinkApp.Start(Seconds(0.0));
+                        UDPSinkApp.Stop(Seconds(BOT_STOP));
+                }
+                else if (configObject["DDoS"][0]["endPoint"].asString().find("MIM") != std::string::npos){
+                        PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
+                             Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
+                        ApplicationContainer UDPSinkApp = UDPsink.Install(MIM.Get(k)); //remoteHost);
+                        UDPSinkApp.Start(Seconds(0.0));
+                        UDPSinkApp.Stop(Seconds(BOT_STOP));
+
+                }
+            }
+            if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
+                        PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
+                             Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
+                        ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost);
+                        UDPSinkApp.Start(Seconds(0.0));
+                        UDPSinkApp.Stop(Seconds(BOT_STOP));
+
+            }
     }
     std::cout << "Done Setting up the bots " << std::endl;
     int mon = std::stoi(configObject["Simulation"][0]["MonitorPerf"].asString());
