@@ -18,7 +18,9 @@ Once the setup is done you can start to run the code
 
 Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G `
 
-### 5G configuration
+When refering to the 3G example, we are talking about topologies that just use a combination of point to point connections, CSMA connections and wifi connections. There is no 4G or 5G in these examples. 
+
+## 5G configuration
 
 To enable 5G capabilities:
 1. request access to https://gitlab.com/cttc-lena/nr
@@ -44,7 +46,7 @@ To enable 5G capabilities:
 4. return to the main ns-3-dev folder
 5. run sudo ./make.sh
 
-### How to run it on a unix cluster
+## How to run it on a unix cluster
 
 Step 1: move the RC folder outside of the repository folder. 
 
@@ -63,20 +65,19 @@ If your system does not have slurm nodes:
 Command to run the simulation: ` ./run.sh _location of RC folder_ `
 
 ## Available configurations
-
-NOTE: using the configuration files, a user can create a ring topology that uses wifi as a connection type, for example. Currently with th eexception of 5G and 4G a user can mix and match any connection types with any topologies.
+Using the configuration files, a user can create a ring topology that uses wifi as a connection type, for example. Currently with the exception of 5G and 4G a user can mix and match any connection types with any topologies.
 
 Existing error: When using a mesh topology with wifi, we do run into the ressource issue with the docker container. If a user want to run such a topology please limit the number of connections per nodes at 2 to 3 connections per nodes. *currently under investigation*
 
-### Topologies
+### Topologies (Only with 3G example)
 1. Ring
-2. Mesh
+2. Mesh (partial when using wifi)
 3. Star
 
 ### Connection types:
 1. point to point connections (p2p)
-2. CSMA
-3. Wifi
+2. CSMA 
+3. Wifi (only on 3G example)
 5. 4G
 6. 5G
 
@@ -84,7 +85,8 @@ Existing error: When using a mesh topology with wifi, we do run into the ressour
 1. 123-node bus model
 2. 9500-node bus model (Current it is called using ieee8500.glm, but it is the ieee9500 model)
 
-NOTE: to automatically generate the input json files use the get\_config.py from the graph folder. If you want to change the glm file that is used either replace the content of ieee8500.glm with the content of your glm file or replace in the python from the name of the glm file that is passed in by the name of the glm file that you want to use
+### Additional tools
+To automatically generate the input json files use the get\_config.py from the graph folder. If you want to change the glm file that is used either replace the content of ieee8500.glm with the content of your glm file or replace in the python from the name of the glm file that is passed in by the name of the glm file that you want to use
 
 #### How to generate config json file
 1. go to graph folder
