@@ -7,8 +7,7 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
 2. clone the NATIG repo
 3. run the following commands:
    - cd NATIG
-   - ./buildimage.sh 
-   - Once the docker finishes building successfully, run: ./rundocker.sh
+   - bash make_run_docker.sh 
    - If you are using MINGW64 (such as gitbash) on windows, please edit the rundocker.sh: ```the input device is not a TTY.  If you are using mintty, try prefixing the command with 'winpty' ```
 
      
@@ -44,15 +43,9 @@ To enable 5G capabilities:
 
 Once the setup is done you can start to run the code
 1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
-2. open the run.sh script
-3. Lines 69, 70 and 71 contain 3 versions of the network setup
-   - line 69 is the 4G setup
-   - line 70 is the 5G setup
-   - line 71 is the base setup
-4. Select the setup
-5. Save the changes
-6. run ./run.sh
+2. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_
 
+Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G `
 
 ### How to run it on a unix cluster
 
