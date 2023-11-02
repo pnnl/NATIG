@@ -23,22 +23,34 @@ When refering to the 3G example, we are talking about topologies that just use a
 ## Out of the box examples
 
 4G example using a start topology.
+
 10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 4G relay antennas (GnB nodes), and one control center.
 This example runs the IEEE 9500 model
+
 DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time)
+
 DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
+
 NumberOfBots": 4,
+
 Active: 1,
+
 Start: 10,
+
 End: 20,
+
 PacketSize: 1048576,
+
 Rate: "60480kb/s",
+
 legitNodeUsedByBots: UE,
+
 endPoint: MIM (Refers to the end point of the attack. Usefull if you want to attack multiple links)
 
 MIM --> Middle node between the UE and the substation
 
 To run this example in docker: ` sudo bash run.sh /rd2c/ 4G "" `
+
 To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 4G RC `
 
 ## 5G configuration
