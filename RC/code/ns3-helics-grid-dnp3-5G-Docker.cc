@@ -639,8 +639,12 @@ main (int argc, char *argv[])
   std::cout << "The translation table" << std::endl;
   std::cout << addrTrans.str().c_str() << std::endl;
 
+  //FILE * addFile;
+  //addFile = fopen ("/rd2c/integration/control/add.txt","w");
   FILE * addFile;
-  addFile = fopen ("/rd2c/integration/control/add.txt","w");
+  std::string loc = std::getenv("RD2C");
+  std::string loc1 = loc + "/integration/control/add.txt";
+  addFile = fopen (loc1.c_str(),"w");
   if (addFile!=NULL)
   {
 	  fprintf(addFile, addrTrans.str().c_str());
