@@ -202,7 +202,7 @@ EpcPgwApplication::RecvFromTunDevice (Ptr<Packet> packet, const Address& source,
 
   std::string line;
   std::ifstream myfile ("/people/belo700/RD2C/workspace/integration/control/add.txt"); 
-  std::map<Ipv4Address, std::string> mymap;
+  std::map<Ipv4Address, std::vector<std::string>> mymap;
   std::string delimiter = ": ";
   if (myfile.is_open())
   {
@@ -214,7 +214,11 @@ EpcPgwApplication::RecvFromTunDevice (Ptr<Packet> packet, const Address& source,
 			  token = line.substr(0, pos);
 			  line.erase(0, pos + delimiter.length());
 			  Ipv4Address temp = Ipv4Address(token.c_str());
-			  mymap[temp] = line;
+			  if (mymap.find(temp) == mymap.end()) {
+			      mymap[temp] = std::vector<std::string>();
+			  }
+                          mymap[temp].push_back(line);
+			  
 		  }
 	  }
 	  myfile.close();
@@ -239,7 +243,7 @@ EpcPgwApplication::RecvFromTunDevice (Ptr<Packet> packet, const Address& source,
 	  }else{
               ip = "7.0.0.1";
 	  }*/
-	  ip = mymap[ueAddr];
+	  ip = mymap[ueAddr][0]; //choose the first ID found
           NS_LOG_UNCOND("I am in the if statement " << ueAddr << " " << ip.c_str());
 	  ueAddr = Ipv4Address (ip.c_str());//"7.0.0.2");
 	  num = num + 1;
