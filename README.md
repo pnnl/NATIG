@@ -27,7 +27,7 @@ When refering to the 3G example, we are talking about topologies that just use a
 10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 4G relay antennas (GnB nodes), and one control center.
 This example runs the IEEE 9500 model
 
-DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time)
+DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
 
 DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
 
