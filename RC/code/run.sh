@@ -73,9 +73,23 @@ cd ${gldDir} && \
 # ===== setting up ns-3 configurations =====
 ns3Dir="/${PWD}/../../ns-3-dev"
 ns3Scratch="${ns3Dir}/scratch"
-#modelName="ns3-helics-grid-dnp3-4G"
+if ["$2" == "4G"]
+then
+cp -r ../../RC/code/4G-conf-9500/*.json config/
+cp -r ../../RC/code/4G-conf-9500/*.glm .
+modelName="ns3-helics-grid-dnp3-4G"
+fi
+if ["$2" == "5G"]
+then
+cp -r ../../RC/code/5G-conf-9500/*.json config/
+cp -r ../../RC/code/5G-conf-9500/*.glm .
 modelName="ns3-helics-grid-dnp3-5G" 
-#modelName="ns3-helics-grid-dnp3"
+fi
+if ["$2" == "3G"]
+then
+cp -r ../../RC/code/4G-conf-9500/*.glm .
+modelName="ns3-helics-grid-dnp3"
+fi
 
 ns3Model="${ns3Scratch}/${modelName}"
 configDir="${ROOT_PATH}/config/"
@@ -99,6 +113,9 @@ cp ${ROOT_PATH}/${modelName}.cc ${ns3Model}.cc && \
   mpirun -np 1 ./waf --run "scratch/${modelName} --helicsConfig=${helicsConfig} --microGridConfig=${microGridConfig} --topologyConfig=${topologyConfig} --pointFileDir=${configDir} --pcapFileDir=$pcapFileDir" >> ${ns3OutFile} 2>&1 & \
   cd -
 
+if [[ "$3" == "RC" ]]
+then
 wait
+fi
 
 exit 0
