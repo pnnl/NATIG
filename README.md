@@ -16,9 +16,30 @@ Once the setup is done you can start to run the code
 1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
 2. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_
 
-Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G `
+Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G "" ` . Change the 3rd parameter to RC when running of docker in a unix cluster that uses slurm.
 
 When refering to the 3G example, we are talking about topologies that just use a combination of point to point connections, CSMA connections and wifi connections. There is no 4G or 5G in these examples. 
+
+## Out of the box examples
+
+4G example using a start topology.
+10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 4G relay antennas (GnB nodes), and one control center.
+This example runs the IEEE 9500 model
+DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time)
+DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
+NumberOfBots": 4,
+Active: 1,
+Start: 10,
+End: 20,
+PacketSize: 1048576,
+Rate: "60480kb/s",
+legitNodeUsedByBots: UE,
+endPoint: MIM (Refers to the end point of the attack. Usefull if you want to attack multiple links)
+
+MIM --> Middle node between the UE and the substation
+
+To run this example in docker: ` sudo bash run.sh /rd2c/ 4G "" `
+To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 4G RC `
 
 ## 5G configuration
 
