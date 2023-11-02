@@ -12,7 +12,7 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
      
 NOTE: The default docker container does not come with 5G enabled
 
-Once the setup is done you can start to run the Out of the box examples
+Once the setup is done you can start to run the out of the box examples
 1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
 2. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_
 
