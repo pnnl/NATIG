@@ -9,12 +9,16 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
    - cd NATIG
    - bash make_run_docker.sh 
    - If you are using MINGW64 (such as gitbash) on windows, please edit the rundocker.sh: ```the input device is not a TTY.  If you are using mintty, try prefixing the command with 'winpty' ```
-
      
-
-
 NOTE: The default docker container does not come with 5G enabled
 
+Once the setup is done you can start to run the code
+1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
+2. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_
+
+Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G `
+
+### 5G configuration
 
 To enable 5G capabilities:
 1. request access to https://gitlab.com/cttc-lena/nr
@@ -39,13 +43,6 @@ To enable 5G capabilities:
   
 4. return to the main ns-3-dev folder
 5. run sudo ./make.sh
-
-
-Once the setup is done you can start to run the code
-1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
-2. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_
-
-Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G `
 
 ### How to run it on a unix cluster
 
