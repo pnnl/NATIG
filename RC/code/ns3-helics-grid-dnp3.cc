@@ -259,15 +259,9 @@ main (int argc, char *argv[])
 
   std::string fedName = helics_federate->getName();
  
-  //Ptr<NrPointToPointEpcHelper> epcHelper = CreateObject<NrPointToPointEpcHelper>();
-  //PointToPointEpcHelper epc;
-  //Ptr<IdealBeamformingHelper> idealBeamformingHelper = CreateObject<IdealBeamformingHelper>();
-  //epcHelper->Initialize ();
-  //Ptr<NrHelper> nrHelper = CreateObject<NrHelper> ();
-  //nrHelper->Initialize ();
 
   PointToPointHelper p2p;
-  p2p.SetDeviceAttribute ("DataRate", StringValue (topologyConfigObject["Channel"][0]["dataRate"].asString()));
+  p2p.SetDeviceAttribute ("DataRate", StringValue (topologyConfigObject["Channel"][0]["P2PRate"].asString()));
   //p2p.SetChannelAttribute ("Delay", StringValue (topologyConfigObject["Channel"][0]["P2Pdelay"].asString()));
 
   CsmaHelper csma2;
@@ -437,6 +431,24 @@ main (int argc, char *argv[])
           MIMNode.Add(star.GetSpokeNode(y));
       }
       hubNode.Add(star.GetHub());
+
+       MobilityHelper mobility;
+         std::cout << "MinX " << topologyConfigObject["Gridlayout"][0]["MinX"].asString() << std::endl;
+         std::cout << "MinY " << topologyConfigObject["Gridlayout"][0]["MinY"].asString() << std::endl;
+         std::cout << "DeltaX " << topologyConfigObject["Gridlayout"][0]["DeltaX"].asString() << std::endl;
+         std::cout << "DeltaY " << topologyConfigObject["Gridlayout"][0]["DeltaY"].asString() << std::endl;
+         std::cout << "GridLayout " << topologyConfigObject["Gridlayout"][0]["GridLayout"].asString() << std::endl;
+         mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
+                                 "MinX", DoubleValue (std::stoi(topologyConfigObject["Gridlayout"][0]["MinX"].asString())),
+                                 "MinY", DoubleValue (std::stoi(topologyConfigObject["Gridlayout"][0]["MinY"].asString())),
+                                 "DeltaX", DoubleValue (std::stoi(topologyConfigObject["Gridlayout"][0]["DeltaX"].asString())),
+                                 "DeltaY", DoubleValue (std::stoi(topologyConfigObject["Gridlayout"][0]["DeltaY"].asString())),
+                                 "GridWidth", UintegerValue (std::stoi(topologyConfigObject["Gridlayout"][0]["GridWidth"].asString())),
+                                 "LayoutType", StringValue (topologyConfigObject["Gridlayout"][0]["LayoutType"].asString()));
+        mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+        mobility.Install (hubNode);
+	mobility.Install (MIMNode);
+	mobility.Install (Microgrid);
   }
   Ptr<Ipv4StaticRouting> ControlRouting = ipv4RoutingHelper.GetStaticRouting(hubNode.Get(0)->GetObject<Ipv4>()); //star.GetHub()->GetObject<Ipv4>());
   for (i = 0; i < configObject["microgrid"].size(); i++){
@@ -450,17 +462,17 @@ main (int argc, char *argv[])
 	  ipv4Sub.SetBase(address.c_str(), "255.255.255.0", "0.0.0.1");
 	  Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign(NetDev);
 	  //Adding the routes
-	  if (!ring){
+	  /*if (!ring){
 	    std::cout << "Second route" << std::endl;
 	    Ptr<Ipv4StaticRouting> MicrogridRouting = ipv4RoutingHelper.GetStaticRouting (Microgrid.Get(i)->GetObject<Ipv4>());
 	    MicrogridRouting->AddNetworkRouteTo (hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal(), Ipv4Mask("255.255.255.0"), MIMNode.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1); //star.GetSpokeIpv4Address(i), 1); star.GetHubIpv4Address(i)
 	    std::cout << "Microgrid Added" << std::endl;
             ControlRouting->AddNetworkRouteTo(Microgrid.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.255.255.0"), MIMNode.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), i+1);//star.GetSpokeIpv4Address(i), i+1);
-          }
+          }*/
   }
-  if (ring){
-	  Ipv4GlobalRoutingHelper::PopulateRoutingTables();
-  }
+  //if (ring){
+  //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
+  //}
   //Ptr<Node> hubNode = star.GetHub();
   //reading the attack configuration
   std::map<std::string, std::string> attack;
@@ -687,8 +699,7 @@ main (int argc, char *argv[])
 
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
 
-    if (DDoS){
-            ApplicationContainer onOffApp[botNodes.GetN()];
+    /*if (DDoS){
             for (int k = 0; k < botNodes.GetN(); ++k)
             {
                 Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (botNodes.Get(k)->GetObject<Ipv4> ());
@@ -698,8 +709,14 @@ main (int argc, char *argv[])
                 else if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
                 remoteHostStaticRouting->AddNetworkRouteTo (hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), MIMNode.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
                 }
+	    }
+    }*/
+    Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
-
+    if (DDoS){
+            ApplicationContainer onOffApp[botNodes.GetN()];
+            for (int k = 0; k < botNodes.GetN(); ++k)
+            {
                 if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
                 OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(Microgrid.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), UDP_SINK_PORT))); //remoteHostAddr, UDP_SINK_PORT)));
                 onoff.SetConstantRate(DataRate(DDOS_RATE));
@@ -746,9 +763,9 @@ main (int argc, char *argv[])
     for (int i = 0; i < hubNode.GetN(); i++){
         endpointNodes.Add (hubNode.Get (i));
     }
-     for (int i = 0; i < MIMNode.GetN(); i++){
+    /*for (int i = 0; i < MIMNode.GetN(); i++){
         endpointNodes.Add (MIMNode.Get (i));
-    }
+    }*/
     for (int i = 0; i < Microgrid.GetN(); i++){
         endpointNodes.Add (Microgrid.Get (i));
     }
