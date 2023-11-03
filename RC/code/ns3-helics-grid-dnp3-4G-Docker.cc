@@ -560,6 +560,12 @@ main (int argc, char *argv[])
     std::string address = "172."+std::to_string(17+csmaSubNodes.size()+i)+".0.0";
     ipv4Sub.SetBase (address.c_str(), "255.255.0.0", "0.0.0.1");
     Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign (internetDevicesSub);
+  
+    Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+    remoteHostStaticRouting->AddNetworkRouteTo (internetDevicesSub.Get(2)->GetNode()->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), internetDevicesSub.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),i+2); //gateway, 1);
+  
+
+
   }
 
   std::cout << "The translation table" << std::endl;
@@ -614,30 +620,60 @@ main (int argc, char *argv[])
 
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  for (int i = 0; i < subNodes.GetN(); i ++){
-    remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
+  for (int i = 0; i < ueNodes.GetN(); i++){
+      remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"),gateway, 1);
+      remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1, 0);
+      int cc = 0;
+      for (int j = 0; j < MIM.GetN(); j++){
+        if (i != j){
+        cc += 1;
+        remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(cc+1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1, cc);
+        }
+      }
   }
 
   for (int i = 0; i < ueNodes.GetN(); i++){
-    Ipv4Address addr3_ = MIM.Get(i%MIM.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
     Ptr<Ipv4StaticRouting> ueNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>());
-    ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i%MIM.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2+int(i/ueNodes.GetN()));
-    Ipv4Address addr2_ = ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress (2+int(i/ueNodes.GetN()), 0).GetLocal ();
-    Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i%MIM.GetN())->GetObject<Ipv4>());
-    for (int j = 0; j < remoteHostContainer.GetN(); j++){
-        subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr2_, 1);
+    ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2+int(i/ueNodes.GetN()), 0);
+    int cc = 0;
+    for (int j = 0; j < subNodes.GetN(); j++){
+      if (i != j){
+      cc += 1;
+      ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc+1,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2+int(i/ueNodes.GetN()), cc);
+      }
     }
-    //for (int j = 0; j < subNodes.GetN(); j++){
-    subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), 1);
-    //}
+  }
+
+  for (int i = 0; i < MIM.GetN(); i++){
+    Ipv4Address addr2_ = ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress (2+int(i/ueNodes.GetN()), 0).GetLocal ();
+    Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
+    subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr2_, 1);
+    subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), 1, 0);
+    int cc = 0;
+    for (int j = 0; j < subNodes.GetN(); j++){
+        if (i != j){
+        cc += 1;
+        subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc+1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), 1, cc);
+        }
+    }
   }
 
   for (int i = 0; i < subNodes.GetN(); i++){
-    Ptr<Ipv4> ipv4_2 = MIM.Get(i%MIM.GetN())->GetObject<Ipv4>();
-    Ipv4Address addr5_ = ipv4_2->GetAddress(1,0).GetLocal();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
-    for (int j = 0; j < remoteHostContainer.GetN(); j++){
-        subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, 1);
+    Ptr<Ipv4> ipv4_2 = MIM.Get(i)->GetObject<Ipv4>();
+    Ipv4Address addr5_ = ipv4_2->GetAddress(1,0).GetLocal();
+    subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, 1, 0);
+  }
+  for (int i = 0; i < subNodes.GetN(); i++){
+    int cc = 0;
+    Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
+    for (int j = 0; j < MIM.GetN(); j++){
+      if (i != j){
+        cc += 1;
+        Ptr<Ipv4> ipv4_2 = MIM.Get(j)->GetObject<Ipv4>();
+        Ipv4Address addr5_ = ipv4_2->GetAddress(i+1,0).GetLocal();
+        subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, cc+1, cc);
+      }
     }
   }
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
@@ -833,54 +869,6 @@ main (int argc, char *argv[])
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
 
     if (DDoS){
-        /*for (int k = 0; k < numBots; ++k)
-                {
-                    std::string enamestring = "Bots" + std::to_string(k);
-                    auto ep_name = configObject["microgrid"][k%MIM.GetN()]["name"].asString();
-                    Dnp3ApplicationHelperNew dnp3bots ("ns3::UdpSocketFactory", InetSocketAddress (botNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), mimPort[(k+4)%MIM.GetN()]));
-
-                    dnp3bots.SetAttribute("LocalPort", UintegerValue(mimPort[(k+4)%MIM.GetN()])); //port));
-                    dnp3bots.SetAttribute("RemoteAddress", AddressValue(ueNodes.Get((k+4)%MIM.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal()));//star.GetSpokeIpv4Address (i)));
-                    dnp3bots.SetAttribute("RemotePort", UintegerValue(mimPort[(k+4)%MIM.GetN()])); //port));
-                    dnp3bots.SetAttribute("JitterMinNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMin"].asString())));
-                    dnp3bots.SetAttribute("JitterMaxNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMax"].asString())));
-                    dnp3bots.SetAttribute("isMaster", BooleanValue (true));
-                    dnp3bots.SetAttribute("Name", StringValue (enamestring));
-                    dnp3bots.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
-                    dnp3bots.SetAttribute("MasterDeviceAddress", UintegerValue(1));
-                    dnp3bots.SetAttribute("StationDeviceAddress", UintegerValue(i+2));
-                    dnp3bots.SetAttribute("IntegrityPollInterval", UintegerValue(1));
-                    dnp3bots.SetAttribute("EnableTCP", BooleanValue (false));
-
-
-                    Ptr<Dnp3ApplicationNew> bots = dnp3bots.Install (botNodes.Get(k), enamestring);
-
-
-                    Dnp3ApplicationHelperNew dnp3Outstation ("ns3::UdpSocketFactory", InetSocketAddress (ueNodes.Get((k+4)%MIM.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), mimPort[(k+4)%MIM.GetN()])); //star.GetSpokeIpv4Address (i), port));
-                    dnp3Outstation.SetAttribute("LocalPort", UintegerValue(mimPort[(k+4)%MIM.GetN()]));
-                    dnp3Outstation.SetAttribute("RemoteAddress", AddressValue(botNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal())); //star.GetHubIpv4Address(i)));
-                    dnp3Outstation.SetAttribute("RemotePort", UintegerValue(mimPort[(k+4)%MIM.GetN()]));
-                    dnp3Outstation.SetAttribute("isMaster", BooleanValue (false));
-                    dnp3Outstation.SetAttribute("Name", StringValue ("Victim"+ep_name));
-                    dnp3Outstation.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
-                    dnp3Outstation.SetAttribute("MasterDeviceAddress", UintegerValue(1));
-                    dnp3Outstation.SetAttribute("StationDeviceAddress", UintegerValue(i+2));
-                    dnp3Outstation.SetAttribute("EnableTCP", BooleanValue (false));
-
-                    Ptr<Dnp3ApplicationNew> slave = dnp3Outstation.Install (ueNodes.Get((k+4)%MIM.GetN()), std::string("Victim"+ep_name));
-
-                    Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, bots, 0);
-                    //Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, bots, 1);
-
-                    ApplicationContainer dnpBotsApp(bots);
-                    dnpBotsApp.Start (Seconds (BOT_START));
-                    dnpBotsApp.Stop (Seconds (BOT_STOP));
-
-                    ApplicationContainer dnpVictim(slave);
-                    dnpVictim.Start (Seconds (BOT_START));
-                    dnpVictim.Stop (Seconds (BOT_STOP));
-
-                }*/
 	    ApplicationContainer onOffApp[botNodes.GetN()];
 	    for (int k = 0; k < botNodes.GetN(); ++k)
             {

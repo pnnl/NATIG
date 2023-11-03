@@ -621,7 +621,7 @@ main (int argc, char *argv[])
     std::cout << "Creating the csma nodes" << std::endl;
     for (int j = 0; j < ueNodes.GetN(); j++){
       if (i != j){
-        NodeContainer csmaSubNodes_temp (ueNodes.Get(i%ueNodes.GetN()), MIM.Get(j%MIM.GetN()), subNodes.Get(i));
+        NodeContainer csmaSubNodes_temp (ueNodes.Get(i), MIM.Get(i), subNodes.Get(j));
         csmaSubNodes2.push_back(csmaSubNodes_temp);
       }
     }
@@ -634,6 +634,16 @@ main (int argc, char *argv[])
     std::string address = "172."+std::to_string(17+csmaSubNodes.size()+i)+".0.0";
     ipv4Sub.SetBase (address.c_str(), "255.255.0.0", "0.0.0.1");
     Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign (internetDevicesSub);
+  }
+
+  for (int i = 0; i < subNodes.GetN(); i++){
+      int cc = 0;
+      for (int j = 0; j < ueNodes.GetN(); j++){
+      if (i != j){
+	cc += 1;
+        addrTrans << subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc+1,0).GetLocal() << ": " << ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal() << endl;
+      }
+    }
   }
 
   std::cout << "The translation table" << std::endl;
@@ -695,33 +705,59 @@ main (int argc, char *argv[])
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   for (int i = 0; i < ueNodes.GetN(); i++){
-      //for (int j = 0; j < int(MIM.GetN()/ueNodes.GetN()); j++){
       remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"),gateway, 1);
-      //}
+      remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1, 0);
+      int cc = 0;
+      for (int j = 0; j < MIM.GetN(); j++){
+        if (i != j){
+        cc += 1;
+        remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(cc+1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1, cc);
+	}
+      }
   }
-  for (int i = 0; i < subNodes.GetN(); i ++){
-    remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1);
+
+  for (int i = 0; i < ueNodes.GetN(); i++){
+    Ptr<Ipv4StaticRouting> ueNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>());
+    ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2+int(i/ueNodes.GetN()), 0);
+    int cc = 0;
+    for (int j = 0; j < subNodes.GetN(); j++){
+      if (i != j){
+      cc += 1;
+      ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc+1,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2+int(i/ueNodes.GetN()), cc);
+      }
+    }
   }
 
   for (int i = 0; i < MIM.GetN(); i++){
-    Ipv4Address addr3_ = MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
-    Ptr<Ipv4StaticRouting> ueNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>());
-    ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2+int(i/ueNodes.GetN()));
-
     Ipv4Address addr2_ = ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress (2+int(i/ueNodes.GetN()), 0).GetLocal ();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
-    for (int j = 0; j < remoteHostContainer.GetN(); j++){
-        subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr2_, 1);
+    subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr2_, 1);
+    subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), 1, 0);
+    int cc = 0;
+    for (int j = 0; j < subNodes.GetN(); j++){
+	if (i != j){
+        cc += 1;
+        subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc+1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), 1, cc);
+	}
     }
-    subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), 1);
   }
 
   for (int i = 0; i < subNodes.GetN(); i++){
+    Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
     Ptr<Ipv4> ipv4_2 = MIM.Get(i)->GetObject<Ipv4>();
     Ipv4Address addr5_ = ipv4_2->GetAddress(1,0).GetLocal();
+    subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, 1, 0);
+  }
+  for (int i = 0; i < subNodes.GetN(); i++){
+    int cc = 0;
     Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
-    for (int j = 0; j < remoteHostContainer.GetN(); j++){
-        subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, 1);
+    for (int j = 0; j < MIM.GetN(); j++){
+      if (i != j){
+        cc += 1;
+        Ptr<Ipv4> ipv4_2 = MIM.Get(j)->GetObject<Ipv4>();
+        Ipv4Address addr5_ = ipv4_2->GetAddress(i+1,0).GetLocal();
+        subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, cc+1, cc);
+      }
     }
   }
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
