@@ -12,13 +12,53 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
      
 NOTE: The default docker container does not come with 5G enabled
 
-Once the setup is done you can start to run the code
+Once the setup is done you can start to run the out of the box examples
 1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
 2. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_
 
-Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G `
+Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G "" ` . Change the 3rd parameter to RC when running of docker in a unix cluster that uses slurm.
 
 When refering to the 3G example, we are talking about topologies that just use a combination of point to point connections, CSMA connections and wifi connections. There is no 4G or 5G in these examples. 
+
+## Out of the box examples
+
+4G example using a start topology.
+
+10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 4G relay antennas (GnB nodes), and one control center.
+This example runs the IEEE 9500 model
+
+DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
+
+DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
+
+NumberOfBots": 4,
+
+Active: 1 ( 1 means that the DDoS is active and 0 means that the DDoS is inactive)
+
+Start: 10,
+
+End: 20,
+
+PacketSize: 1048576,
+
+Rate: "60480kb/s",
+
+legitNodeUsedByBots: UE, (This is the node that the bots conducting the DDoS attack connect to)
+
+endPoint: MIM (Refers to the end point of the attack. Usefull if you want to attack multiple links)
+
+MIM --> Middle node between the UE and the substation
+
+To run this example in docker: ` sudo bash run.sh /rd2c/ 4G "" `
+
+To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 4G RC `
+
+Interesting outputted data:
+
+1. TP.txt this file contains the performance of each path full path between the control center and the substation. To read this file only take the 20 last inputs per timesteps. if the number of substation changes, only read the last 2 X the number of substations rows per timesteps.
+
+  - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Bytes received since last measured timestep, Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
+
 
 ## 5G configuration
 
