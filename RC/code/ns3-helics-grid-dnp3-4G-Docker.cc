@@ -547,7 +547,7 @@ main (int argc, char *argv[])
     std::cout << "Creating the csma nodes" << std::endl;
     for (int j = 0; j < ueNodes.GetN(); j++){
       if (i != j){
-        NodeContainer csmaSubNodes_temp (ueNodes.Get(i%ueNodes.GetN()), MIM.Get(j%MIM.GetN()), subNodes.Get(i));
+        NodeContainer csmaSubNodes_temp (ueNodes.Get(i), MIM.Get(i), subNodes.Get(j));
         csmaSubNodes2.push_back(csmaSubNodes_temp);
       }
     }
@@ -561,11 +561,15 @@ main (int argc, char *argv[])
     ipv4Sub.SetBase (address.c_str(), "255.255.0.0", "0.0.0.1");
     Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign (internetDevicesSub);
   
-    Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-    remoteHostStaticRouting->AddNetworkRouteTo (internetDevicesSub.Get(2)->GetNode()->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), internetDevicesSub.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),i+2); //gateway, 1);
-  
-
-
+  }
+  for (int i = 0; i < subNodes.GetN(); i++){
+      int cc = 0;
+      for (int j = 0; j < ueNodes.GetN(); j++){
+      if (i != j){
+        cc += 1;
+        addrTrans << subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc+1,0).GetLocal() << ": " << ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal() << endl;
+      }
+    }
   }
 
   std::cout << "The translation table" << std::endl;
