@@ -164,6 +164,24 @@ void PrintRoutingTable (Ptr<Node>& n)
     }
 }
 
+void changeRoute (NodeContainer n) {
+      std::cout << "Getting the available interfaces" << std::endl;
+      for (int i = 0; i < n.GetN(); i++){
+          Ptr<Ipv4> ipv4_2 = n.Get(i)->GetObject<Ipv4>();
+          //ipv4_2->SetDown(1);
+          for (int j = 0; j < n.GetN(); j++){
+              Ipv4Address addr5_ = ipv4_2->GetAddress(1+j,0).GetLocal();
+              std::cout << addr5_ << "\t";
+              int32_t interface = ipv4_2->GetInterfaceForAddress(addr5_);
+              ipv4_2->SetMetric(interface, j);
+              uint16_t Metric = ipv4_2->GetMetric(interface);
+              std::cout << interface << "\t";
+              std::cout << Metric << std::endl;
+          }
+          std::cout << std::endl;
+      }
+}
+
 void Throughput (){
         Ptr<Ipv4FlowClassifier> classifier=DynamicCast<Ipv4FlowClassifier>(flowHelper.GetClassifier());
 
@@ -680,6 +698,7 @@ main (int argc, char *argv[])
       }
     }
   }
+  changeRoute (MIM);
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
 
