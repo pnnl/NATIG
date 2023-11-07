@@ -9,17 +9,19 @@
                         "WifiPropagationDelay": "ConstantSpeedPropagationDelayModel",
                         "WifiRate": "DsssRate1Mbps",
                         "WifiStandard": "80211b",
-                        "P2PRate": "100Mb/s"
+                        "P2PRate": "100Mb/s",
+			"MTU": 2500,
+                        "delay": 0
                 }
         ],
         "Gridlayout": [
                 {
                         "MinX": 0,
                         "MinY": 0,
-                        "DeltaX": 5000,
-                        "DeltaY": 5000,
-                        "GridWidth": 5,
-			"distance": 60,
+                        "DeltaX": 50,
+                        "DeltaY": 50,
+                        "GridWidth": 10,
+			"distance": 15,
 			"GnBH": 10.0,
 			"UEH": 1.5,
                         "LayoutType": "RowFirst",
