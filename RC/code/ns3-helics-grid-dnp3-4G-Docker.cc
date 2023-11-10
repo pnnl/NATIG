@@ -287,9 +287,9 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
     for (int j = 0; j < subNodes.GetN(); j++){
       cc += 1;
       int ind = i;
-      if (not cc == 2){
+      /*if (not cc == 2){
             ind += 1;
-      }
+      }*/
       ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(ind)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2, 0);
     }
   }
@@ -302,9 +302,9 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
     for (int j = 0; j < subNodes.GetN(); j++){
         cc += 1;
 	int ind = i;
-        if (not cc == 2){
+        /*if (not cc == 2){
             ind += 1;
-        }
+        }*/
 	subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(ind)->GetObject<Ipv4>());
         subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask ("255.255.0.0"), cc, 0);
     }
