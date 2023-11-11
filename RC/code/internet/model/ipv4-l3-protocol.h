@@ -110,7 +110,8 @@ public:
    * \param node node to set
    */
   void SetNode (Ptr<Node> node);
-
+  Ipv4Address destAddr;
+  Ipv4Address NewdestAddr;
   // functions defined in base class Ipv4
 
   void SetRoutingProtocol (Ptr<Ipv4RoutingProtocol> routingProtocol);

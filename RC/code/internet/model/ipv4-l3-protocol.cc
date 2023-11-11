@@ -1059,10 +1059,25 @@ Ipv4L3Protocol::SendRealOut (Ptr<Ipv4Route> route,
       m_dropTrace (ipHeader, packet, DROP_NO_ROUTE, m_node->GetObject<Ipv4> (), 0);
       return;
     }
+  Ipv4Header ipHead = ipHeader;
+  std::ostringstream s1s;
+  std::ostringstream s2s;
+  s1s << destAddr;
+  s2s << ipHeader.GetDestination ();
+  std::cout << "LOOOOOOOK HERE!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+  std::cout << destAddr << " vs " << s1s.str() << " vs " << s2s.str() << std::endl;
   Ptr<NetDevice> outDev = route->GetOutputDevice ();
+  if (s1s.str().find(s2s.str()) != std::string::npos){
+    ipHead.SetDestination (NewdestAddr);
+  }
+
   int32_t interface = GetInterfaceForDevice (outDev);
   NS_ASSERT (interface >= 0);
   Ptr<Ipv4Interface> outInterface = GetInterface (interface);
+  if (s1s.str().find(s2s.str()) != std::string::npos){
+     //interface += 1;
+     std::cout << "INTERFACE!!!!!!!!!!!!!!! " << interface << std::endl;
+  }
   NS_LOG_LOGIC ("Send via NetDevice ifIndex " << outDev->GetIfIndex () << " ipv4InterfaceIndex " << interface);
 
   std::string delimiter = ".";
@@ -1119,7 +1134,7 @@ Ipv4L3Protocol::SendRealOut (Ptr<Ipv4Route> route,
 
   if (route->GetGateway ().IsAny ())
     {
-      target = ipHeader.GetDestination ();
+      target = ipHead.GetDestination ();
       targetLabel = "destination";
     }
   else
@@ -1131,10 +1146,10 @@ Ipv4L3Protocol::SendRealOut (Ptr<Ipv4Route> route,
   if (outInterface->IsUp ())
     {
       NS_LOG_LOGIC ("Send to " << targetLabel << " " << target);
-      if ( packet->GetSize () + ipHeader.GetSerializedSize () > outInterface->GetDevice ()->GetMtu () )
+      if ( packet->GetSize () + ipHead.GetSerializedSize () > outInterface->GetDevice ()->GetMtu () )
         {
           std::list<Ipv4PayloadHeaderPair> listFragments;
-          DoFragmentation (packet, ipHeader, outInterface->GetDevice ()->GetMtu (), listFragments);
+          DoFragmentation (packet, ipHead, outInterface->GetDevice ()->GetMtu (), listFragments);
           for ( std::list<Ipv4PayloadHeaderPair>::iterator it = listFragments.begin (); it != listFragments.end (); it++ )
             {
               NS_LOG_LOGIC ("Sending fragment " << *(it->first) );
@@ -1144,8 +1159,8 @@ Ipv4L3Protocol::SendRealOut (Ptr<Ipv4Route> route,
         }
       else
         {
-          CallTxTrace (ipHeader, packet, m_node->GetObject<Ipv4> (), interface);
-          outInterface->Send (packet, ipHeader, target);
+          CallTxTrace (ipHead, packet, m_node->GetObject<Ipv4> (), interface);
+          outInterface->Send (packet, ipHead, target);
         }
     }
 }

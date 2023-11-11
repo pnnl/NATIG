@@ -47,9 +47,9 @@
 #include "ns3/dnp3-application-helper-new.h"
 #include "ns3/dnp3-simulator-impl.h"
 
-#include <jsoncpp/json/json.h>
-#include <jsoncpp/json/forwards.h>
-#include <jsoncpp/json/writer.h>
+#include <json/json.h>
+#include <json/forwards.h>
+#include <json/writer.h>
 
 #include <filesystem>
 #include <iostream>
@@ -286,11 +286,7 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
     int cc = 0;
     for (int j = 0; j < subNodes.GetN(); j++){
       cc += 1;
-      int ind = i;
-      /*if (not cc == 2){
-            ind += 1;
-      }*/
-      ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(ind)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2, 0);
+      ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 2, 0);
     }
   }
 
@@ -302,9 +298,6 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
     for (int j = 0; j < subNodes.GetN(); j++){
         cc += 1;
 	int ind = i;
-        /*if (not cc == 2){
-            ind += 1;
-        }*/
 	subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(ind)->GetObject<Ipv4>());
         subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask ("255.255.0.0"), cc, 0);
     }
@@ -329,23 +322,26 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
 void changeRoute (NodeContainer remoteHostContainer, NodeContainer subNodes, NodeContainer MIM, NodeContainer ueNodes, Ipv4Address gateway, int index) {
       std::cout << "Getting the available interfaces" << std::endl;
       Ipv4StaticRoutingHelper ipv4RoutingHelper;
-      for (int i = 0; i < MIM.GetN(); i++){
-          Ptr<Ipv4> ipv4_2 = MIM.Get(i)->GetObject<Ipv4>();
-          int NewIndex = index + 1;
-          if (NewIndex == subNodes.GetN()){
-              NewIndex = index - 1;
-          } 
-          ipv4_2->SetDown(index); 
-	  //Ptr<Ipv4> ipv4_3 = subNodes.Get(i)->GetObject<Ipv4>(); 
-          //ipv4_3->SetDown(index);
+      //for (int i = 0; i < MIM.GetN(); i++){
+      Ptr<Ipv4> ipv4_2 = subNodes.Get(index-1)->GetObject<Ipv4>();
+      int NewIndex = index + 1;
+      if (NewIndex == subNodes.GetN()){
+          NewIndex = index - 1;
+      }
+      remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetObject<Ipv4L3Protocol> ()->destAddr = subNodes.Get(index-1)->GetObject<Ipv4>()->GetAddress(index, 0).GetLocal();
+      remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetObject<Ipv4L3Protocol> ()->NewdestAddr = subNodes.Get(index-1)->GetObject<Ipv4>()->GetAddress(NewIndex, 0).GetLocal();
+      //MIM.Get(index-1)->GetObject<Ipv4>()->SetDown(index); 
 
-          /*Ipv4InterfaceAddress add12 = ipv4_2->GetAddress(NewIndex,0);
-          Ipv4InterfaceAddress add1 = ipv4_2->GetAddress(index,0);
-          ipv4_2->AddAddress (NewIndex, add1);
-          ipv4_2->AddAddress (index, add12);
-          ipv4_2->RemoveAddress (index, add1.GetLocal());
-          ipv4_2->RemoveAddress (NewIndex, add12.GetLocal());*/
-     }
+      std::cout << "Setting the addresses" << std::endl;
+      std::cout <<  remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetObject<Ipv4L3Protocol> ()->destAddr << std::endl;
+      std::cout <<  remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetObject<Ipv4L3Protocol> ()->NewdestAddr << std::endl;
+
+      Ipv4InterfaceAddress add12 = ipv4_2->GetAddress(NewIndex,0);
+      Ipv4InterfaceAddress add1 = ipv4_2->GetAddress(index,0);
+      ipv4_2->AddAddress (NewIndex, add1);
+      ipv4_2->AddAddress (index, add12);
+      ipv4_2->RemoveAddress (index, add1.GetLocal());
+      ipv4_2->RemoveAddress (NewIndex, add12.GetLocal());
       setRoutingTable(remoteHostContainer, subNodes, MIM, ueNodes, gateway);
       updateUETable(subNodes, ueNodes);
       
@@ -441,7 +437,7 @@ main (int argc, char *argv[])
    simTime = Seconds(std::stof(configObject["Simulation"][0]["SimTime"].asString()));
    float start = std::stof(configObject["Simulation"][0]["StartTime"].asString());
    includeMIM = std::stoi(configObject["Simulation"][0]["includeMIM"].asString());
-
+   bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
    numBots = std::stoi(configObject["DDoS"][0]["NumberOfBots"].asString());
    distance = std::stod(topologyConfigObject["Gridlayout"][0]["distance"].asString());
    Config::SetDefault("ns3::LteUePhy::EnableUplinkPowerControl", BooleanValue(true));
@@ -489,8 +485,13 @@ main (int argc, char *argv[])
   Ipv4ListRoutingHelper list;
   list.Add (staticRouting, 0);
   list.Add (olsr, 10);
-  internet.SetRoutingHelper (list);
-  internet.Install (remoteHostContainer);
+  /*if (DDoS){
+    internetMIM.SetRoutingHelper (list);
+    internetMIM.Install (remoteHostContainer);
+  }else{*/
+    internet.SetRoutingHelper (list);
+    internet.Install (remoteHostContainer);
+  //}
 
   PointToPointHelper p2ph2;
   p2ph2.SetDeviceAttribute ("DataRate", DataRateValue (DataRate (topologyConfigObject["Channel"][0]["P2PRate"].asString())));
@@ -552,8 +553,13 @@ main (int argc, char *argv[])
  
 
   // Install the IP stack on the UEs
-  internet.SetRoutingHelper (list);
-  internet.Install (ueNodes);
+  if (DDoS){
+    internetMIM.SetRoutingHelper (list);
+    internetMIM.Install (ueNodes); 
+  }else{
+    internet.SetRoutingHelper (list);
+    internet.Install (ueNodes);
+  }
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
   // Assign IP address to UEs, and install applications
@@ -576,8 +582,13 @@ main (int argc, char *argv[])
   int numSSPUE = configObject["microgrid"].size(); //10;
   NodeContainer subNodes;
   subNodes.Create (numSSPUE);
-  internet.SetRoutingHelper (list);
-  internet.Install (subNodes);
+  /*if (DDoS){
+    internetMIM.SetRoutingHelper (list);
+    internetMIM.Install (subNodes);
+  }else{*/
+    internet.SetRoutingHelper (list);
+    internet.Install (subNodes);
+  //}
 
   NodeContainer botNodes;
   botNodes.Create(numBots);
@@ -656,7 +667,7 @@ main (int argc, char *argv[])
 
 
   setRoutingTable(remoteHostContainer, subNodes, MIM, ueNodes, gateway);
-  //changeRoute (remoteHostContainer, subNodes, MIM, ueNodes, gateway, 2);
+  changeRoute (remoteHostContainer, subNodes, MIM, ueNodes, gateway, 2);
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
 
@@ -736,7 +747,8 @@ main (int argc, char *argv[])
 	     
 	     Ptr<Dnp3ApplicationNew> master = dnp3Master.Install (remoteHost, std::string(cc_name+ep_name));
 	     dnpMasterApp.Add(master);
-	     
+            
+             	     
 	     Dnp3ApplicationHelperNew dnp3Outstation ("ns3::UdpSocketFactory", InetSocketAddress (tempnode1->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal(), port)); //star.GetSpokeIpv4Address (i), port));
 	     dnp3Outstation.SetAttribute("LocalPort", UintegerValue(port));
 	     dnp3Outstation.SetAttribute("RemoteAddress", AddressValue(remoteHostAddr)); //star.GetHubIpv4Address(i)));
@@ -750,6 +762,7 @@ main (int argc, char *argv[])
 	     
 	     Ptr<Dnp3ApplicationNew> slave = dnp3Outstation.Install (tempnode1, std::string(ep_name));
 	     dnpOutstationApp.Add(slave);
+	     
 	     Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, master, std::stoi(configObject["Simulation"][0]["PollReqFreq"].asString()));
 	     //Simulator::Schedule(MilliSeconds(3005), &Dnp3ApplicationNew::send_control_analog, master, 
 	     //		           Dnp3ApplicationNew::DIRECT, 0, -16);
@@ -847,7 +860,6 @@ main (int argc, char *argv[])
     int MAX_BULK_BYTES = std::stof(configObject["DDoS"][0]["PacketSize"].asString()); //20971520000;
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
 
-    bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
 
     if (DDoS){
 	    ApplicationContainer onOffApp[botNodes.GetN()];
@@ -918,7 +930,7 @@ main (int argc, char *argv[])
     std::cout << "Done Setting up the bots " << std::endl;
 
     NodeContainer endpointNodes;
-    endpointNodes.Add (remoteHost);
+    endpointNodes.Add (remoteHostContainer.Get(0));
     for (int i = 0; i < ueNodes.GetN(); i++){
         endpointNodes.Add (ueNodes.Get (i));
     }
