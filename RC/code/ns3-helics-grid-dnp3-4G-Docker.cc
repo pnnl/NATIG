@@ -47,9 +47,9 @@
 #include "ns3/dnp3-application-helper-new.h"
 #include "ns3/dnp3-simulator-impl.h"
 
-#include <json/json.h>
-#include <json/forwards.h>
-#include <json/writer.h>
+#include <jsoncpp/json/json.h>
+#include <jsoncpp/json/forwards.h>
+#include <jsoncpp/json/writer.h>
 
 #include <filesystem>
 #include <iostream>
