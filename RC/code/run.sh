@@ -35,7 +35,8 @@ fi
 
 #sbatch run-helics.sh ${helicsLOGlevel} ${helicsOutFile}
 cd ${ROOT_PATH} && \
-helics_broker --slowresponding --federates=2 --port=9000 --loglevel=${helicsLOGlevel} >> ${helicsOutFile} 2>&1 & \
+v2=$( grep 'brokerPort' gridlabd_config.json | sed -r 's/^[^:]*:(.*)$/\1/' | sed 's/,//' ) \
+helics_broker --slowresponding --federates=2 --port=$v2 --loglevel=${helicsLOGlevel} >> ${helicsOutFile} 2>&1 & \
  #helics_app tracer test.txt --config-file endpoints.txt --loglevel 7 --timedelta 1 >> tracer.txt 2>&1 & \
 cd -
 
