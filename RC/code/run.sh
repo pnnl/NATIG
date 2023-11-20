@@ -110,7 +110,7 @@ cd ${ns3Dir} && \
 cp ${ROOT_PATH}/${modelName}.cc ${ns3Model}.cc && \
 ./make.sh "$1" && \
   #./waf --run "scratch/${modelName}" >> ${ns3OutFile} 2>&1 & \
-  mpirun -np 1 ./waf --run "scratch/${modelName} --helicsConfig=${helicsConfig} --microGridConfig=${microGridConfig} --topologyConfig=${topologyConfig} --pointFileDir=${configDir} --pcapFileDir=$pcapFileDir" >> ${ns3OutFile} 2>&1 & \
+  ./waf --run "scratch/${modelName} --helicsConfig=${helicsConfig} --microGridConfig=${microGridConfig} --topologyConfig=${topologyConfig} --pointFileDir=${configDir} --pcapFileDir=$pcapFileDir" >> ${ns3OutFile} 2>&1 & \
   cd -
 
 if [[ "$3" == "RC" ]]

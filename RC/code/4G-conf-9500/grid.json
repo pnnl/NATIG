@@ -6530,15 +6530,20 @@
                         ]
                 }
         ],
+	"Controller": [
+                      {
+                          "use": 0
+		      }
+	],
         "DDoS": [
                 {
                         "NumberOfBots": 4,
                         "Active": 1,
                         "Start": 10,
-                        "End": 20,
-                        "TimeOn": 20.0,
+                        "End": 35,
+                        "TimeOn": 25.0,
                         "TimeOff": 0.0,
-                        "PacketSize": 1048576,
+                        "PacketSize": 1500,
                         "Rate": "40480kb/s",
                         "NodeType": [
                                 "UE"

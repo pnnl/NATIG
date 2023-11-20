@@ -14,7 +14,8 @@ NOTE: The default docker container does not come with 5G enabled
 
 Once the setup is done you can start to run the out of the box examples
 1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
-2. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_
+2. make sure that all TP*.txt files are removed by running ` rm -r TP*.txt `
+3. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_
 
 Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G "" ` . Change the 3rd parameter to RC when running of docker in a unix cluster that uses slurm.
 
@@ -22,7 +23,7 @@ When refering to the 3G example, we are talking about topologies that just use a
 
 ## Out of the box examples
 
-4G example using a start topology.
+4G example using a star topology.
 
 10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 4G relay antennas (GnB nodes), and one control center.
 This example runs the IEEE 9500 model
@@ -59,6 +60,23 @@ Interesting outputted data:
 
   - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Bytes received since last measured timestep, Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
 
+## How to stop the run?
+
+If running using Docker, to stop the run run ` bash killall.sh ` to make sure most threads stop
+
+  - Once script has finished runing run ` ps aux | grep root ` to check that no other thread related to ns3 is still running
+
+  - If some threads have been found run ` kill -9 \<ID number\> ` to kill the remaining thread
+
+## Is the code running?
+
+Once the code has started there are several ways to track the progress:
+
+1. run ` ps aux | grep root ` to see if you can see ns3, helics and gridlabd threads
+
+2. run ` tail -\< Number of lines chosen \> output/ns3-helics-grid-dnp3-\< chosen example ID\>.log ` to see the most recent outputed lines from the run
+
+3. run ` cat TP.txt ` to see the throughput monitoring file being populated
 
 ## 5G configuration
 

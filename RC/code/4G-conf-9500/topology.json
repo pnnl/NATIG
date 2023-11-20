@@ -9,8 +9,8 @@
                         "WifiPropagationDelay": "ConstantSpeedPropagationDelayModel",
                         "WifiRate": "DsssRate1Mbps",
                         "WifiStandard": "80211b",
-                        "P2PRate": "100Mb/s",
-			"MTU": 2500,
+                        "P2PRate": "150Mb/s",
+			"MTU": 1500,
                         "delay": 0
                 }
         ],
@@ -18,8 +18,8 @@
                 {
                         "MinX": 0,
                         "MinY": 0,
-                        "DeltaX": 50,
-                        "DeltaY": 50,
+                        "DeltaX": 40,
+                        "DeltaY": 80,
                         "GridWidth": 10,
 			"distance": 15,
 			"GnBH": 10.0,
@@ -47,7 +47,7 @@
 			"num1": 2,
 			"num2": 0,
                         "scenario": "UMi-StreetCayon",
-                        "txPower": 60
+                        "txPower": 40
                 }
         ],
         "Node": [
