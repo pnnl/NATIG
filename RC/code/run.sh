@@ -33,9 +33,28 @@ then
 fi
 
 
+if [[ "$2" == "4G" ]]
+then
+cp -r ../../RC/code/4G-conf-9500/*.json config/
+cp -r ../../RC/code/4G-conf-9500/*.glm .
+modelName="ns3-helics-grid-dnp3-4G"
+fi
+if [[ "$2" == "5G" ]]
+then
+cp -r ../../RC/code/5G-conf-9500/*.json config/
+cp -r ../../RC/code/5G-conf-9500/*.glm .
+modelName="ns3-helics-grid-dnp3-5G"
+fi
+if [[ "$2" == "3G" ]]
+then
+cp -r ../../RC/code/4G-conf-9500/*.glm .
+modelName="ns3-helics-grid-dnp3"
+fi
+
 #sbatch run-helics.sh ${helicsLOGlevel} ${helicsOutFile}
+v2=$( grep 'brokerPort' ${PWD}/config/gridlabd_config.json | sed -r 's/^[^:]*:(.*)$/\1/' | sed 's/,//' | sed 's/ //' )
+
 cd ${ROOT_PATH} && \
-v2=$( grep 'brokerPort' gridlabd_config.json | sed -r 's/^[^:]*:(.*)$/\1/' | sed 's/,//' ) \
 helics_broker --slowresponding --federates=2 --port=$v2 --loglevel=${helicsLOGlevel} >> ${helicsOutFile} 2>&1 & \
  #helics_app tracer test.txt --config-file endpoints.txt --loglevel 7 --timedelta 1 >> tracer.txt 2>&1 & \
 cd -
@@ -74,23 +93,6 @@ cd ${gldDir} && \
 # ===== setting up ns-3 configurations =====
 ns3Dir="/${PWD}/../../ns-3-dev"
 ns3Scratch="${ns3Dir}/scratch"
-if [[ "$2" == "4G" ]]
-then
-cp -r ../../RC/code/4G-conf-9500/*.json config/
-cp -r ../../RC/code/4G-conf-9500/*.glm .
-modelName="ns3-helics-grid-dnp3-4G"
-fi
-if [[ "$2" == "5G" ]]
-then
-cp -r ../../RC/code/5G-conf-9500/*.json config/
-cp -r ../../RC/code/5G-conf-9500/*.glm .
-modelName="ns3-helics-grid-dnp3-5G" 
-fi
-if [[ "$2" == "3G" ]]
-then
-cp -r ../../RC/code/4G-conf-9500/*.glm .
-modelName="ns3-helics-grid-dnp3"
-fi
 
 ns3Model="${ns3Scratch}/${modelName}"
 configDir="${ROOT_PATH}/config/"
