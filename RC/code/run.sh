@@ -35,19 +35,19 @@ fi
 
 if [[ "$2" == "4G" ]]
 then
-cp -r ../../RC/code/4G-conf-9500/*.json config/
-cp -r ../../RC/code/4G-conf-9500/*.glm .
+cp -r ../../PUSH/NATIG/RC/code/4G-conf-9500/*.json config/
+cp -r ../../PUSH/NATIG/RC/code/4G-conf-9500/*.glm .
 modelName="ns3-helics-grid-dnp3-4G"
 fi
 if [[ "$2" == "5G" ]]
 then
-cp -r ../../RC/code/5G-conf-9500/*.json config/
-cp -r ../../RC/code/5G-conf-9500/*.glm .
+cp -r ../../PUSH/NATIG/RC/code/5G-conf-9500/*.json config/
+cp -r ../../PUSH/NATIG/RC/code/5G-conf-9500/*.glm .
 modelName="ns3-helics-grid-dnp3-5G"
 fi
 if [[ "$2" == "3G" ]]
 then
-cp -r ../../RC/code/4G-conf-9500/*.glm .
+cp -r ../../PUSH/NATIG/RC/code/4G-conf-9500/*.glm .
 modelName="ns3-helics-grid-dnp3"
 fi
 
