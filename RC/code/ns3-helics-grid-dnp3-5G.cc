@@ -276,7 +276,7 @@ void Throughput (){
 
 		FILE * pFile;
 		pFile = fopen (loc2.c_str(),"a");
-		if (pFile!=NULL)
+		if (pFile!=NULL and ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 > 0)
 		{
 			fprintf(pFile, netStatsOut.str().c_str());
 			fclose (pFile);
@@ -591,43 +591,6 @@ main (int argc, char *argv[])
   double maxBigBoxX = 20.0; //20.0; //110,0;
   double maxBigBoxY =  10.0; //10.0; //35.0;
 
-/*  for (uint8_t j = 0; j < int(numNodePairs/2); j++)
-    {
-      double minSmallBoxY = minBigBoxY + j * (maxBigBoxY - minBigBoxY) / 2;
-
-      for (uint8_t i = j; i < j+2; i++)
-        {
-          double minSmallBoxX = minBigBoxX + i * (maxBigBoxX - minBigBoxX) / int(numNodePairs/2);
-          Ptr<UniformRandomVariable> ueRandomVarX = CreateObject<UniformRandomVariable> ();
-
-          double minX = minSmallBoxX;
-          double maxX = minSmallBoxX + (maxBigBoxX - minBigBoxX) / 2 - 0.0001;
-          double minY = minSmallBoxY;
-          double maxY = minSmallBoxY + (maxBigBoxY - minBigBoxY) / int(numNodePairs/2) - 0.0001;
-
-          Ptr<RandomBoxPositionAllocator> ueRandomRectPosAlloc = CreateObject<RandomBoxPositionAllocator> ();
-          ueRandomVarX->SetAttribute ("Min", DoubleValue (minX));
-          ueRandomVarX->SetAttribute ("Max", DoubleValue (maxX));
-          ueRandomRectPosAlloc->SetX (ueRandomVarX);
-          Ptr<UniformRandomVariable> ueRandomVarY = CreateObject<UniformRandomVariable> ();
-          ueRandomVarY->SetAttribute ("Min", DoubleValue (minY));
-          ueRandomVarY->SetAttribute ("Max", DoubleValue (maxY));
-          ueRandomRectPosAlloc->SetY (ueRandomVarY);
-          Ptr<ConstantRandomVariable> ueRandomVarZ = CreateObject<ConstantRandomVariable> ();
-          ueRandomVarZ->SetAttribute ("Constant", DoubleValue (ueHeight));
-          ueRandomRectPosAlloc->SetZ (ueRandomVarZ);
-
-	  staPositionAlloc->Add(Vector(ueRandomVarX->GetValue(minX,maxX), ueRandomVarY->GetValue(minY,maxY), ueHeight));
-
-        }
-    }
-  for (uint8_t j = 0; j < 2; j++)
-    {
-      for (uint8_t i = 0; i < int(numNodePairs/2); i++)
-        {
-          apPositionAlloc->Add (Vector ( i * distance, j * distance, gNbHeight));
-        }
-    }*/
 
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   //mobility.SetPositionAllocator (apPositionAlloc);
@@ -664,11 +627,16 @@ main (int argc, char *argv[])
   OperationBandInfo band2 = ccBwpCreator.CreateOperationBandContiguousCc (bandConf2);
 
   Config::SetDefault ("ns3::ThreeGppChannelModel::UpdatePeriod",TimeValue (MilliSeconds (0)));
-  nrHelper->SetChannelConditionModelAttribute ("UpdatePeriod", TimeValue (MilliSeconds (0)));
+  //nrHelper->SetChannelConditionModelAttribute ("UpdatePeriod", TimeValue (MilliSeconds (0)));
   nrHelper->SetPathlossAttribute ("ShadowingEnabled", BooleanValue (false));
   
   Config::SetDefault ("ns3::LteEnbRrc::SrsPeriodicity", UintegerValue (std::stoi(topologyConfigObject["5GSetup"][0]["Srs"].asString()))); //320));
   nrHelper->SetSchedulerTypeId (TypeId::LookupByName ("ns3::NrMacSchedulerTdmaPF"));
+
+  //bool useFixedMcs = true;
+  //nrHelper->SetSchedulerTypeId (TypeId::LookupByName ("ns3::NrMacSchedulerTdmaRR"));
+  //nrHelper->SetSchedulerAttribute ("FixedMcsDl", BooleanValue (useFixedMcs));
+  //nrHelper->SetSchedulerAttribute ("FixedMcsUl", BooleanValue (useFixedMcs));
 
   nrHelper->InitializeOperationBand (&band1);
 
@@ -697,6 +665,13 @@ main (int argc, char *argv[])
   uint32_t bwpIdForLowLat = 1;
   uint32_t bwpIdForVoice = 1;
 
+  //nrHelper->SetUlErrorModel ("ns3::NrEesmIrT1");
+  //nrHelper->SetDlErrorModel ("ns3::NrEesmIrT1");
+
+  // Both DL and UL AMC will have the same model behind.
+  //nrHelper->SetGnbDlAmcAttribute ("AmcModel", EnumValue (NrAmc::ErrorModel)); // NrAmc::ShannonModel or NrAmc::ErrorModel
+  //nrHelper->SetGnbUlAmcAttribute ("AmcModel", EnumValue (NrAmc::ErrorModel));
+
   nrHelper->SetGnbBwpManagerAlgorithmAttribute ("NGBR_LOW_LAT_EMBB", UintegerValue (bwpIdForLowLat));
   nrHelper->SetGnbBwpManagerAlgorithmAttribute ("GBR_CONV_VOICE", UintegerValue (bwpIdForVoice));
 
@@ -712,12 +687,12 @@ main (int argc, char *argv[])
 
   for (int i = 0; i < enbNetDev.GetN (); i++){
       nrHelper->GetGnbPhy (enbNetDev.Get (i), 0)->SetAttribute ("Numerology", UintegerValue (numerologyBwp1));
-      nrHelper->GetGnbPhy (enbNetDev.Get (i), 0)->SetAttribute ("TxPower", DoubleValue (10 * log10 ((bandwidthBand1 / totalBandwidth) * x)));
+      nrHelper->GetGnbPhy (enbNetDev.Get (i), 0)->SetAttribute ("TxPower", DoubleValue (totalTxPower)); //10 * log10 ((bandwidthBand1 / totalBandwidth) * x)));
 
        // Get the first netdevice (enbNetDev.Get (0)) and the second bandwidth part (1)
        // and set the attribute.
        nrHelper->GetGnbPhy (enbNetDev.Get (i), 1)->SetAttribute ("Numerology", UintegerValue (numerologyBwp2));
-       nrHelper->GetGnbPhy (enbNetDev.Get (i), 1)->SetTxPower (10 * log10 ((bandwidthBand2 / totalBandwidth) * x));
+       nrHelper->GetGnbPhy (enbNetDev.Get (i), 1)->SetTxPower (totalTxPower); //10 * log10 ((bandwidthBand2 / totalBandwidth) * x));
    }
 
   for (auto it = enbNetDev.Begin (); it != enbNetDev.End (); ++it)
@@ -745,7 +720,7 @@ main (int argc, char *argv[])
   //Point to point for bots:
   PointToPointHelper p2ph2;
   p2ph2.SetDeviceAttribute ("DataRate", DataRateValue (DataRate (topologyConfigObject["Channel"][0]["P2PRate"].asString())));
-  p2ph2.SetDeviceAttribute ("Mtu", UintegerValue (std::stoi(topologyConfigObject["Channel"][0]["MTU"].asString())));
+  p2ph2.SetDeviceAttribute ("Mtu", UintegerValue (std::stoi(configObject["DDoS"][0]["PacketSize"].asString())));
   p2ph2.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (std::stoi(topologyConfigObject["Channel"][0]["delay"].asString()))));
 
   //Valid traffic point to point
@@ -821,7 +796,6 @@ main (int argc, char *argv[])
 
   Ipv4InterfaceContainer inter;
   Ipv4InterfaceContainer inter_MIM;
-  std::stringstream addrTrans;
   for (int i = 0; i < csmaSubNodes.size(); i++){
     NetDeviceContainer internetDevicesSub = csma.Install (csmaSubNodes[i]);
 
@@ -915,6 +889,29 @@ main (int argc, char *argv[])
   for (i = 0;i < configObject["microgrid"].size();i++)
       {
 	    //if (systemId == i){
+	    std::string delimiter = ".";
+            std::ostringstream ss;
+            ss << subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal();//ipHeader.GetSource();
+            std::vector<std::string> ip;
+            std::string ip_ = ss.str();
+            size_t pos = 0;
+            while ((pos = ip_.find(delimiter)) != std::string::npos) {
+               ip.push_back(ip_.substr(0, pos));
+               ip_.erase(0, pos + delimiter.length());
+            }
+
+            std::stringstream ss1;
+            ss1 << ip[1];
+            //int IDx;
+            //ss1 >> IDx;
+            std::cout << "I am " << ip[1] << std::endl;
+            string temp = ss1.str().substr(ss1.str().length() - 1, 1);
+            std::stringstream ss2;
+            ss2 << temp;
+            int ID2;
+            ss2 >> ID2;
+            interface[ID2] = i+1;
+
             mimPort.push_back(master_port);
             auto ep_name = configObject["microgrid"][i]["name"].asString();
             std::cout << "Microgrid network node: " << ep_name << " " << subNodes.GetN() << " " << configObject["microgrid"][i].size() << " " << i << std::endl;

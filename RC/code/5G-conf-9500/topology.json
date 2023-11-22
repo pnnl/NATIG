@@ -9,8 +9,8 @@
                         "WifiPropagationDelay": "ConstantSpeedPropagationDelayModel",
                         "WifiRate": "DsssRate1Mbps",
                         "WifiStandard": "80211b",
-                        "P2PRate": "100Mb/s",
-			"MTU": 2500,
+                        "P2PRate": "150Mb/s",
+			"MTU": 1500,
 			"delay": 0
                 }
         ],
@@ -18,8 +18,8 @@
                 {
                         "MinX": 0,
                         "MinY": 0,
-                        "DeltaX": 40,
-                        "DeltaY": 40,
+                        "DeltaX": 20,
+                        "DeltaY": 20,
                         "GridWidth": 10,
 			"distance": 15,
 			"GnBH": 10.0,
@@ -34,20 +34,20 @@
                         "N1Delay": 0.01,
                         "N2Delay": 0.01,
                         "Srs": 10,
-                        "UeRow": 2,
-                        "UeCol": 4,
-                        "GnBRow": 4,
-                        "GnBCol": 8,
+                        "UeRow": 4,
+                        "UeCol": 8,
+                        "GnBRow": 8,
+                        "GnBCol": 4,
                         "numUE": 10,
                         "numEnb": 10,
 			"CentFreq1": 28e9,
 			"CentFreq2": 28.2e9,
-			"Band1": 100e6,
-			"Band2": 100e6,
-			"num1": 4,
-			"num2": 2,
+			"Band1": 150e6,
+			"Band2": 150e6,
+			"num1": 2,
+			"num2": 0,
                         "scenario": "UMi-StreetCayon",
-                        "txPower": 4
+                        "txPower": 40
                 }
         ],
         "Node": [

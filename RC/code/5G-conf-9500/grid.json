@@ -6532,7 +6532,7 @@
         ],
 	"Controller": [
                       {
-                          "use": 0
+                          "use": 1
                       }
         ],
         "DDoS": [
@@ -6543,7 +6543,7 @@
                         "End": 35,
                         "TimeOn": 25.0,
                         "TimeOff": 0.0,
-                        "PacketSize": 1048576,
+                        "PacketSize": 1500,
                         "Rate": "40480kb/s",
                         "NodeType": [
                                 "UE"
@@ -6551,7 +6551,7 @@
                         "NodeID": [
                                 2
                         ],
-                        "endPoint": "MIM"
+                        "endPoint": "CC"
                 }
         ],
         "MIM": [
