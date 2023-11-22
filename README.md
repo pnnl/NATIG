@@ -11,9 +11,9 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
 
 [Out of the box examples (5G)](https://github.com/pnnl/NATIG/blob/master/README.md#5G-out-of-the-box-example)
 
-[How to check if the code is running](https://github.com/pnnl/NATIG/blob/master/README.md#Is-the-code-running?)
+[How to check if the code is running](https://github.com/pnnl/NATIG/blob/master/README.md#Is-the-code-running)
 
-[How to stop the code](https://github.com/pnnl/NATIG/blob/master/README.md#How-to-stop-the-run?)
+[How to stop the code](https://github.com/pnnl/NATIG/blob/master/README.md#How-to-stop-the-run)
 
 ## How to get started
 1. Have docker installed
