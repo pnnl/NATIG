@@ -94,7 +94,7 @@ This example runs the IEEE 9500 model
 DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
 
 DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
-
+```
 NumberOfBots": 4,
 
 Active: 1 ( 1 means that the DDoS is active and 0 means that the DDoS is inactive)
@@ -110,7 +110,7 @@ Rate: "40480kb/s",
 legitNodeUsedByBots: UE, (This is the node that the bots conducting the DDoS attack connect to)
 
 endPoint: MIM (Refers to the end point of the attack. Usefull if you want to attack multiple links)
-
+```
 MIM --> Middle node between the UE and the substation
 
 To run this example in docker: ` sudo bash run.sh /rd2c/ 5G "" `
