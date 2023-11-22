@@ -3,17 +3,17 @@
 It is a standalone, containerized, and reusable environment to enable cyber analysts and researchers to run different cyber security and performance scenarios on powergrid. 
 
 ## Table of contents
-[How to get started](https://github.com/pnnl/NATIG/blob/master/README.md#how-to-get-started)
+[How to get started](https://github.com/pnnl/NATIG/tree/master/README.md#how-to-get-started)
 
-[Out of the box examples (4G)](https://github.com/pnnl/NATIG/blob/master/README.md#out-of-the-box-examples)
+[Out of the box examples (4G)](https://github.com/pnnl/NATIG/tree/master/README.md#out-of-the-box-examples)
 
-[5G configuration](https://github.com/pnnl/NATIG/blob/master/README.md#5G-configuration)
+[5G configuration](https://github.com/pnnl/NATIG/tree/master/README.md#5G-configuration)
 
-[Out of the box examples (5G)](https://github.com/pnnl/NATIG/blob/master/README.md#5G-out-of-the-box-example)
+[Out of the box examples (5G)](https://github.com/pnnl/NATIG/tree/master/README.md#5G-out-of-the-box-example)
 
-[How to check if the code is running](https://github.com/pnnl/NATIG/blob/master/README.md#Is-the-code-running)
+[How to check if the code is running](https://github.com/pnnl/NATIG/tree/master/README.md#Is-the-code-running)
 
-[How to stop the code](https://github.com/pnnl/NATIG/blob/master/README.md#How-to-stop-the-run)
+[How to stop the code](https://github.com/pnnl/NATIG/tree/master/README.md#How-to-stop-the-run)
 
 ## How to get started
 1. Have docker installed
