@@ -184,7 +184,8 @@ RUN cd $RD2C \
     && cp -r RC/code/helics-backup/model/dnp3-application-new.h ${RD2C}/ns-3-dev/contrib/helics/model/ \
     && cp -r RC/code/helics-backup/model/dnp3-application-new-Docker.cc ${RD2C}/ns-3-dev/contrib/helics/model/dnp3-application-new.cc \
     && cp -r RC/code/helics-backup/model/dnp3-helics-application-Docker.cc ${RD2C}/ns-3-dev/contrib/helics/model/dnp3-helics-application.cc \
-    && cp -r RC/code/internet/* ${RD2C}/ns-3-dev/src/internet/ 
+    && cp -r RC/code/internet/* ${RD2C}/ns-3-dev/src/internet/ \
+    && cp -r RC/code/lte/* ${RD2C}/ns-3-dev/src/lte/ 
 
 RUN apt-get update && apt-get install -y procps
 # ----------------------------------------------------
