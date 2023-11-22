@@ -201,10 +201,9 @@ EpcPgwApplication::RecvFromTunDevice (Ptr<Packet> packet, const Address& source,
   NS_LOG_UNCOND("CHECK HERE PLEASEEEE " << source << " " << dest);
 
   std::string line;
-  FILE * myfile;
   std::string loc = std::getenv("RD2C");
   std::string loc1 = loc + "/integration/control/add.txt";
-  myfile = fopen (loc1.c_str(),"w");
+  std::ifstream myfile (loc1.c_str());
   std::map<Ipv4Address, std::vector<std::string>> mymap;
   std::string delimiter = ": ";
   if (myfile.is_open())
