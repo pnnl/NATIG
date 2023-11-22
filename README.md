@@ -2,6 +2,19 @@
 
 It is a standalone, containerized, and reusable environment to enable cyber analysts and researchers to run different cyber security and performance scenarios on powergrid. 
 
+## Table of contents
+[How to get started](https://github.com/pnnl/NATIG/tree/master/README.md#how-to-get-started)
+
+[Out of the box examples (4G)](https://github.com/pnnl/NATIG/tree/master/README.md#out-of-the-box-examples)
+
+[5G configuration](https://github.com/pnnl/NATIG/tree/master/README.md#5G-configuration)
+
+[Out of the box examples (5G)](https://github.com/pnnl/NATIG/tree/master/README.md#5G-out-of-the-box-example)
+
+[How to check if the code is running](https://github.com/pnnl/NATIG/tree/master/README.md#Is-the-code-running)
+
+[How to stop the code](https://github.com/pnnl/NATIG/tree/master/README.md#How-to-stop-the-run)
+
 ## How to get started
 1. Have docker installed
 2. clone the NATIG repo
@@ -31,7 +44,7 @@ This example runs the IEEE 9500 model
 DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
 
 DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
-
+```
 NumberOfBots": 4,
 
 Active: 1 ( 1 means that the DDoS is active and 0 means that the DDoS is inactive)
@@ -47,7 +60,7 @@ Rate: "40480kb/s",
 legitNodeUsedByBots: UE, (This is the node that the bots conducting the DDoS attack connect to)
 
 endPoint: MIM (Refers to the end point of the attack. Usefull if you want to attack multiple links)
-
+```
 MIM --> Middle node between the UE and the substation
 
 To run this example in docker: ` sudo bash run.sh /rd2c/ 4G "" `
@@ -94,7 +107,7 @@ This example runs the IEEE 9500 model
 DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
 
 DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
-
+```
 NumberOfBots": 4,
 
 Active: 1 ( 1 means that the DDoS is active and 0 means that the DDoS is inactive)
@@ -110,7 +123,7 @@ Rate: "40480kb/s",
 legitNodeUsedByBots: UE, (This is the node that the bots conducting the DDoS attack connect to)
 
 endPoint: MIM (Refers to the end point of the attack. Usefull if you want to attack multiple links)
-
+```
 MIM --> Middle node between the UE and the substation
 
 To run this example in docker: ` sudo bash run.sh /rd2c/ 5G "" `
@@ -203,10 +216,9 @@ NOTE: to change the helics broker's port, the run.sh, the gridlabd\_config.json 
 2. Parameter changes (Man-in-the-middle): The attacker modifies the Pref and Qref values of two inverters in Microgrid 1 while the microgrids are islanded
 3. DDoS: The attacker generates a number of bots that will flood 1 to n nodes in the network to slow down the network performance
 
-### Comming soon
-1. Insider attack
-2. DDoS attack on base network
-3. 5G attack vectors, example attack at the SDN level, attacks on slice configurations, etc.
+### In progress
+
+
 
 
 ### Reference
