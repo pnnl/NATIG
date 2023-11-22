@@ -2,6 +2,19 @@
 
 It is a standalone, containerized, and reusable environment to enable cyber analysts and researchers to run different cyber security and performance scenarios on powergrid. 
 
+## Table of contents
+[How to get started](https://github.com/pnnl/NATIG/edit/master/README.md#how-to-get-started)
+
+[Out of the box examples (4G)](https://github.com/pnnl/NATIG/edit/master/README.md#out-of-the-box-examples)
+
+[5G configuration](https://github.com/pnnl/NATIG/edit/master/README.md#5G-configuration)
+
+[Out of the box examples (5G)](https://github.com/pnnl/NATIG/edit/master/README.md#5G-out-of-the-box-example)
+
+[How to check if the code is running](https://github.com/pnnl/NATIG/edit/master/README.md#Is-the-code-running?)
+
+[How to stop the code](https://github.com/pnnl/NATIG/edit/master/README.md#How-to-stop-the-run?)
+
 ## How to get started
 1. Have docker installed
 2. clone the NATIG repo
@@ -203,10 +216,9 @@ NOTE: to change the helics broker's port, the run.sh, the gridlabd\_config.json 
 2. Parameter changes (Man-in-the-middle): The attacker modifies the Pref and Qref values of two inverters in Microgrid 1 while the microgrids are islanded
 3. DDoS: The attacker generates a number of bots that will flood 1 to n nodes in the network to slow down the network performance
 
-### Comming soon
-1. Insider attack
-2. DDoS attack on base network
-3. 5G attack vectors, example attack at the SDN level, attacks on slice configurations, etc.
+### In progress
+
+
 
 
 ### Reference
