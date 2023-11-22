@@ -38,7 +38,7 @@ cp -r ../PUSH/NATIG/RC/code/applications/* src/applications/
 cp -r ../PUSH/NATIG/RC/code/internet/* src/internet/
 cp -r ../PUSH/NATIG/RC/code/lte/* src/lte/
 cp -r ../PUSH/NATIG/RC/code/point-to-point-layout/* src/point-to-point-layout/
-sudo ./make.sh
+sudo ./make.sh $2
 if [ "$1" == "5G" ]; then
     echo "installing 5G"
     cd contrib
@@ -47,6 +47,6 @@ if [ "$1" == "5G" ]; then
     git checkout 5g-lena-v1.2.y
     cd ../../
     cp -r ../PUSH/NATIG/patch/nr/* contrib/nr/
-    sudo ./make.sh
+    sudo ./make.sh $2
 fi
 #sudo ./make.sh
