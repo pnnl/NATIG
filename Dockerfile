@@ -167,7 +167,7 @@ RUN cd $RD2C \
     && cd PUSH \
     && git clone https://github.com/pnnl/NATIG.git \
     && cd NATIG \
-    && ./build_ns3.sh ${RD2C} 
+    && ./build_ns3.sh "" ${RD2C} 
 
 RUN cd $RD2C \
     && git clone https://github.com/pnnl/NATIG.git \
