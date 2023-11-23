@@ -160,6 +160,8 @@ RUN cd ${RD2C} \
 
 RUN apt-get update && apt-get install -y libjsoncpp-dev
 
+RUN apt-get update && apt-get install gcc --without-multilib --with-fortran
+
 RUN cd ${RD2C} \
     && wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz \
     && tar -xvf openmpi-4.1.5.tar.gz \
