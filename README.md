@@ -217,8 +217,8 @@ NOTE: to change the helics broker's port, the run.sh, the gridlabd\_config.json 
 3. DDoS: The attacker generates a number of bots that will flood 1 to n nodes in the network to slow down the network performance
 
 ### In progress
-
-
+1. MPI capabilities for the code
+2. Examples for Man-In-The-Middle attacks
 
 
 ### Reference
