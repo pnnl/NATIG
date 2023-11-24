@@ -166,7 +166,8 @@ RUN cd ${RD2C} \
     && wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz \
     && tar -xvf openmpi-4.1.5.tar.gz \
     && cd openmpi-4.1.5/ \
-    && CC=gcc FC=gfortran ./configure --prefix=${RD2C} \
+    && ./configure --prefix=${RD2C} F77=gfortran FC=gfortran \
+      CC=clang CXX=c++ --enable-static\
     && make \
     && make install 
 
