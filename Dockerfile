@@ -162,13 +162,8 @@ RUN apt-get update && apt-get install -y libjsoncpp-dev
 
 RUN apt-get update && apt-get install gcc 
 
-RUN cd ${RD2C} \
-    && wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz \
-    && tar -xvf openmpi-4.1.5.tar.gz \
-    && cd openmpi-4.1.5/ \
-    && ./configure --prefix=${RD2C} F77=gfortran FC=gfortran \
-    && make \
-    && make install 
+RUN apt-get install openmpi-bin openmpi-common libopenmpi-dev libgtk2.0-dev
+
 
 ENV LDFLAGS="-ljsoncpp -L/usr/local/include/jsoncpp/"
 RUN cd $RD2C \
