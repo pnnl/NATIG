@@ -160,9 +160,9 @@ RUN cd ${RD2C} \
 
 RUN apt-get update && apt-get install -y libjsoncpp-dev
 
-RUN apt-get update && apt-get install gcc 
+RUN apt-get update && apt-get install -y gcc 
 
-RUN apt-get install openmpi-bin openmpi-common libopenmpi-dev libgtk2.0-dev
+RUN apt-get install -y openmpi-bin openmpi-common libopenmpi-dev libgtk2.0-dev
 
 
 ENV LDFLAGS="-ljsoncpp -L/usr/local/include/jsoncpp/"
