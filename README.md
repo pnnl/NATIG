@@ -95,7 +95,8 @@ Once the code has started there are several ways to track the progress:
 
 To enable 5G capabilities:
 1. request access to https://gitlab.com/cttc-lena/nr
-2. run ``` ./build_ns3.sh 5G ``` from the NATIG folder in the PUSH folder
+2. run ``` ./build_ns3.sh 5G /<root folder that the simulation is run on>/ ``` from the NATIG folder in the PUSH folder
+  - in the case of Docker run ``` ./build_ns3.sh 5G /rd2c/ ```
 
 ## 5G out of the box example
 
