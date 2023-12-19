@@ -28,9 +28,9 @@ NOTE: The default docker container does not come with 5G enabled
 Once the setup is done you can start to run the out of the box examples
 1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
 2. make sure that all TP*.txt files are removed by running ` rm -r TP*.txt `
-3. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_
+3. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_ _[9500/123]_
 
-Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G "" ` . Change the 3rd parameter to RC when running of docker in a unix cluster that uses slurm.
+Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G "" 9500 ` . Change the 3rd parameter to RC when running of docker in a unix cluster that uses slurm. The 4th parameter is the model number that will be used by gridlabd for the simulation.
 
 When refering to the 3G example, we are talking about topologies that just use a combination of point to point connections, CSMA connections and wifi connections. There is no 4G or 5G in these examples. 
 
@@ -63,9 +63,13 @@ endPoint: MIM (Refers to the end point of the attack. Usefull if you want to att
 ```
 MIM --> Middle node between the UE and the substation
 
-To run this example in docker: ` sudo bash run.sh /rd2c/ 4G "" `
+To run this example in docker: ` sudo bash run.sh /rd2c/ 4G "" 9500 `
 
-To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 4G RC `
+To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 4G "" 123 `
+
+To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 4G RC 9500 `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 4G RC 123 `
 
 Interesting outputted data:
 
@@ -127,9 +131,13 @@ endPoint: MIM (Refers to the end point of the attack. Usefull if you want to att
 ```
 MIM --> Middle node between the UE and the substation
 
-To run this example in docker: ` sudo bash run.sh /rd2c/ 5G "" `
+To run this example in docker: ` sudo bash run.sh /rd2c/ 5G "" 9500 `
 
-To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 5G RC `
+To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 5G "" 123 `
+
+To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 5G RC 9500 `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 4G RC 123 `
 
 Interesting outputted data:
 
