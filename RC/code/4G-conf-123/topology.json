@@ -1,45 +1,56 @@
 {
-    "Channel": [
-	    {
-             "P2Pdelay":"2ms",
-	     "CSMAdelay":"6560",
-	     "dataRate": "5Mbps",
-	     "jitterMin": 10,
-	     "jitterMax": 100,
-	     "WifiPropagationDelay": "ConstantSpeedPropagationDelayModel",
-	     "WifiRate": "DsssRate1Mbps",
-	     "WifiStandard": "80211b",
-	     "P2PRate": "100Mb/s" 
-	    }
+        "Channel": [
+         {
+            "P2PDelay": "2ms",
+            "CSMAdelay": "6560",
+            "dataRate": "5Mbps",
+            "jitterMin": 10,
+            "jitterMax": 100,
+            "WifiPropagationDelay": "ConstantSpeedPropagationDelayModel",
+            "WifiRate": "DsssRate1Mbps",
+            "WifiStandard": "80211b",
+            "P2PRate": "150Mb/s",
+	    "MTU": 1500,
+	    "delay": 0
+        }
     ],
     "Gridlayout": [
-        {
-	    "MinX":0,
-	    "MinY":0,
-	    "DeltaX":500,
-	    "DeltaY":500,
-            "GridWidth":5,
-	    "LayoutType":"RowFirst",
-	    "setPos":1
-	}
+         {
+            "MinX": 0,
+            "MinY": 0,
+            "DeltaX": 20,
+            "DeltaY": 20,
+            "GridWidth": 10,
+	    "distance": 15,
+	    "GnBH": 10.0,
+	    "UEH": 1.5,
+            "LayoutType": "RowFirst",
+            "SetPos": 1
+        }
     ],
     "5GSetup": [
-        {
-           "S1uLinkDelay": 1,
-	   "N1Delay": 0.01,
-	   "N2Delay": 0.01,
-	   "Srs": 5,
-	   "UeRow":8,
-	   "UeCol":4,
-	   "GnBRow":4,
-	   "GnBCol":8,
-	   "numUE": 4,
-	   "numEnb":4,
-	   "scenario":"UMi-StreetCanyon",
-	   "txPower": 40  
-	}
+            {
+                "S1uLinkDelay": 0,
+                "N1Delay": 0.01,
+                "N2Delay": 0.01,
+                "Srs": 10,
+                "UeRow": 4,
+                "UeCol": 8,
+                "GnBRow": 8,
+                "GnBCol": 4,
+                "numUE": 4,
+                "numEnb": 4,
+		"CentFreq1": 28e9,
+		"CentFreq2": 28.2e9,
+		"Band1": 150e6,
+		"Band2": 150e6,
+	        "num1": 2,
+        	"num2": 0,
+                "scenario": "UMi-StreetCayon",
+                "txPower": 40
+          }
     ],
-    "Node": [
+        "Node": [
           {
 		  "name":0,
 		  "connections": [

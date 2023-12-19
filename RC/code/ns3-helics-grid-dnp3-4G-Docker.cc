@@ -29,6 +29,7 @@
 #include <cassert>
 #include <math.h>
 #include <stdio.h>
+#include <numeric>
 #include "ns3/core-module.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/internet-module.h"
@@ -77,7 +78,8 @@ Ptr<FlowMonitor> flowMonitor;
 FlowMonitorHelper flowHelper;
 std::map<FlowId, double> tp_transmitted;
 std::map<int, int> previous;
-std::map<int, std::map<int, int>> route_perf;
+std::map<int, std::map<int, std::vector<int>>> route_perf;
+std::map<int, std::string> monitor;
 std::map<int, int> interface;
 void readMicroGridConfig(std::string fpath, Json::Value& configobj)
 {
@@ -172,8 +174,8 @@ void PrintRoutingTable (Ptr<Node>& n)
 void Throughput (){
         Ptr<Ipv4FlowClassifier> classifier=DynamicCast<Ipv4FlowClassifier>(flowHelper.GetClassifier());
 
-        std::stringstream netStatsOut;
         std::stringstream netStatsOut2;
+	std::vector<int> seen;
         std::string loc = std::getenv("RD2C");
         std::string loc1 = loc + "/integration/control/TP-Prob.txt";
         std::string loc2 = loc + "/integration/control/TP.txt";
@@ -214,6 +216,7 @@ void Throughput (){
         for (map< FlowId, FlowMonitor::FlowStats>::iterator
                         flow=stats.begin(); flow!=stats.end(); flow++)
         {
+		std::stringstream netStatsOut;
                 Ipv4FlowClassifier::FiveTuple  t = classifier->FindFlow(flow->first);
                 switch(t.protocol)
                 {
@@ -245,38 +248,47 @@ void Throughput (){
                 ss1 << ip[1];
                 int ID;
                 ss1 >> ID;
+                string temp = ss1.str().substr(ss1.str().length() - 1, 1);
+                std::stringstream ss2;
+                ss2 << temp;
+                int ID2;
+                ss2 >> ID2;
 
+		if (ID > 0){
+                    std::cout << "I am HERE -------------------------- " << ss1.str() << std::endl;
+                    std::cout << "Choosing interface " << std::to_string(interface[ID2]) << "for" << std::to_string(ID) << std::endl;
+                    if (route_perf.find(ID2) == route_perf.end()){
+                          std::map<int, std::vector<int>> xxx;
+                          route_perf[ID2] = xxx;
+                    }
 
-		if (ID>106){
-			std::cout << "I am HERE -------------------------- " << ss1.str() << std::endl;
-                        string temp = ss1.str().substr(ss1.str().length() - 1, 1);
-                        std::stringstream ss2;
-                        ss2 << temp;
-                        int ID2;
-                        ss2 >> ID2;
-			std::cout << "Choosing interface " << std::to_string(interface[ID2]) << "for" << std::to_string(ID) << std::endl;
-		        if (route_perf.find(ID2) == route_perf.end()){
-			    std::map<int, int> xxx;
-			    route_perf[ID2] = xxx;
-		        } 
-		        route_perf[ID2][interface[ID2]] = ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024;
+                    route_perf[ID2][interface[ID2]].push_back((1-(((double)flow->second.txBytes-(double)flow->second.rxBytes)/(double)flow->second.txBytes))*(((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024)); 
 		}
 
-		if (int(flow->first) < 21){
-                double rx = (double)flow->second.rxBytes;
-                netStatsOut << Simulator::Now ().GetSeconds () << " " <<  flow->first << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 << " " << flow->second.lostPackets << " " << rx - tp_transmitted[flow->first] << " " << flow->second.txBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
-                tp_transmitted[flow->first] = (double)flow->second.rxBytes;                
-                FILE * pFile;
-                pFile = fopen (loc2.c_str(),"a");
-                if (pFile!=NULL)
+		if (((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 > 0 )
                 {
-                        fprintf(pFile, netStatsOut.str().c_str());
-                        fclose (pFile);
+                        double rx = (double)flow->second.rxBytes;
+                        if (ID == 0){
+			     netStatsOut << Simulator::Now ().GetSeconds () << " " << t.sourcePort << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 << " " << flow->second.lostPackets << " " <<  (double)flow->second.rxBytes << " " << flow->second.txBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
+                            monitor[t.sourcePort] = netStatsOut.str();
+                        }else{
+		             netStatsOut << Simulator::Now ().GetSeconds () << " " <<  t.destinationPort << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 << " " << flow->second.lostPackets << " " <<  (double)flow->second.rxBytes << " " << flow->second.txBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
+                            monitor[t.destinationPort] = netStatsOut.str();
+                        }
+                        tp_transmitted[flow->first] = (double)flow->second.rxBytes;
                 }
-		}
+
 
         }
-        Simulator::Schedule (Seconds (.1), &Throughput); // Callback every 0.5s
+	FILE * pFile;
+        pFile = fopen (loc2.c_str(),"a");
+        map<int, std::string>::iterator it;
+        for (it = monitor.begin(); it != monitor.end(); it++)
+        {
+              fprintf(pFile, it->second.c_str());
+        }
+        fclose (pFile);
+        Simulator::Schedule (Seconds (.05), &Throughput); // Callback every 0.5s
 
 }
 
@@ -356,7 +368,7 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
   }
 }
 
-void changeRoute (NodeContainer remoteHostContainer, NodeContainer subNodes, NodeContainer MIM, NodeContainer ueNodes, Ipv4Address gateway, int index) {
+/*void changeRoute (NodeContainer remoteHostContainer, NodeContainer subNodes, NodeContainer MIM, NodeContainer ueNodes, Ipv4Address gateway, int index) {
           std::cout << "Getting the available interfaces" << std::endl;
           Ipv4StaticRoutingHelper ipv4RoutingHelper;
           Ptr<Ipv4> ipv4_2 = subNodes.Get(index-1)->GetObject<Ipv4>();
@@ -461,6 +473,160 @@ void changeRoute (NodeContainer remoteHostContainer, NodeContainer subNodes, Nod
           subNodes.Get(index-1)->GetObject<Ipv4>()->SetDown(index); 
       
           Simulator::Schedule(MilliSeconds(500), changeRoute, remoteHostContainer, subNodes, MIM, ueNodes, gateway, nextNode_ind);
+}*/
+
+void changeRoute (std::vector<NodeContainer> nodes, Ipv4Address gateway, int index, std::string fileID) { //NodeContainer remoteHostContainer, NodeContainer subNodes, NodeContainer MIM, NodeContainer ueNodes, Ipv4Address gateway, int index, std::string fileID) {
+          std::cout << "Getting the available interfaces" << std::endl;
+          Ipv4StaticRoutingHelper ipv4RoutingHelper;
+          Ptr<Ipv4> ipv4_2 = nodes[1].Get(index-1)->GetObject<Ipv4>();
+          int NewIndex = 1 + (rand() % int(nodes[3].GetN())); //random - (rand() % int(nodes[3].GetN()/2));
+          if (NewIndex > nodes[1].GetN()){
+              NewIndex =  nodes[1].GetN();
+          }
+
+         std::string delimiter = ".";
+          std::ostringstream ss;
+          ss << ipv4_2->GetAddress(index,0);//ipHeader.GetSource();
+          std::vector<std::string> ip;
+          std::string ip_ = ss.str();
+          size_t pos = 0;
+          while ((pos = ip_.find(delimiter)) != std::string::npos) {
+               ip.push_back(ip_.substr(0, pos));
+               ip_.erase(0, pos + delimiter.length());
+          }
+
+          std::stringstream ss1;
+          ss1 << ip[1];
+          int ID2;
+          ss1 >> ID2;
+          //string temp(ss1.str().back());
+          std::cout << "I am " << ip[1] << std::endl;
+          string temp = ss1.str().substr(ss1.str().length() - 1, 1);
+          std::stringstream ss2;
+          ss2 << temp;
+          int ID;
+          ss2 >> ID;
+
+         if (previous.find(index-1) != previous.end()){
+            if (not nodes[1].Get(index-1)->GetObject<Ipv4>()->IsUp(previous[index-1])){
+              nodes[1].Get(index-1)->GetObject<Ipv4>()->SetUp(previous[index-1]);
+            }
+          }
+
+          if (not nodes[1].Get(index-1)->GetObject<Ipv4>()->IsUp(interface[ID])){
+             nodes[1].Get(index-1)->GetObject<Ipv4>()->SetUp(interface[ID]);
+          }
+          if (not nodes[1].Get(index-1)->GetObject<Ipv4>()->IsUp(NewIndex)){
+             nodes[1].Get(index-1)->GetObject<Ipv4>()->SetUp(NewIndex);
+          }
+          std::cout << "Random number " << random << std::endl;
+
+
+          map<int, std::vector<int>>::iterator it;
+          map<int, map<int, std::vector<int>>>::iterator itx;
+          map<int, int> min;
+          map<int, int> max;
+          int nextNode_ind = NewIndex; //(rand() % int(ueNodes.GetN())-2);
+          int nextNode_TP = 10000000;
+          std::vector<int> IDs;
+          if (route_perf[ID].size() > 0){
+             for (itx = route_perf.begin(); itx != route_perf.end(); itx++){
+               int TP_min = 10000000;
+               int TP_max = 0;
+               int ind = 0;
+               int ind_max = 0;
+               int count = 0;
+               for (it = route_perf[itx->first].begin(); it != route_perf[itx->first].end(); it++){
+		 int average = (std::accumulate(it->second.begin(), it->second.end(),0) / it->second.size()) + (it->second[-1]-it->second[-2]); 
+                 std::cout << std::to_string(it->first) << ':' << std::to_string(average) << std::endl;
+                 if (average < TP_min){
+                     TP_min = average;
+                     ind = it->first;
+                 }
+                 if (average < nextNode_TP){
+                     nextNode_TP = average;
+                     nextNode_ind = it->first;
+                 }
+                 if (average > TP_max){
+                     TP_max = average;
+                     ind_max = it->first;
+                 }
+                 count += 1;
+               }
+               std::cout << itx->first << " " << ind << ':' << TP_min << std::endl;
+	       std::cout << itx->first << " " << ind_max << ':' << TP_max << std::endl;
+               min[itx->first] = ind;
+               max[itx->first] = ind_max;
+	       IDs.push_back(itx->first);
+             }
+             std::cout << nextNode_ind << ':' << nextNode_TP << std::endl;
+             NewIndex = max[ID];
+	     //Adding a connection to Kishan's code here
+             bool found = false;
+             struct stat buffer;
+             if (stat (fileID.c_str(), &buffer) == 0){
+               std::vector<int> selIDs;
+               std::string line;
+               std::ifstream infile(fileID.c_str());
+               NewIndex = interface[ID];
+               while (std::getline(infile, line))
+               {
+                 std::string delimiter = ".";
+                 size_t pos = 0;
+                 std::string token;
+                 token = line.substr(0, pos);
+                 line.erase(0, pos + delimiter.length());
+                 int nodeID = std::stoi(token);
+                 if (index == nodeID){
+                     NewIndex = std::stoi(line)+1;
+                 }
+                 if (nextNode_ind == nodeID){
+                     found = true;
+                 }
+                 selIDs.push_back(nodeID);
+               }
+               if (not found){
+                  int minTemp = 1000000;
+                  for (int ind = 0; ind < selIDs.size(); ind ++){
+                      if (min[IDs[selIDs[ind]]] < minTemp){
+                          minTemp = min[IDs[selIDs[ind]]];
+                          nextNode_ind = IDs[selIDs[ind]];
+                      }
+                  }
+               }
+             }
+             int flag = (rand() % 10);
+             if (flag < 2){
+		 nextNode_ind =  1 + (rand() % int(nodes[3].GetN()));
+                 //int random3 = int(nodes[3].GetN()/2)+(rand() % int(nodes[3].GetN()/2));
+                 NewIndex = 1 + (rand() % int(nodes[3].GetN()));//random3 - (rand() % int(nodes[3].GetN()/2));
+             }
+          }
+
+          while (NewIndex == 0){
+               NewIndex = 1 + (rand() % int(nodes[3].GetN()));
+          }
+          if (not nodes[1].Get(index-1)->GetObject<Ipv4>()->IsUp(NewIndex)){
+             nodes[1].Get(index-1)->GetObject<Ipv4>()->SetUp(NewIndex);
+          }
+
+          if (NewIndex != interface[ID]){
+            Ipv4InterfaceAddress add12 = ipv4_2->GetAddress(NewIndex,0);
+            Ipv4InterfaceAddress add1 = ipv4_2->GetAddress(interface[ID],0);
+            ipv4_2->AddAddress (NewIndex, add1);
+            ipv4_2->AddAddress (interface[ID], add12);
+            ipv4_2->RemoveAddress (interface[ID], add1.GetLocal());
+            ipv4_2->RemoveAddress (NewIndex, add12.GetLocal());
+            setRoutingTable(nodes[0], nodes[1], nodes[2], nodes[3], gateway);
+            updateUETable(nodes[1], nodes[3]);
+            previous[index-1] = interface[ID];
+
+            nodes[1].Get(index-1)->GetObject<Ipv4>()->SetDown(interface[ID]);
+            interface[ID] = NewIndex;
+            Simulator::Schedule(MilliSeconds(500), changeRoute, nodes, gateway, nextNode_ind, fileID);
+          }else{
+            Simulator::Schedule(MilliSeconds(500), changeRoute, nodes, gateway, nextNode_ind, fileID);
+          }
 }
 
 int
@@ -908,7 +1074,12 @@ main (int argc, char *argv[])
       }
   int control = std::stoi(configObject["Controller"][0]["use"].asString());
   if (control){
-      Simulator::Schedule(MilliSeconds(1000), changeRoute, remoteHostContainer, subNodes, MIM, ueNodes, gateway, 2);
+      std::vector<NodeContainer> nodes;
+      nodes.push_back(remoteHostContainer);
+      nodes.push_back(subNodes);
+      nodes.push_back(MIM);
+      nodes.push_back(ueNodes);
+      Simulator::Schedule(MilliSeconds(1000), changeRoute, nodes, gateway, 2, configObject["Controller"][0]["actionFile"].asString());
   }
   fedName = helics_federate->getName();
   std::cout << "Federate name: " << helics_federate->getName().c_str() << std::endl;
