@@ -273,7 +273,11 @@ void Throughput (){
                 std::stringstream timestamp;
                 timestamp << Simulator::Now ().GetSeconds ();
                 features.push_back(timestamp.str());
-                //Path ID
+                //Port
+		std::stringstream port;
+                port << t.sourcePort;
+                features.push_back(port.str());
+		//Path ID
                 std::stringstream pathID;
                 pathID << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") ";
                 features.push_back(pathID.str());
@@ -322,7 +326,7 @@ void Throughput (){
                           route_perf[ID2] = xxx;
                     }
 		    //rerouting the paths according to the throughput
-		    route_perf[ID2][interface[ID2]].push_back(std::stof(features[2]));
+		    route_perf[ID2][interface[ID2]].push_back(std::stof(features[3]));
 		}
 
 
