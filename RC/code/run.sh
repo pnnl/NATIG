@@ -35,14 +35,14 @@ fi
 
 if [[ "$2" == "4G" ]]
 then
-cp -r ../../PUSH/NATIG/RC/code/4G-conf-9500/*.json config/
-cp -r ../../PUSH/NATIG/RC/code/4G-conf-9500/*.glm .
+cp -r ../../PUSH/NATIG/RC/code/4G-conf-${4}/*.json config/
+cp -r ../../PUSH/NATIG/RC/code/4G-conf-${4}/*.glm .
 modelName="ns3-helics-grid-dnp3-4G"
 fi
 if [[ "$2" == "5G" ]]
 then
-cp -r ../../PUSH/NATIG/RC/code/5G-conf-9500/*.json config/
-cp -r ../../PUSH/NATIG/RC/code/5G-conf-9500/*.glm .
+cp -r ../../PUSH/NATIG/RC/code/5G-conf-${4}/*.json config/
+cp -r ../../PUSH/NATIG/RC/code/5G-conf-${4}/*.glm .
 modelName="ns3-helics-grid-dnp3-5G"
 fi
 if [[ "$2" == "3G" ]]
@@ -62,7 +62,14 @@ cd -
 # ===== starting GridLAB-D ===== 
 gldDir="${ROOT_PATH}"
 gldOutFile="${OUT_DIR}/gridlabd.log"
-gldModelFile="${gldDir}/ieee8500.glm"
+if [[ "$4" == "9500" ]]
+then
+  gldModelFile="${gldDir}/ieee8500.glm"
+fi
+if [[ "$4" == "123" ]]
+then
+  gldModelFile="${gldDir}/IEEE_123_Dynamic.glm"
+fi
 if test -e $gldOutFile
 then
   echo "$gldOutFile exists. Deleting..."
@@ -112,7 +119,6 @@ if test -e $ns3OutFile
 cd ${ns3Dir} && \
 cp ${ROOT_PATH}/${modelName}.cc ${ns3Model}.cc && \
 ./make.sh "$1" && \
-  #./waf --run "scratch/${modelName}" >> ${ns3OutFile} 2>&1 & \
   ./waf --run "scratch/${modelName} --helicsConfig=${helicsConfig} --microGridConfig=${microGridConfig} --topologyConfig=${topologyConfig} --pointFileDir=${configDir} --pcapFileDir=$pcapFileDir" >> ${ns3OutFile} 2>&1 & \
   cd -
 
