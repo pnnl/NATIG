@@ -34,6 +34,8 @@ Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G
 
 When refering to the 3G example, we are talking about topologies that just use a combination of point to point connections, CSMA connections and wifi connections. There is no 4G or 5G in these examples. 
 
+Finally, when collecting data from recorders in gridlabd, with the IEEE 9500 bus model the files get fully populated at the end of the run. _currently under investigation_
+
 ## Out of the box examples
 
 4G example using a star topology.
