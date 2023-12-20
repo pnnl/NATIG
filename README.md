@@ -100,7 +100,7 @@ Interesting outputted data:
 
 1. TP.txt this file contains the performance of each path full path between the control center and the substation. To read this file only take the 20 last inputs per timesteps. if the number of substation changes, only read the last 2 X the number of substations rows per timesteps.
 
-  - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Bytes received since last measured timestep, Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
+  - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Total received bytes since the start of the simulation , Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
 
 ## How to stop the run?
 
@@ -168,7 +168,67 @@ Interesting outputted data:
 
 1. TP.txt this file contains the performance of each path full path between the control center and the substation. To read this file only take the 20 last inputs per timesteps. if the number of substation changes, only read the last 2 X the number of substations rows per timesteps.
 
-  - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Bytes received since last measured timestep, Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
+  - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Total received bytes since the start of the simulation , Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
+
+## Example output data
+
+NS3 example output data:
+
+Code generates a file containing the performance of paths between the Substations and the Control center
+
+Location: File called TP.txt is located in integration/control/ folder
+
+Column IDs: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Total received bytes since the start of the simulation , Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
+
+Example output for DDoS out of the box example on 5G network:
+
+```
+1.05 20000 (UDP 1.0.0.2 / 20000 --> 172.17.0.3 / 20000) 62.4727 0 343 343 0 0.0027614 7 7 0.00143351
+1.05 40000 (UDP 172.107.0.3 / 20000 --> 1.0.0.2 / 40000) 2409.84 0 9918 21028 0.528571 0.00702642 70 33 0.000376239
+1.05 40001 (UDP 172.108.0.3 / 20000 --> 1.0.0.2 / 40001) 3654.13 0 15578 25676 0.395604 0.00445615 91 55 0.000375062
+1.05 40002 (UDP 172.109.0.3 / 20000 --> 1.0.0.2 / 40002) 5027.92 0 24951 33663 0.258929 0.00431755 112 83 0.000253965
+1.05 40003 (UDP 172.110.0.3 / 20000 --> 1.0.0.2 / 40003) 5094.66 0 21982 36883 0.404762 0.00457615 126 75 0.000253877
+1.05 40004 (UDP 172.111.0.3 / 20000 --> 1.0.0.2 / 40004) 5634.63 0 26154 44226 0.408163 0.00504666 147 87 0.000363581
+1.05 40005 (UDP 172.112.0.3 / 20000 --> 1.0.0.2 / 40005) 4569.61 0 16290 53844 0.697802 0.00578028 182 55 0.00045446
+1.05 40006 (UDP 172.113.0.3 / 20000 --> 1.0.0.2 / 40006) 12935.8 0 50112 59521 0.157635 0.00483181 203 171 0.000196482
+1.05 40007 (UDP 172.114.0.3 / 20000 --> 1.0.0.2 / 40007) 7145.32 0 31503 71393 0.558824 0.00595131 238 105 0.000302485
+1.05 40008 (UDP 172.115.0.3 / 20000 --> 1.0.0.2 / 40008) 10829.2 0 49198 84511 0.417857 0.00569313 280 163 0.000209076
+1.05 40009 (UDP 172.116.0.3 / 20000 --> 1.0.0.2 / 40009) 13533.5 0 58298 100436 0.419643 0.00586743 336 195 0.000153357
+1.05 49153 (UDP 1.0.0.2 / 49153 --> 172.116.0.3 / 20000) 62.474 0 343 343 0 0.00247497 7 7 0.00129082
+1.05 49154 (UDP 1.0.0.2 / 49154 --> 172.105.0.3 / 20000) 62.4741 0 343 343 0 0.00190355 7 7 0.00100508
+1.05 49155 (UDP 1.0.0.2 / 49155 --> 172.83.0.3 / 20000) 62.4741 0 343 343 0 0.00333212 7 7 0.00171937
+1.05 49156 (UDP 1.0.0.2 / 49156 --> 172.61.0.3 / 20000) 62.4741 0 343 343 0 0.00161216 7 7 0.000719382
+1.05 49157 (UDP 1.0.0.2 / 49157 --> 172.50.0.3 / 20000) 62.4741 0 343 343 0 0.00190357 7 7 0.00100508
+1.05 49158 (UDP 1.0.0.2 / 49158 --> 172.28.0.3 / 20000) 62.4741 0 343 343 0 0.00190355 7 7 0.0010051
+1.05 49159 (UDP 1.0.0.2 / 49159 --> 172.72.0.3 / 20000) 62.4741 0 343 343 0 0.00390983 7 7 0.00200508
+1.05 49160 (UDP 1.0.0.2 / 49160 --> 172.39.0.3 / 20000) 62.4741 0 343 343 0 0.0011836 7 7 0.000290798
+1.05 49161 (UDP 1.0.0.2 / 49161 --> 172.94.0.3 / 20000) 62.4741 0 343 343 0 0.00218926 7 7 0.00114794
+1.1 20000 (UDP 1.0.0.2 / 20000 --> 172.17.0.3 / 20000) 58.3214 0 686 686 0 0.0018276 14 14 0.000716774
+1.1 40000 (UDP 172.107.0.3 / 20000 --> 1.0.0.2 / 40000) 2944.77 0 31550 42056 0.25 0.00614299 140 105 0.000432111
+1.1 40001 (UDP 172.108.0.3 / 20000 --> 1.0.0.2 / 40001) 3745.95 0 41556 51352 0.192308 0.0046746 182 147 0.00036117
+1.1 40002 (UDP 172.109.0.3 / 20000 --> 1.0.0.2 / 40002) 5041.71 0 59195 67326 0.120536 0.00470509 224 197 0.000315051
+1.1 40003 (UDP 172.110.0.3 / 20000 --> 1.0.0.2 / 40003) 5348.01 0 59167 73766 0.198413 0.00488587 252 202 0.000333664
+1.1 40004 (UDP 172.111.0.3 / 20000 --> 1.0.0.2 / 40004) 6227.26 0 70682 88452 0.20068 0.0052444 294 235 0.000335353
+1.1 40005 (UDP 172.112.0.3 / 20000 --> 1.0.0.2 / 40005) 6926.15 0 70436 107688 0.346154 0.00561846 364 238 0.00033879
+1.1 40006 (UDP 172.113.0.3 / 20000 --> 1.0.0.2 / 40006) 10548.9 0 109935 119042 0.0763547 0.00532056 406 375 0.000239682
+1.1 40007 (UDP 172.114.0.3 / 20000 --> 1.0.0.2 / 40007) 9433.16 0 103198 142786 0.277311 0.00597634 476 344 0.000292309
+1.1 40008 (UDP 172.115.0.3 / 20000 --> 1.0.0.2 / 40008) 12179.6 0 133709 169022 0.208929 0.0059743 560 443 0.000173171
+1.1 40009 (UDP 172.116.0.3 / 20000 --> 1.0.0.2 / 40009) 14696.9 0 159338 200872 0.206845 0.00613447 672 533 0.000161582
+1.1 49153 (UDP 1.0.0.2 / 49153 --> 172.116.0.3 / 20000) 58.322 0 686 686 0 0.00190303 14 14 0.00108371
+1.1 49154 (UDP 1.0.0.2 / 49154 --> 172.105.0.3 / 20000) 57.4183 0 686 686 0 0.00181145 14 14 0.000605874
+1.1 49155 (UDP 1.0.0.2 / 49155 --> 172.83.0.3 / 20000) 58.322 0 686 686 0 0.00211247 14 14 0.000859698
+1.1 49156 (UDP 1.0.0.2 / 49156 --> 172.61.0.3 / 20000) 58.322 0 686 686 0 0.00125248 14 14 0.000359708
+1.1 49157 (UDP 1.0.0.2 / 49157 --> 172.50.0.3 / 20000) 58.322 0 686 686 0 0.00139818 14 14 0.00050255
+1.1 49158 (UDP 1.0.0.2 / 49158 --> 172.28.0.3 / 20000) 58.322 0 686 686 0 0.00139817 14 14 0.000502563
+1.1 49159 (UDP 1.0.0.2 / 49159 --> 172.72.0.3 / 20000) 58.322 0 686 686 0 0.00240132 14 14 0.00100255
+1.1 49160 (UDP 1.0.0.2 / 49160 --> 172.39.0.3 / 20000) 58.322 0 686 686 0 0.0010382 14 14 0.00014542
+1.1 49161 (UDP 1.0.0.2 / 49161 --> 172.94.0.3 / 20000) 58.3221 0 686 686 0 0.00154102 14 14 0.000573984
+```
+
+
+Gridlabd example output data:
+
+TBD
 
 ## How to run it on a unix cluster
 
