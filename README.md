@@ -38,12 +38,19 @@ Finally, when collecting data from recorders in gridlabd, with the IEEE 9500 bus
 
 ## Out of the box examples
 
-4G example using a star topology.
+4G or point to point example using a star topology.
 
+For 4G network:
 When using the IEEE 9500 bus model, the topology contains 10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 4G relay antennas (EnB nodes), and one control center.
 When using the IEEE 123 bus model, the topology contains 4 substation, 4 middle nodes, 4 user equipments (UE) connected to 4 4G relay antennas (EnB nodes), and one control center.
 
-DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
+For base point to point connected star topology
+When using the IEEE 9500 bus model, the topology contains 10 substation, 10 middle nodes, and one control center.
+When using the IEEE 123 bus model, the topology contains 4 substation, 4 middle nodes, and one control center.
+
+DDoS enabled and running between 10 and 35 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
+
+When refering to MIM nodes for DDoS attack scenario: These nodes are simple hops in the network between the substation and the UE nodes for 4G network, or the Control center for the base point to point connected network.
 
 DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
 ```
@@ -63,7 +70,9 @@ legitNodeUsedByBots: UE, (This is the node that the bots conducting the DDoS att
 
 endPoint: MIM (Refers to the end point of the attack. Usefull if you want to attack multiple links)
 ```
-MIM --> Middle node between the UE and the substation
+MIM --> Middle node between the UE and the substation/Control center
+
+Using 4G as the communication protocol:
 
 To run this example in docker: ` sudo bash run.sh /rd2c/ 4G "" 9500 `
 
@@ -72,6 +81,16 @@ To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/
 To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 4G RC 9500 `
 
 To run this example in a unix cluster using slurm with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 4G RC 123 `
+
+Using base point to point connected star topology:
+
+To run this example in docker: ` sudo bash run.sh /rd2c/ 3G "" 9500 `
+
+To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 3G "" 123 `
+
+To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 3G RC 9500 `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 3G RC 123 `
 
 Interesting outputted data:
 
@@ -111,7 +130,7 @@ To enable 5G capabilities:
 When using the IEEE 9500 bus model, the topology contains 10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 5G relay antennas (GnB nodes), and one control center.
 When using the IEEE 123 bus model, the topology contains 4 substation, 4 middle nodes, 4 user equipments (UE) connected to 4 5G relay antennas (GnB nodes), and one control center.
 
-DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
+DDoS enabled and running between 10 and 35 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
 
 DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
 ```
