@@ -47,7 +47,8 @@ modelName="ns3-helics-grid-dnp3-5G"
 fi
 if [[ "$2" == "3G" ]]
 then
-cp -r ../../PUSH/NATIG/RC/code/4G-conf-9500/*.glm .
+cp -r ../../PUSH/NATIG/RC/code/3G-conf-${4}/*.json config/
+cp -r ../../PUSH/NATIG/RC/code/3G-conf-${4}/*.glm .
 modelName="ns3-helics-grid-dnp3"
 fi
 
