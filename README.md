@@ -181,7 +181,10 @@ Location: File called TP.txt is located in integration/control/ folder
 Column IDs: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Total received bytes since the start of the simulation , Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
 
 Example output for DDoS out of the box example on 5G network:
-
+<details>
+   <summary>
+      5G example NS3 data
+   </summary>
 ```
 1.05 20000 (UDP 1.0.0.2 / 20000 --> 172.17.0.3 / 20000) 62.4727 0 343 343 0 0.0027614 7 7 0.00143351
 1.05 40000 (UDP 172.107.0.3 / 20000 --> 1.0.0.2 / 40000) 2409.84 0 9918 21028 0.528571 0.00702642 70 33 0.000376239
@@ -224,7 +227,7 @@ Example output for DDoS out of the box example on 5G network:
 1.1 49160 (UDP 1.0.0.2 / 49160 --> 172.39.0.3 / 20000) 58.322 0 686 686 0 0.0010382 14 14 0.00014542
 1.1 49161 (UDP 1.0.0.2 / 49161 --> 172.94.0.3 / 20000) 58.3221 0 686 686 0 0.00154102 14 14 0.000573984
 ```
-
+</details>
 
 Gridlabd example output data:
 
