@@ -28,20 +28,33 @@ NOTE: The default docker container does not come with 5G enabled
 Once the setup is done you can start to run the out of the box examples
 1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
 2. make sure that all TP*.txt files are removed by running ` rm -r TP*.txt `
-3. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_
+3. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_ _[9500/123]_
 
-Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G "" ` . Change the 3rd parameter to RC when running of docker in a unix cluster that uses slurm.
+Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G "" 9500 ` . Change the 3rd parameter to RC when running of docker in a unix cluster that uses slurm. The 4th parameter is the model number that will be used by gridlabd for the simulation.
 
 When refering to the 3G example, we are talking about topologies that just use a combination of point to point connections, CSMA connections and wifi connections. There is no 4G or 5G in these examples. 
 
+Finally, when collecting data from recorders in gridlabd, with the IEEE 9500 bus model the files get fully populated at the end of the run. _currently under investigation_
+
 ## Out of the box examples
 
-4G example using a star topology.
+4G or point to point example using a star topology.
 
-10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 4G relay antennas (EnB nodes), and one control center.
-This example runs the IEEE 9500 model
+For 4G network:
 
-DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
+When using the IEEE 9500 bus model, the topology contains 10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 4G relay antennas (EnB nodes), and one control center.
+
+When using the IEEE 123 bus model, the topology contains 4 substation, 4 middle nodes, 4 user equipments (UE) connected to 4 4G relay antennas (EnB nodes), and one control center.
+
+For base point to point connected star topology:
+
+When using the IEEE 9500 bus model, the topology contains 10 substation, 10 middle nodes, and one control center.
+
+When using the IEEE 123 bus model, the topology contains 4 substation, 4 middle nodes, and one control center.
+
+DDoS enabled and running between 10 and 35 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
+
+When refering to MIM nodes for DDoS attack scenario: These nodes are simple hops in the network between the substation and the UE nodes for 4G network, or the Control center for the base point to point connected network.
 
 DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
 ```
@@ -61,17 +74,33 @@ legitNodeUsedByBots: UE, (This is the node that the bots conducting the DDoS att
 
 endPoint: MIM (Refers to the end point of the attack. Usefull if you want to attack multiple links)
 ```
-MIM --> Middle node between the UE and the substation
+MIM --> Middle node between the UE and the substation/Control center
 
-To run this example in docker: ` sudo bash run.sh /rd2c/ 4G "" `
+Using 4G as the communication protocol:
 
-To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 4G RC `
+To run this example in docker: ` sudo bash run.sh /rd2c/ 4G "" 9500 `
+
+To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 4G "" 123 `
+
+To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 4G RC 9500 `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 4G RC 123 `
+
+Using base point to point connected star topology:
+
+To run this example in docker: ` sudo bash run.sh /rd2c/ 3G "" 9500 `
+
+To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 3G "" 123 `
+
+To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 3G RC 9500 `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 3G RC 123 `
 
 Interesting outputted data:
 
 1. TP.txt this file contains the performance of each path full path between the control center and the substation. To read this file only take the 20 last inputs per timesteps. if the number of substation changes, only read the last 2 X the number of substations rows per timesteps.
 
-  - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Bytes received since last measured timestep, Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
+  - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Total received bytes since the start of the simulation , Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
 
 ## How to stop the run?
 
@@ -102,10 +131,10 @@ To enable 5G capabilities:
 
 5G example using a star topology.
 
-10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 5G relay antennas (GnB nodes), and one control center.
-This example runs the IEEE 9500 model
+When using the IEEE 9500 bus model, the topology contains 10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 5G relay antennas (GnB nodes), and one control center.
+When using the IEEE 123 bus model, the topology contains 4 substation, 4 middle nodes, 4 user equipments (UE) connected to 4 5G relay antennas (GnB nodes), and one control center.
 
-DDoS enabled and running between 10 and 20 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
+DDoS enabled and running between 10 and 35 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
 
 DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
 ```
@@ -127,15 +156,69 @@ endPoint: MIM (Refers to the end point of the attack. Usefull if you want to att
 ```
 MIM --> Middle node between the UE and the substation
 
-To run this example in docker: ` sudo bash run.sh /rd2c/ 5G "" `
+To run this example in docker: ` sudo bash run.sh /rd2c/ 5G "" 9500 `
 
-To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 5G RC `
+To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 5G "" 123 `
+
+To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 5G RC 9500 `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 4G RC 123 `
 
 Interesting outputted data:
 
 1. TP.txt this file contains the performance of each path full path between the control center and the substation. To read this file only take the 20 last inputs per timesteps. if the number of substation changes, only read the last 2 X the number of substations rows per timesteps.
 
-  - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Bytes received since last measured timestep, Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
+  - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Total received bytes since the start of the simulation , Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
+
+## Example output data
+
+NS3 example output data:
+
+Code generates a file containing the performance of paths between the Substations and the Control center
+
+Location: File called TP.txt is located in integration/control/ folder
+
+Column IDs: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Total received bytes since the start of the simulation , Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
+
+Example output for DDoS out of the box example on 5G network:
+
+```
+1.05 20000 (UDP 1.0.0.2 / 20000 --> 172.17.0.3 / 20000) 62.4727 0 343 343 0 0.0027614 7 7 0.00143351
+1.05 40000 (UDP 172.107.0.3 / 20000 --> 1.0.0.2 / 40000) 2409.84 0 9918 21028 0.528571 0.00702642 70 33 0.000376239
+1.05 40001 (UDP 172.108.0.3 / 20000 --> 1.0.0.2 / 40001) 3654.13 0 15578 25676 0.395604 0.00445615 91 55 0.000375062
+1.05 40002 (UDP 172.109.0.3 / 20000 --> 1.0.0.2 / 40002) 5027.92 0 24951 33663 0.258929 0.00431755 112 83 0.000253965
+1.05 40003 (UDP 172.110.0.3 / 20000 --> 1.0.0.2 / 40003) 5094.66 0 21982 36883 0.404762 0.00457615 126 75 0.000253877
+1.05 40004 (UDP 172.111.0.3 / 20000 --> 1.0.0.2 / 40004) 5634.63 0 26154 44226 0.408163 0.00504666 147 87 0.000363581
+1.05 40005 (UDP 172.112.0.3 / 20000 --> 1.0.0.2 / 40005) 4569.61 0 16290 53844 0.697802 0.00578028 182 55 0.00045446
+1.05 40006 (UDP 172.113.0.3 / 20000 --> 1.0.0.2 / 40006) 12935.8 0 50112 59521 0.157635 0.00483181 203 171 0.000196482
+1.05 40007 (UDP 172.114.0.3 / 20000 --> 1.0.0.2 / 40007) 7145.32 0 31503 71393 0.558824 0.00595131 238 105 0.000302485
+1.05 40008 (UDP 172.115.0.3 / 20000 --> 1.0.0.2 / 40008) 10829.2 0 49198 84511 0.417857 0.00569313 280 163 0.000209076
+1.05 40009 (UDP 172.116.0.3 / 20000 --> 1.0.0.2 / 40009) 13533.5 0 58298 100436 0.419643 0.00586743 336 195 0.000153357
+1.05 49153 (UDP 1.0.0.2 / 49153 --> 172.116.0.3 / 20000) 62.474 0 343 343 0 0.00247497 7 7 0.00129082
+1.05 49154 (UDP 1.0.0.2 / 49154 --> 172.105.0.3 / 20000) 62.4741 0 343 343 0 0.00190355 7 7 0.00100508
+1.05 49155 (UDP 1.0.0.2 / 49155 --> 172.83.0.3 / 20000) 62.4741 0 343 343 0 0.00333212 7 7 0.00171937
+1.05 49156 (UDP 1.0.0.2 / 49156 --> 172.61.0.3 / 20000) 62.4741 0 343 343 0 0.00161216 7 7 0.000719382
+1.05 49157 (UDP 1.0.0.2 / 49157 --> 172.50.0.3 / 20000) 62.4741 0 343 343 0 0.00190357 7 7 0.00100508
+1.05 49158 (UDP 1.0.0.2 / 49158 --> 172.28.0.3 / 20000) 62.4741 0 343 343 0 0.00190355 7 7 0.0010051
+1.05 49159 (UDP 1.0.0.2 / 49159 --> 172.72.0.3 / 20000) 62.4741 0 343 343 0 0.00390983 7 7 0.00200508
+1.05 49160 (UDP 1.0.0.2 / 49160 --> 172.39.0.3 / 20000) 62.4741 0 343 343 0 0.0011836 7 7 0.000290798
+1.05 49161 (UDP 1.0.0.2 / 49161 --> 172.94.0.3 / 20000) 62.4741 0 343 343 0 0.00218926 7 7 0.00114794
+1.1 20000 (UDP 1.0.0.2 / 20000 --> 172.17.0.3 / 20000) 58.3214 0 686 686 0 0.0018276 14 14 0.000716774
+1.1 40000 (UDP 172.107.0.3 / 20000 --> 1.0.0.2 / 40000) 2944.77 0 31550 42056 0.25 0.00614299 140 105 0.000432111
+...
+...
+1.1 49156 (UDP 1.0.0.2 / 49156 --> 172.61.0.3 / 20000) 58.322 0 686 686 0 0.00125248 14 14 0.000359708
+1.1 49157 (UDP 1.0.0.2 / 49157 --> 172.50.0.3 / 20000) 58.322 0 686 686 0 0.00139818 14 14 0.00050255
+1.1 49158 (UDP 1.0.0.2 / 49158 --> 172.28.0.3 / 20000) 58.322 0 686 686 0 0.00139817 14 14 0.000502563
+1.1 49159 (UDP 1.0.0.2 / 49159 --> 172.72.0.3 / 20000) 58.322 0 686 686 0 0.00240132 14 14 0.00100255
+1.1 49160 (UDP 1.0.0.2 / 49160 --> 172.39.0.3 / 20000) 58.322 0 686 686 0 0.0010382 14 14 0.00014542
+1.1 49161 (UDP 1.0.0.2 / 49161 --> 172.94.0.3 / 20000) 58.3221 0 686 686 0 0.00154102 14 14 0.000573984
+```
+
+
+Gridlabd example output data:
+
+TBD
 
 ## How to run it on a unix cluster
 
