@@ -41,11 +41,15 @@ Finally, when collecting data from recorders in gridlabd, with the IEEE 9500 bus
 4G or point to point example using a star topology.
 
 For 4G network:
+
 When using the IEEE 9500 bus model, the topology contains 10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 4G relay antennas (EnB nodes), and one control center.
+
 When using the IEEE 123 bus model, the topology contains 4 substation, 4 middle nodes, 4 user equipments (UE) connected to 4 4G relay antennas (EnB nodes), and one control center.
 
-For base point to point connected star topology
+For base point to point connected star topology:
+
 When using the IEEE 9500 bus model, the topology contains 10 substation, 10 middle nodes, and one control center.
+
 When using the IEEE 123 bus model, the topology contains 4 substation, 4 middle nodes, and one control center.
 
 DDoS enabled and running between 10 and 35 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
