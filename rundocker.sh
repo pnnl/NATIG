@@ -1,1 +1,1 @@
-winpty docker run -it --rm -d --name=natigbase_container pnnl/natig:natigbase bash
+winpty docker run -it -d --name=natigbase_container pnnl/natig:natigbase bash
