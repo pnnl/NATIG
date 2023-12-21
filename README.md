@@ -2,6 +2,8 @@
 
 It is a standalone, containerized, and reusable environment to enable cyber analysts and researchers to run different cyber security and performance scenarios on powergrid and generate benchmark datasets. It supports IEEE123 and IEEE9500 as the reference powergrid models with communication model using mesh/ring/star topologies. The communication model supports CSMA, WiFi, 4G, and 5G (optional) protocols. 
 
+We demonstrate few attack scenarios in the default framework and provide ways to design additional scenarios using configuration files.
+
 ## Table of contents
 [How to get started](https://github.com/pnnl/NATIG/tree/master/README.md#how-to-get-started)
 
