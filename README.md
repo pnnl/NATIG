@@ -1,6 +1,6 @@
 **N**etwork **A**ttack **T**estbed **I**n [Power] **G**rid (**NATI[P]G**), a co-simulation environment for distribution power grid network using state-of-the-art simulators.
 
-It is a standalone, containerized, and reusable environment to enable cyber analysts and researchers to run different cyber security and performance scenarios on powergrid. 
+It is a standalone, containerized, and reusable environment to enable cyber analysts and researchers to run different cyber security and performance scenarios on powergrid and generate benchmark datasets. It supports IEEE123 and IEEE9500 as the reference powergrid models with communication model using mesh/ring/star topologies. The communication model supports CSMA, WiFi, 4G, and 5G (optional) protocols. 
 
 ## Table of contents
 [How to get started](https://github.com/pnnl/NATIG/tree/master/README.md#how-to-get-started)
@@ -19,20 +19,22 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
 
 ## How to get started
 1. Have docker installed
-2. clone the NATIG repo
+2. clone the NATIG repo ```git clone https://github.com/pnnl/NATIG.git```
 3. run the following commands:
+   ```
    - cd NATIG
-   - bash make_run_docker.sh 
+   - bash make_run_docker.sh
+   ```
    - If you are using MINGW64 (such as gitbash) on windows, please edit the rundocker.sh: ```the input device is not a TTY.  If you are using mintty, try prefixing the command with 'winpty' ```
      
-NOTE: The default docker container does not come with 5G enabled
+**NOTE: The default docker container does not come with 5G enabled**
 
-Once the setup is done you can start to run the out of the box examples
+Once the setup is done you can run the out of the box examples
 1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
 2. make sure that all TP*.txt files are removed by running ` rm -r TP*.txt `
 3. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_ _[9500/123]_
 
-Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G "" 9500 ` . Change the 3rd parameter to RC when running of docker in a unix cluster that uses slurm. The 4th parameter is the model number that will be used by gridlabd for the simulation.
+**Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G "" 9500 ` . Change the 3rd parameter to RC when running of docker in a unix cluster that uses slurm. The 4th parameter is the model number that will be used by gridlabd for the simulation.**
 
 When refering to the 3G example, we are talking about topologies that just use a combination of point to point connections, CSMA connections and wifi connections. There is no 4G or 5G in these examples. 
 
