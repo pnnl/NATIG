@@ -15,6 +15,8 @@ It is a standalone, containerized, and reusable environment to enable cyber anal
 
 [How to stop the code](https://github.com/pnnl/NATIG/tree/master/README.md#How-to-stop-the-run)
 
+[Citation] ( https://github.com/pnnl/NATIG/tree/master/README.md#Reference)
+
 ## How to get started
 1. Have docker installed
 2. clone the NATIG repo
