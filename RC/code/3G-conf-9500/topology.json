@@ -1,24 +1,27 @@
 {
-        "Channel": [
+	"Channel": [
                 {
                         "P2PDelay": "2ms",
                         "CSMAdelay": "6560",
+                        "dataRate": "5Mbps",
                         "jitterMin": 10,
                         "jitterMax": 100,
                         "WifiPropagationDelay": "ConstantSpeedPropagationDelayModel",
                         "WifiRate": "DsssRate1Mbps",
                         "WifiStandard": "80211b",
-                        "P2PRate": "10Mb/s"
+                        "P2PRate": "150Mb/s",
+			"MTU": 1500,
+                        "delay": 0
                 }
         ],
         "Gridlayout": [
                 {
                         "MinX": 0,
                         "MinY": 0,
-                        "DeltaX": 20,
-                        "DeltaY": 20,
+                        "DeltaX": 40,
+                        "DeltaY": 80,
                         "GridWidth": 10,
-			"distance": 60,
+			"distance": 15,
 			"GnBH": 10.0,
 			"UEH": 1.5,
                         "LayoutType": "RowFirst",
@@ -44,7 +47,7 @@
 			"num1": 2,
 			"num2": 0,
                         "scenario": "UMi-StreetCayon",
-                        "txPower": 60
+                        "txPower": 40
                 }
         ],
         "Node": [

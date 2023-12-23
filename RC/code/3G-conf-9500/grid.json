@@ -4,7 +4,7 @@
                         "SimTime": 35,
                         "StartTime": 0.0,
                         "PollReqFreq": 7,
-                        "includeMIM": 0,
+                        "includeMIM": 1,
                         "UseDynTop": 0,
                         "MonitorPerf": 0
                 }
@@ -6530,6 +6530,11 @@
                         ]
                 }
         ],
+	"Controller": [
+                      {
+                          "use": 0
+		      }
+	],
         "DDoS": [
                 {
                         "NumberOfBots": 4,
@@ -6551,19 +6556,19 @@
         ],
         "MIM": [
                 {
-                        "NumberAttackers": 3,
-                        "listMIM": "0,1,2"
+                        "NumberAttackers": 1,
+                        "listMIM": "0"
                 },
                 {
                         "name": "MIM0",
                         "attack_val": "TRIP",
                         "real_val": "NA",
-                        "node_id": "microgrid_switch1",
+                        "node_id": "swt_ln293471_s",
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM1",
