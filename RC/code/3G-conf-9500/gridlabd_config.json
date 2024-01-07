@@ -386,6 +386,30 @@
                         "global": false,
                         "info": "{\"m1209-dies1\":\"bustype\"}"
                 },
+		{
+		        "name": "SS_0_swt_dg1209dies_sw$status",
+			"type": "string",
+			"global": false,
+                        "info": "{\"swt_dg1209dies_sw\": \"status\"}"
+		},
+		{
+                        "name": "SS_0_swt_dg1209dies_sw$phase_A_state",
+			"type": "string",
+			"global": false,
+                        "info": "{\"swt_dg1209dies_sw\": \"phase_A_state\"}"
+		},
+		{
+                        "name": "SS_0_swt_dg1209dies_sw$phase_B_state",
+			"type": "string",
+			"global": false,
+                        "info": "{\"swt_dg1209dies_sw\": \"phase_B_state\"}"
+		},
+		{
+                        "name": "SS_0_swt_dg1209dies_sw$phase_C_state",
+			"type": "string",
+			"global": false,
+                        "info": "{\"swt_dg1209dies_sw\": \"phase_C_state\"}"
+		},
                 {
                         "name": "SS_0_m1026854$phases",
                         "type": "string",
@@ -51755,6 +51779,30 @@
                         "global": false,
                         "info": "{\"x2000704b\":\"nominal_voltage\"}"
                 },
+		{
+		        "name": "SS_9_swt_x8223_48332_sw$status",
+			"type": "string",
+			"global": false,
+                        "info": "{\"swt_x8223_48332_sw\": \"status\"}"
+		},
+		{
+                        "name": "SS_9_swt_x8223_48332_sw$phase_A_state",
+			"type": "string",
+			"global": false,
+                        "info": "{\"swt_x8223_48332_sw\": \"phase_A_state\"}"
+		},
+		{
+                        "name": "SS_9_swt_x8223_48332_sw$phase_B_state",
+			"type": "string",
+			"global": false,
+                        "info": "{\"swt_x8223_48332_sw\": \"phase_B_state\"}"
+		},
+		{
+                        "name": "SS_9_swt_x8223_48332_sw$phase_C_state",
+			"type": "string",
+			"global": false,
+                        "info": "{\"swt_x8223_48332_sw\": \"phase_C_state\"}"
+		},
                 {
                         "name": "SS_9_m1047828$phases",
                         "type": "string",

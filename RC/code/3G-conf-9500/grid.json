@@ -254,6 +254,9 @@
                                 "sx3195327a",
                                 "sx3142049c"
                         ],
+			"switch":[
+                                "swt_dg1209dies_sw"
+			],
 			"diesel_dg":[
                             "dg_diesel620"
                         ]
@@ -5807,7 +5810,7 @@
                                 "line_293471"
                         ],
                         "switch": [
-                                "swt_ln293471_sw"
+                                "swt_x8223_48332_sw"
                         ],
                         "transformer": [
                                 "xf_t5293471c",
@@ -6556,14 +6559,14 @@
         ],
         "MIM": [
                 {
-                        "NumberAttackers": 1,
-                        "listMIM": "0"
+                        "NumberAttackers": 2,
+                        "listMIM": "0,9"
                 },
                 {
                         "name": "MIM0",
                         "attack_val": "TRIP",
                         "real_val": "NA",
-                        "node_id": "swt_ln293471_s",
+                        "node_id": "swt_dg1209dies_sw",
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
@@ -6662,12 +6665,12 @@
                         "name": "MIM9",
                         "attack_val": "TRIP",
                         "real_val": "NA",
-                        "node_id": "microgrid_switch1",
+                        "node_id": "swt_x8223_48332_sw",
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 }
         ],
         "controlCenter": {

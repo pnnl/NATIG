@@ -3,7 +3,7 @@
 clock {
 	timezone "PST+8PDT";
 	starttime '2001-08-01 12:00:00 PST';
-	stoptime '2001-08-01 12:03:00 PST';
+	stoptime '2001-08-01 12:00:35 PST';
 }
 
 #set suppress_repeat_messages=1
@@ -105,7 +105,7 @@ object player {
 //m2001-mt1_dgmtr
 object recorder {
 	parent reg_feeder_reg3a;
-	interval 35;
+	interval 1;
 	file main_regulator.csv;
 	property power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag;
 };
@@ -120,12 +120,40 @@ object recorder {
 
 object recorder {
 	name recorder_microgrid_switch0;
-	parent swt_ln293471_sw;
+	parent swt_dg1209dies_sw;
 	file "switch/microgrid_switch0.csv";
 	property phase_A_state,phase_B_state,phase_C_state;
 	flags DELTAMODE;
 	interval 1;
 };
+
+object recorder {
+        name recorder_microgrid_switch1;
+        parent swt_x8223_48332_sw;
+        file "switch/microgrid_switch1.csv";
+        property phase_A_state,phase_B_state,phase_C_state;
+        flags DELTAMODE;
+        interval 1;
+};
+
+object recorder {
+        name recorder_MG0_freq;
+        parent m1209-dies1;
+        property "GFA_status,measured_frequency";
+        interval 1;
+        flags DELTAMODE;
+        file "gen/MG_0_freq.csv";
+}
+
+object recorder {
+        name recorder_MG9_freq;
+        parent e182724;
+        property "GFA_status,measured_frequency";
+        interval 1;
+        flags DELTAMODE;
+        file "gen/MG_9_freq.csv";
+}
+
 
 object regulator_configuration {
   name "rcon_feeder_reg3a";
@@ -74428,6 +74456,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2001210c_pvmtr";
+  flags DELTAMODE;
   parent "sx2001210c";
   phases CS;
   nominal_voltage 120.09;
@@ -75010,6 +75039,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2001209c_pvmtr";
+  flags DELTAMODE;
   parent "sx2001209c";
   phases CS;
   nominal_voltage 120.09;
@@ -75136,6 +75166,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2001208c_pvmtr";
+  flags DELTAMODE;
   parent "sx2001208c";
   phases CS;
   nominal_voltage 120.09;
@@ -75248,6 +75279,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2001207c_pvmtr";
+  flags DELTAMODE;
   parent "sx2001207c";
   phases CS;
   nominal_voltage 120.09;
@@ -75475,6 +75507,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2001206c_pvmtr";
+  flags DELTAMODE;
   parent "sx2001206c";
   phases CS;
   nominal_voltage 120.09;
@@ -75768,6 +75801,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2001205c_pvmtr";
+  flags DELTAMODE;
   parent "sx2001205c";
   phases CS;
   nominal_voltage 120.09;
@@ -75815,6 +75849,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2710521a_pvmtr";
+  flags DELTAMODE;
   parent "sx2710521a";
   phases AS;
   nominal_voltage 120.09;
@@ -75931,6 +75966,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2001204c_pvmtr";
+  flags DELTAMODE;
   parent "sx2001204c";
   phases CS;
   nominal_voltage 120.09;
@@ -75960,6 +75996,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2841616a_pvmtr";
+  flags DELTAMODE;
   parent "sx2841616a";
   phases AS;
   nominal_voltage 120.09;
@@ -77300,6 +77337,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2936214a_pvmtr";
+  flags DELTAMODE;
   parent "sx2936214a";
   phases AS;
   nominal_voltage 120.09;
@@ -77447,6 +77485,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3048937c_pvmtr";
+  flags DELTAMODE;
   parent "sx3048937c";
   phases CS;
   nominal_voltage 120.09;
@@ -77568,6 +77607,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2748143a_pvmtr";
+  flags DELTAMODE;
   parent "sx2748143a";
   phases AS;
   nominal_voltage 120.09;
@@ -78968,6 +79008,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3160862c_pvmtr";
+  flags DELTAMODE;
   parent "sx3160862c";
   phases CS;
   nominal_voltage 120.09;
@@ -79037,6 +79078,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2001203c_pvmtr";
+  flags DELTAMODE;
   parent "sx2001203c";
   phases CS;
   nominal_voltage 120.09;
@@ -79111,6 +79153,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2710543c_pvmtr";
+  flags DELTAMODE;
   parent "sx2710543c";
   phases CS;
   nominal_voltage 120.09;
@@ -79168,6 +79211,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2803199b_pvmtr";
+  flags DELTAMODE;
   parent "sx2803199b";
   phases BS;
   nominal_voltage 120.09;
@@ -79301,6 +79345,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2001202c_pvmtr";
+  flags DELTAMODE;
   parent "sx2001202c";
   phases CS;
   nominal_voltage 120.09;
@@ -79456,6 +79501,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2897772a_pvmtr";
+  flags DELTAMODE;
   parent "sx2897772a";
   phases AS;
   nominal_voltage 120.09;
@@ -79698,6 +79744,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3197641a_pvmtr";
+  flags DELTAMODE;
   parent "sx3197641a";
   phases AS;
   nominal_voltage 120.09;
@@ -80212,6 +80259,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3104126c_pvmtr";
+  flags DELTAMODE;
   parent "sx3104126c";
   phases CS;
   nominal_voltage 120.09;
@@ -80549,6 +80597,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2991943c_pvmtr";
+  flags DELTAMODE;
   parent "sx2991943c";
   phases CS;
   nominal_voltage 120.09;
@@ -80933,6 +80982,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2822867b_pvmtr";
+  flags DELTAMODE;
   parent "sx2822867b";
   phases BS;
   nominal_voltage 120.09;
@@ -82428,6 +82478,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2766750c_pvmtr";
+  flags DELTAMODE;
   parent "sx2766750c";
   phases CS;
   nominal_voltage 120.09;
@@ -82499,6 +82550,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2673308b_pvmtr";
+  flags DELTAMODE;
   parent "sx2673308b";
   phases BS;
   nominal_voltage 120.09;
@@ -83349,6 +83401,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3179650b_pvmtr";
+  flags DELTAMODE;
   parent "sx3179650b";
   phases BS;
   nominal_voltage 120.09;
@@ -83524,6 +83577,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2897768c_pvmtr";
+  flags DELTAMODE;
   parent "sx2897768c";
   phases CS;
   nominal_voltage 120.09;
@@ -83875,6 +83929,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2935551c_pvmtr";
+  flags DELTAMODE;
   parent "sx2935551c";
   phases CS;
   nominal_voltage 120.09;
@@ -84061,6 +84116,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2897767c_pvmtr";
+  flags DELTAMODE;
   parent "sx2897767c";
   phases CS;
   nominal_voltage 120.09;
@@ -84602,6 +84658,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2841638c_pvmtr";
+  flags DELTAMODE;
   parent "sx2841638c";
   phases CS;
   nominal_voltage 120.09;
@@ -85045,6 +85102,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2841636b_pvmtr";
+  flags DELTAMODE;
   parent "sx2841636b";
   phases BS;
   nominal_voltage 120.09;
@@ -85137,6 +85195,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2804252a_pvmtr";
+  flags DELTAMODE;
   parent "sx2804252a";
   phases AS;
   nominal_voltage 120.09;
@@ -85458,6 +85517,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3160106a_pvmtr";
+  flags DELTAMODE;
   parent "sx3160106a";
   phases AS;
   nominal_voltage 120.09;
@@ -85567,6 +85627,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2785538a_pvmtr";
+  flags DELTAMODE;
   parent "sx2785538a";
   phases AS;
   nominal_voltage 120.09;
@@ -86158,6 +86219,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3104134c_pvmtr";
+  flags DELTAMODE;
   parent "sx3104134c";
   phases CS;
   nominal_voltage 120.09;
@@ -86221,6 +86283,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3160113b_pvmtr";
+  flags DELTAMODE;
   parent "sx3160113b";
   phases BS;
   nominal_voltage 120.09;
@@ -86319,6 +86382,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3216368c_pvmtr";
+  flags DELTAMODE;
   parent "sx3216368c";
   phases CS;
   nominal_voltage 120.09;
@@ -86477,6 +86541,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3104132a_pvmtr";
+  flags DELTAMODE;
   parent "sx3104132a";
   phases AS;
   nominal_voltage 120.09;
@@ -86773,6 +86838,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2001400c_pvmtr";
+  flags DELTAMODE;
   parent "sx2001400c";
   phases CS;
   nominal_voltage 120.09;
@@ -86796,6 +86862,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2990098a_pvmtr";
+  flags DELTAMODE;
   parent "sx2990098a";
   phases AS;
   nominal_voltage 120.09;
@@ -87584,6 +87651,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2673317a_pvmtr";
+  flags DELTAMODE;
   parent "sx2673317a";
   phases AS;
   nominal_voltage 120.09;
@@ -87607,6 +87675,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3048965b_pvmtr";
+  flags DELTAMODE;
   parent "sx3048965b";
   phases BS;
   nominal_voltage 120.09;
@@ -88769,6 +88838,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2673318c_pvmtr";
+  flags DELTAMODE;
   parent "sx2673318c";
   phases CS;
   nominal_voltage 120.09;
@@ -88792,6 +88862,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2839305a_pvmtr";
+  flags DELTAMODE;
   parent "sx2839305a";
   phases AS;
   nominal_voltage 120.09;
@@ -89034,6 +89105,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2673319c_pvmtr";
+  flags DELTAMODE;
   parent "sx2673319c";
   phases CS;
   nominal_voltage 120.09;
@@ -89069,6 +89141,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2936279c_pvmtr";
+  flags DELTAMODE;
   parent "sx2936279c";
   phases CS;
   nominal_voltage 120.09;
@@ -90619,6 +90692,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2992556c_pvmtr";
+  flags DELTAMODE;
   parent "sx2992556c";
   phases CS;
   nominal_voltage 120.09;
@@ -90832,6 +90906,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2841627a_pvmtr";
+  flags DELTAMODE;
   parent "sx2841627a";
   phases AS;
   nominal_voltage 120.09;
@@ -91178,6 +91253,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2785523c_pvmtr";
+  flags DELTAMODE;
   parent "sx2785523c";
   phases CS;
   nominal_voltage 120.09;
@@ -91747,6 +91823,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3254214b_pvmtr";
+  flags DELTAMODE;
   parent "sx3254214b";
   phases BS;
   nominal_voltage 120.09;
@@ -92030,6 +92107,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2729428a_pvmtr";
+  flags DELTAMODE;
   parent "sx2729428a";
   phases AS;
   nominal_voltage 120.09;
@@ -93288,6 +93366,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx2710510c_pvmtr";
+  flags DELTAMODE;
   parent "sx2710510c";
   phases CS;
   nominal_voltage 120.09;
@@ -93382,6 +93461,7 @@ object triplex_node {
 }
 object triplex_meter {
   name "sx3104144a_pvmtr";
+  flags DELTAMODE;
   parent "sx3104144a";
   phases AS;
   nominal_voltage 120.09;
