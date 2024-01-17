@@ -255,7 +255,7 @@
                                 "sx3142049c"
                         ],
 			"switch":[
-                                "swt_dg1209dies_sw"
+                                "swt_hvmv69s1b4_sw"
 			],
 			"diesel_dg":[
                             "dg_diesel620"
@@ -950,6 +950,10 @@
                                 "sx3215203a",
                                 "sx2692660a"
                         ],
+			"switch":[
+                            "swt_ln2001mt1_sw",
+			    "swt_ln2001mt2_sw"
+			],
 			"diesel_dg":[
                             "dg_microturb-2"
                         ]
@@ -6560,13 +6564,13 @@
         "MIM": [
                 {
                         "NumberAttackers": 2,
-                        "listMIM": "0,9"
+                        "listMIM": "0,2"
                 },
                 {
                         "name": "MIM0",
                         "attack_val": "TRIP",
                         "real_val": "NA",
-                        "node_id": "swt_dg1209dies_sw",
+                        "node_id": "swt_hvmv69s1b4_sw",
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
@@ -6586,14 +6590,14 @@
                 },
                 {
                         "name": "MIM2",
-                        "attack_val": "TRIP",
-                        "real_val": "NA",
-                        "node_id": "microgrid_switch1",
-                        "point_id": "status",
+                        "attack_val": "TRIP,TRIP",
+                        "real_val": "NA,NA",
+                        "node_id": "swt_ln2001mt1_sw,swt_ln2001mt2_sw",
+                        "point_id": "status,status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM3",
