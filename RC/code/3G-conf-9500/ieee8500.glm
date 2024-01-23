@@ -22,7 +22,10 @@ clock {
 #set maximum_synctime=6400
 #define VSOURCE=69715.065 //66395.28 //66395.3 //2401.8
 
-module tape;
+//module tape;
+module tape {
+  flush_interval 0 s;
+}
 module reliability {
 	enable_subsecond_models true;
 	maximum_event_length 1800000;	//Maximum length of events in seconds (manual events are excluded from this limit)
@@ -31,7 +34,7 @@ module reliability {
 
 module powerflow {
 	enable_subsecond_models true;
-	deltamode_timestep 10 ms;	//10 ms
+	deltamode_timestep 100 ms;	//10 ms
 	solver_method NR;
 	all_powerflow_delta true;
 	lu_solver "KLU";
@@ -54,7 +57,7 @@ object helics_msg {
 
 module generators {
 	enable_subsecond_models true;
-	deltamode_timestep 10 ms;
+	deltamode_timestep 100 ms;
 }
 
  module climate;
@@ -67,7 +70,7 @@ object climate {
 
 object player {
         name recorder_trigger;
-        parent hvmv11sub3_lsb;
+        parent sourcebus;
         file trigger.player;
         property nominal_voltage;
         flags DELTAMODE;
@@ -78,32 +81,40 @@ object player {
 object recorder {
 	parent reg_feeder_reg3a;
 	interval 1;
+        limit 10000000;
 	file collected_data/regulator3a.csv;
 	property power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag;
         flags DELTAMODE;
+        flush 0;
 };
 object recorder {
         parent reg_feeder_reg3b;
         interval 1;
+        limit 10000000;
         file collected_data/regulator3b.csv;
         property power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag;
         flags DELTAMODE;
+        flush 0;
 }
 
 object recorder {
-	parent swt_ln2001mt1_sw;
+	parent swt_ln4625876_sw;
 	file "collected_data/microgrid_switch0.csv";
 	property phase_A_state,phase_B_state,phase_C_state;
 	flags DELTAMODE;
 	interval 1;
+        limit 10000000;
+        flush 0;
 };
 
 object recorder {
-        parent swt_ln2001mt2_sw;
+        parent swt_l9191_48332_sw;
         file "collected_data/microgrid_switch1.csv";
         property phase_A_state,phase_B_state,phase_C_state;
         flags DELTAMODE;
         interval 1;
+        limit 10000000;
+        flush 0;
 };
 
 object recorder {
@@ -112,6 +123,8 @@ object recorder {
         property phase_A_state,phase_B_state,phase_C_state;
         flags DELTAMODE;
         interval 1;
+        limit 10000000;
+        flush 0;
 };
 
 object recorder {
@@ -120,17 +133,27 @@ object recorder {
         interval 1;
         flags DELTAMODE;
         file "collected_data/e192860.csv";
+        limit 10000000;
+        flush 0;
 }
 
 object recorder {
-        parent ld_293471a0;
+        parent ld_293663c0;
         property "GFA_status,measured_frequency";
         interval 1;
         flags DELTAMODE;
         file "collected_data/ld_293471a0.csv";
+        limit 10000000;
+        flush 0;
 }
 
-
+object group_recorder {
+  group "class=inverter";
+  property VA_Out; // VA_out.imag for the reactive power
+  complex_part REAL;
+  file collected_data/inv_power.csv;
+  interval 1;  // 5 minutes
+};
 
 object regulator_configuration {
   name "rcon_feeder_reg3a";
@@ -1925,12 +1948,12 @@ object capacitor {
   cap_nominal_voltage 7200.00;
   capacitor_A 400000.00;
   switchA CLOSED;
-  control MANUAL; // VAR;
+  control VAR; //MANUAL; // VAR;
   VAr_set_low -300000.00;
   VAr_set_high 200000.00;
-	remote_sense "line_cap_3a";
+  	remote_sense "line_cap_3a";
   pt_phase A;
-	control_level BANK;
+  	control_level BANK;
   dwell_time 100.00;
 }
 object capacitor {
@@ -1941,12 +1964,12 @@ object capacitor {
   cap_nominal_voltage 7200.00;
   capacitor_B 400000.00;
   switchB CLOSED;
-  control MANUAL; // VAR;
+  control VAR; //MANUAL; // VAR;
   VAr_set_low -300000.00;
   VAr_set_high 200000.00;
-	remote_sense "line_cap_3b";
+  	remote_sense "line_cap_3b";
   pt_phase B;
-	control_level BANK;
+  	control_level BANK;
   dwell_time 101.00;
 }
 object capacitor {
@@ -1957,7 +1980,7 @@ object capacitor {
   cap_nominal_voltage 7200.00;
   capacitor_A 300000.00;
   switchA CLOSED;
-  control MANUAL; // VAR;
+  control VAR; //MANUAL; // VAR;
   VAr_set_low -225000.00;
   VAr_set_high 150000.00;
 	remote_sense "line_cap_2a";
@@ -1976,9 +1999,9 @@ object capacitor {
   control MANUAL; // VAR;
   VAr_set_low -300000.00;
   VAr_set_high 200000.00;
-	remote_sense "line_cap_3c";
+  	remote_sense "line_cap_3c";
   pt_phase C;
-	control_level BANK;
+  	control_level BANK;
   dwell_time 102.00;
 }
 object capacitor {
@@ -2067,7 +2090,7 @@ object inverter {
   parent "sx2000404a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2091,7 +2114,7 @@ object inverter {
   parent "sx2000405a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2115,7 +2138,7 @@ object inverter {
   parent "sx2000402a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2139,7 +2162,7 @@ object inverter {
   parent "sx2000403a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2163,7 +2186,7 @@ object inverter {
   parent "sx2804272b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2187,7 +2210,7 @@ object inverter {
   parent "sx2001309a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2211,7 +2234,7 @@ object inverter {
   parent "sx2879078a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2235,7 +2258,7 @@ object inverter {
   parent "sx2803199b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2259,7 +2282,7 @@ object inverter {
   parent "sx2001310a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2283,7 +2306,7 @@ object inverter {
   parent "sx2730149c_pvmtr";
   phases CS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2307,7 +2330,7 @@ object inverter {
   parent "sx2000712b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2331,7 +2354,7 @@ object inverter {
   parent "sx2000713b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2355,7 +2378,7 @@ object inverter {
   parent "sx2000714b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2379,7 +2402,7 @@ object inverter {
   parent "sx2814529c_pvmtr";
   phases CS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2403,7 +2426,7 @@ object inverter {
   parent "sx2001306a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2427,7 +2450,7 @@ object inverter {
   parent "sx2673317a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2451,7 +2474,7 @@ object inverter {
   parent "sx2000715b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2475,7 +2498,7 @@ object inverter {
   parent "sx3104155c_pvmtr";
   phases CS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2499,7 +2522,7 @@ object inverter {
   parent "sx2001307a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2523,7 +2546,7 @@ object inverter {
   parent "sx2897792a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2547,7 +2570,7 @@ object inverter {
   parent "sx2000902c_pvmtr";
   phases CS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2571,7 +2594,7 @@ object inverter {
   parent "sx3216347c_pvmtr";
   phases CS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2595,7 +2618,7 @@ object inverter {
   parent "sx2001308a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2619,7 +2642,7 @@ object inverter {
   parent "sx3197637c_pvmtr";
   phases CS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2643,7 +2666,7 @@ object inverter {
   parent "sx2748143a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2667,7 +2690,7 @@ object inverter {
   parent "sx3178981b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2691,7 +2714,7 @@ object inverter {
   parent "sx2001314a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2715,7 +2738,7 @@ object inverter {
   parent "sx3101194c_pvmtr";
   phases CS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2739,7 +2762,7 @@ object inverter {
   parent "sx2001315a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2763,7 +2786,7 @@ object inverter {
   parent "sx2000707b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2787,7 +2810,7 @@ object inverter {
   parent "sx2000708b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2811,7 +2834,7 @@ object inverter {
   parent "sx2000709b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2835,7 +2858,7 @@ object inverter {
   parent "sx2766721a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2859,7 +2882,7 @@ object inverter {
   parent "sx3104144a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2883,7 +2906,7 @@ object inverter {
   parent "sx2000710b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2907,7 +2930,7 @@ object inverter {
   parent "sx2729428a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2931,7 +2954,7 @@ object inverter {
   parent "sx2001311a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2955,7 +2978,7 @@ object inverter {
   parent "sx2710521a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -2979,7 +3002,7 @@ object inverter {
   parent "sx2000711b_pvmtr";
   phases BS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -3003,7 +3026,7 @@ object inverter {
   parent "sx2935551c_pvmtr";
   phases CS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -3027,7 +3050,7 @@ object inverter {
   parent "sx2001312a_pvmtr";
   phases AS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -5811,7 +5834,7 @@ object inverter {
   parent "sx3216368c_pvmtr";
   phases CS;
   generator_status ONLINE;
-  four_quadrant_control_mode CONSTANT_PQ;
+  four_quadrant_control_mode CONSTANT_PF; //LOAD_FOLLOWING; //CONSTANT_PQ;
   inverter_type FOUR_QUADRANT;
   inverter_efficiency 1.0;
   power_factor 1.0;
@@ -6415,7 +6438,7 @@ object diesel_dg {
   power_out_A 0.00+0.00j;
   power_out_B 0.00+0.00j;
   power_out_C 0.00+0.00j;
-  Gen_type CONSTANT_PQ;
+  Gen_type DYN_SYNCHRONOUS; //CONSTANT_PQ;
   Rated_V 480.00;
   Rated_VA 775000.00;
 }
@@ -6427,7 +6450,7 @@ object diesel_dg {
   power_out_A 16666.67+8072.03j;
   power_out_B 16666.67+8072.03j;
   power_out_C 16666.67+8072.03j;
-  Gen_type CONSTANT_PQ;
+  Gen_type DYN_SYNCHRONOUS; //CONSTANT_PQ;
   Rated_V 480.00;
   Rated_VA 250000.00;
 }
@@ -6439,7 +6462,7 @@ object diesel_dg {
   power_out_A 0.00+0.00j;
   power_out_B 0.00+0.00j;
   power_out_C 0.00+0.00j;
-  Gen_type CONSTANT_PQ;
+  Gen_type DYN_SYNCHRONOUS; //CONSTANT_PQ;
   Rated_V 480.00;
   Rated_VA 250000.00;
 }
@@ -6451,7 +6474,7 @@ object diesel_dg {
   power_out_A 0.00+0.00j;
   power_out_B 0.00+0.00j;
   power_out_C 0.00+0.00j;
-  Gen_type CONSTANT_PQ;
+  Gen_type DYN_SYNCHRONOUS; //CONSTANT_PQ;
   Rated_V 480.00;
   Rated_VA 250000.00;
 }
@@ -6463,7 +6486,7 @@ object diesel_dg {
   power_out_A 333333.33-359828.53j;
   power_out_B 333333.33-359828.53j;
   power_out_C 333333.33-359828.53j;
-  Gen_type CONSTANT_PQ;
+  Gen_type DYN_SYNCHRONOUS; //CONSTANT_PQ;
   Rated_V 12470.00;
   Rated_VA 4000000.00;
 }
@@ -6475,7 +6498,7 @@ object diesel_dg {
   power_out_A 33333.33+16144.07j;
   power_out_B 33333.33+16144.07j;
   power_out_C 33333.33+16144.07j;
-  Gen_type CONSTANT_PQ;
+  Gen_type DYN_SYNCHRONOUS; //CONSTANT_PQ;
   Rated_V 480.00;
   Rated_VA 250000.00;
 }
@@ -6487,7 +6510,7 @@ object diesel_dg {
   power_out_A 0.00+0.00j;
   power_out_B 0.00+0.00j;
   power_out_C 0.00+0.00j;
-  Gen_type CONSTANT_PQ;
+  Gen_type DYN_SYNCHRONOUS; //CONSTANT_PQ;
   Rated_V 480.00;
   Rated_VA 125000.00;
 }
@@ -6499,7 +6522,7 @@ object diesel_dg {
   power_out_A 0.00+0.00j;
   power_out_B 0.00+0.00j;
   power_out_C 0.00+0.00j;
-  Gen_type CONSTANT_PQ;
+  Gen_type DYN_SYNCHRONOUS; //CONSTANT_PQ;
   Rated_V 480.00;
   Rated_VA 737000.00;
 }
@@ -6511,7 +6534,7 @@ object diesel_dg {
   power_out_A 0.00+0.00j;
   power_out_B 0.00+0.00j;
   power_out_C 0.00+0.00j;
-  Gen_type CONSTANT_PQ;
+  Gen_type DYN_SYNCHRONOUS; //CONSTANT_PQ;
   Rated_V 480.00;
   Rated_VA 2250000.00;
 }
@@ -60794,7 +60817,8 @@ object triplex_load {
 }
 object node {
   name "r18242";
- flags DELTAMODE;
+  flags DELTAMODE;
+  frequency_measure_type PLL;
   phases ABCN;
   nominal_voltage 7199.56;
 }
@@ -62154,7 +62178,8 @@ object node {
 }
 object node {
   name "q14414";
- flags DELTAMODE;
+  flags DELTAMODE;
+  frequency_measure_type PLL;
   phases ABCN;
   nominal_voltage 7199.56;
 }
@@ -74932,16 +74957,26 @@ object triplex_load {
 }
 object triplex_node {
   name "sx3216368c";
- flags DELTAMODE;
+  flags DELTAMODE;
   phases CS;
   nominal_voltage 120.09;
+  frequency_measure_type PLL;
+  GFA_enable true;
+  GFA_freq_low_trip 55 Hz;
+  GFA_freq_high_trip 65 Hz;
+
 }
 object triplex_meter {
   name "sx3216368c_pvmtr";
   flags DELTAMODE;
+  frequency_measure_type PLL;
   parent "sx3216368c";
   phases CS;
   nominal_voltage 120.09;
+  GFA_enable true;
+  GFA_freq_low_trip 55 Hz;
+  GFA_freq_high_trip 65 Hz;
+
 }
 object triplex_load {
   name "ld_293663c0";
@@ -74953,6 +74988,11 @@ object triplex_load {
   current_fraction_1 1.00;
   current_pf_2 0.97;
   current_fraction_2 1.00;
+  frequency_measure_type PLL;
+  GFA_enable true;
+  GFA_freq_low_trip 55 Hz;
+  GFA_freq_high_trip 65 Hz;
+
 }
 object triplex_node {
   name "sx3085388b";
@@ -91392,7 +91432,8 @@ object node {
 }
 object node {
   name "r42246";
- flags DELTAMODE;
+  flags DELTAMODE;
+  frequency_measure_type PLL;
   phases ABCN;
   nominal_voltage 7199.56;
 }

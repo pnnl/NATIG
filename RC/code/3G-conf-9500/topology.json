@@ -1,5 +1,5 @@
 {
-	"Channel": [
+        "Channel": [
                 {
                         "P2PDelay": "2ms",
                         "CSMAdelay": "6560",
@@ -10,7 +10,7 @@
                         "WifiRate": "DsssRate1Mbps",
                         "WifiStandard": "80211b",
                         "P2PRate": "150Mb/s",
-			"MTU": 1500,
+                        "MTU": 1500,
                         "delay": 0
                 }
         ],
@@ -21,31 +21,30 @@
                         "DeltaX": 40,
                         "DeltaY": 80,
                         "GridWidth": 10,
-			"distance": 15,
-			"GnBH": 10.0,
-			"UEH": 1.5,
+                        "GnBH": 10.0,
+                        "UEH": 1.5,
                         "LayoutType": "RowFirst",
-                        "SetPos": 1
+                        "SetPos": 0
                 }
         ],
         "5GSetup": [
                 {
-                        "S1uLinkDelay": 1,
+                        "S1uLinkDelay": 0,
                         "N1Delay": 0.01,
                         "N2Delay": 0.01,
-                        "Srs": 10,
-                        "UeRow": 6,
-                        "UeCol": 10,
-                        "GnBRow": 10,
-                        "GnBCol": 6,
-                        "numUE": 10,
-                        "numEnb": 10,
-			"CentFreq1": 28e9,
-			"CentFreq2": 28.2e9,
-			"Band1": 100e6,
-			"Band2": 100e6,
-			"num1": 2,
-			"num2": 0,
+                        "Srs": 20,
+                        "UeRow": 4.5,
+                        "UeCol": 9,
+                        "GnBRow": 9,
+                        "GnBCol": 4.5,
+                        "numUE": 11,
+                        "numEnb": 11,
+                        "CentFreq1": 28000000000.0,
+                        "CentFreq2": 28200000000.0,
+                        "Band1": 150000000.0,
+                        "Band2": 150000000.0,
+                        "num1": 2,
+                        "num2": 0,
                         "scenario": "UMi-StreetCayon",
                         "txPower": 40
                 }
@@ -162,13 +161,25 @@
                 {
                         "name": 9,
                         "connections": [
-                                0
+                                10
                         ],
                         "UseCSMA": 0,
                         "MTU": 1500,
                         "UseWifi": 1,
                         "x": 17,
                         "y": 36,
+                        "error": "0.001"
+                },
+                {
+                        "name": 10,
+                        "connections": [
+                                0
+                        ],
+                        "UseCSMA": 0,
+                        "MTU": 1500,
+                        "UseWifi": 1,
+                        "x": 12,
+                        "y": 100,
                         "error": "0.001"
                 }
         ]
