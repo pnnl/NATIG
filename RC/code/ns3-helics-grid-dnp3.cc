@@ -830,8 +830,8 @@ main (int argc, char *argv[])
   {
     mimPort.push_back(master_port);
     auto ep_name = configObject["microgrid"][i]["name"].asString();
-    std::string ID = "SS_"
-    if (std::string(ep_name).find(ID) != std::string::npos){
+    std::string ID2 = "SS_";
+    if (std::string(ep_name).find(ID2) != std::string::npos){
         ep_name = "SS_"+std::to_string(i+1);
     }
     std::cout << "Microgrid network node: " << ep_name << " " << Microgrid.GetN() << " " << configObject["microgrid"][i].size() << " " << i << std::endl;
@@ -908,8 +908,8 @@ main (int argc, char *argv[])
     for (int x = 0; x < val.size(); x++){ //std::stoi(configObject["MIM"][0]["NumberAttackers"].asString()); x++){
       int MIM_ID = std::stoi(val[x]) + 1; //x+1;
       auto ep_name = configObject["MIM"][MIM_ID]["name"].asString();
-      std::string ID = "SS_"
-      if (std::string(ep_name).find(ID) != std::string::npos){
+      std::string ID2 = "SS_";
+      if (std::string(ep_name).find(ID2) != std::string::npos){
          ep_name = "SS_"+std::to_string(MIM_ID);
       }
       Ptr<Node> tempnode = MIMNode.Get(MIM_ID-1); //star.GetSpokeNode (MIM_ID-1);
