@@ -908,9 +908,10 @@ main (int argc, char *argv[])
     for (int x = 0; x < val.size(); x++){ //std::stoi(configObject["MIM"][0]["NumberAttackers"].asString()); x++){
       int MIM_ID = std::stoi(val[x]) + 1; //x+1;
       auto ep_name = configObject["MIM"][MIM_ID]["name"].asString();
+      auto ep_name2 = configObject["microgrid"][MIM_ID]["name"].asString();
       std::string ID2 = "SS_";
-      if (std::string(ep_name).find(ID2) != std::string::npos){
-         ep_name = "SS_"+std::to_string(MIM_ID);
+      if (std::string(ep_name2).find(ID2) != std::string::npos){
+         ep_name2 = "SS_"+std::to_string(MIM_ID);
       }
       Ptr<Node> tempnode = MIMNode.Get(MIM_ID-1); //star.GetSpokeNode (MIM_ID-1);
       Names::Add(ep_name, tempnode);
@@ -934,7 +935,7 @@ main (int argc, char *argv[])
       }
       dnp3MIM1.SetAttribute("RemotePort", UintegerValue(mimPort[MIM_ID-1]));
 
-      dnp3MIM1.SetAttribute ("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
+      dnp3MIM1.SetAttribute ("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name2+".csv"));
       dnp3MIM1.SetAttribute("JitterMinNs", DoubleValue (500));
       dnp3MIM1.SetAttribute("JitterMaxNs", DoubleValue (1000));
       dnp3MIM1.SetAttribute("isMaster", BooleanValue (false));
