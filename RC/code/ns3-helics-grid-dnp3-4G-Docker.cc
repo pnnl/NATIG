@@ -535,7 +535,7 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
           Simulator::Schedule(MilliSeconds(500), changeRoute, remoteHostContainer, subNodes, MIM, ueNodes, gateway, nextNode_ind);
 }*/
 
-void changeRoute (std::vector<NodeContainer> nodes, Ipv4Address gateway, int index, std::string fileID) { //NodeContainer remoteHostContainer, NodeContainer subNodes, NodeContainer MIM, NodeContainer ueNodes, Ipv4Address gateway, int index, std::string fileID) {
+/*void changeRoute (std::vector<NodeContainer> nodes, Ipv4Address gateway, int index, std::string fileID) { //NodeContainer remoteHostContainer, NodeContainer subNodes, NodeContainer MIM, NodeContainer ueNodes, Ipv4Address gateway, int index, std::string fileID) {
           std::cout << "Getting the available interfaces" << std::endl;
           Ipv4StaticRoutingHelper ipv4RoutingHelper;
           Ptr<Ipv4> ipv4_2 = nodes[1].Get(index-1)->GetObject<Ipv4>();
@@ -665,6 +665,130 @@ void changeRoute (std::vector<NodeContainer> nodes, Ipv4Address gateway, int ind
           }else{
             Simulator::Schedule(MilliSeconds(500), changeRoute, nodes, gateway, nextNode_ind, fileID);
           }
+}*/
+
+void changeRoute (std::vector<NodeContainer> nodes, Ipv4Address gateway, int index, std::string fileID) {
+          std::cout << "Getting the available interfaces" << std::endl;
+          Ipv4StaticRoutingHelper ipv4RoutingHelper;
+          //for (int index = 1; index < ueNodes.GetN()+1; index ++){
+          Ptr<Ipv4> ipv4_2 = nodes[1].Get(0)->GetObject<Ipv4>();
+          std::string delimiter = ".";
+          std::ostringstream ss;
+          ss << ipv4_2->GetAddress(1,0);//ipHeader.GetSource();
+          std::vector<std::string> ip;
+          std::string ip_ = ss.str();
+          size_t pos = 0;
+          while ((pos = ip_.find(delimiter)) != std::string::npos) {
+               ip.push_back(ip_.substr(0, pos));
+               ip_.erase(0, pos + delimiter.length());
+          }
+
+          std::stringstream ss1;
+          ss1 << ip[1];
+          int ID2;
+          ss1 >> ID2;
+          //string temp(ss1.str().back());
+          std::cout << "I am " << ip[1] << std::endl;
+          string temp = ss1.str(); //.substr(ss1.str().length() - 2);
+          if (ss1.str().length() > 2){
+                temp = ss1.str().substr(ss1.str().length() - 2);
+          }
+          int ID = 0;
+
+          int NewIndex = 1 + (rand() % int(nodes[1].GetN()));//random - (rand() % int(ueNodes.GetN()/2));
+          if (NewIndex > nodes[1].GetN()){
+              NewIndex =  1;
+          }
+
+
+          map<int, std::vector<int>>::iterator it;
+          map<int, map<int, std::vector<int>>>::iterator itx;
+          map<int, int> min;
+          map<int, int> max;
+          int nextNode_ind = NewIndex; //(rand() % int(ueNodes.GetN())-2);
+          int nextNode_TP = 10000000;
+          //int max_TP = 0;
+          //int ind_max = 0;
+          int count = 0;
+          struct stat buffer;
+          if (stat (fileID.c_str(), &buffer) == 0){
+               std::string line;
+               std::ifstream infile(fileID.c_str());
+               NewIndex = interface[ID];
+               while (std::getline(infile, line))
+               {
+                 std::string delimiter = ".";
+                 size_t pos = 0;
+                 std::string token;
+                 token = line.substr(0, pos);
+                 line.erase(0, pos + delimiter.length());
+                 int ID = std::stoi(token);
+                 int NewIndex = std::stoi(line)+1;
+                 if (not nodes[1].Get(ID)->GetObject<Ipv4>()->IsUp(NewIndex)){
+                    nodes[1].Get(ID)->GetObject<Ipv4>()->SetUp(NewIndex);
+                 }
+                 if (NewIndex != interface[ID]){ //itx->first]){
+                    Ptr<Ipv4> ipv4_3 = nodes[1].Get(ID)->GetObject<Ipv4>();
+                    Ipv4InterfaceAddress add12 = ipv4_3->GetAddress(NewIndex,0);
+                    Ipv4InterfaceAddress add1 = ipv4_3->GetAddress(interface[ID],0);
+                    ipv4_3->AddAddress (NewIndex, add1);
+                    ipv4_3->AddAddress (interface[ID], add12);
+                    ipv4_3->RemoveAddress (interface[ID], add1.GetLocal());
+                    ipv4_3->RemoveAddress (NewIndex, add12.GetLocal());
+                    //setRoutingTable(nodes[0], nodes[1], nodes[2], nodes[3], gateway);
+                    updateUETable(nodes[1], nodes[3]);
+                    previous[ID] = interface[ID];
+
+                    nodes[1].Get(ID)->GetObject<Ipv4>()->SetDown(interface[ID]);
+                    interface[ID] = NewIndex;
+                  }
+               }
+	 }else{
+             for (itx = route_perf.begin(); itx != route_perf.end(); itx++){
+               int max_TP = 0;
+               int ind_max = 0;
+               //NewIndex = interface[it->first] + 1;
+               if (ID < nodes[1].GetN()){
+               std::cout << "NEXT" << std::endl;
+               if (not nodes[1].Get(ID)->GetObject<Ipv4>()->IsUp(interface[ID])){//itx->first])){
+                  nodes[1].Get(ID)->GetObject<Ipv4>()->SetUp(interface[ID]); //itx->first]);
+               }
+
+               nextNode_ind =  1 + (rand() % int(nodes[1].GetN()));
+               NewIndex = 1 + (rand() % int(nodes[1].GetN()));
+
+               if (not nodes[1].Get(ID)->GetObject<Ipv4>()->IsUp(NewIndex)){
+                  nodes[1].Get(ID)->GetObject<Ipv4>()->SetUp(NewIndex);
+               }
+               while (NewIndex == 0){
+                  NewIndex = 1; //1 + (rand() % int(ueNodes.GetN()));
+               }
+               if (not nodes[1].Get(ID)->GetObject<Ipv4>()->IsUp(NewIndex)){
+                  nodes[1].Get(ID)->GetObject<Ipv4>()->SetUp(NewIndex);
+               }
+               if (NewIndex != interface[ID]){ //itx->first]){
+                    Ptr<Ipv4> ipv4_3 = nodes[1].Get(ID)->GetObject<Ipv4>();
+                    Ipv4InterfaceAddress add12 = ipv4_3->GetAddress(NewIndex,0);
+                    Ipv4InterfaceAddress add1 = ipv4_3->GetAddress(interface[ID],0);
+                    ipv4_3->AddAddress (NewIndex, add1);
+                    ipv4_3->AddAddress (interface[ID], add12);
+                    ipv4_3->RemoveAddress (interface[ID], add1.GetLocal());
+                    ipv4_3->RemoveAddress (NewIndex, add12.GetLocal());
+                    //setRoutingTable(nodes[0], nodes[1], nodes[2], nodes[3], gateway);
+                    updateUETable(nodes[1], nodes[3]);
+                    previous[ID] = interface[ID];
+                    std::cout << ID << "===================" << std::endl;
+                    nodes[1].Get(ID)->GetObject<Ipv4>()->SetDown(interface[ID]);
+                    interface[ID] = NewIndex;
+                    std::cout << "END" << std::endl;
+                }
+                }
+               ID = ID + 1;
+
+             }
+          }
+          Simulator::Schedule(MilliSeconds(period_routing), changeRoute, nodes, gateway, nextNode_ind, fileID);
+          //Simulator::Schedule(MilliSeconds(period_routing), changeRoute, remoteHostContainer, subNodes, MIM, ueNodes, gateway, nextNode_ind);
 }
 
 int
