@@ -544,29 +544,7 @@ void changeRoute (std::vector<NodeContainer> nodes, Ipv4Address gateway, int ind
               NewIndex =  nodes[1].GetN();
           }
 
-         std::string delimiter = ".";
-          std::ostringstream ss;
-          ss << ipv4_2->GetAddress(index,0);//ipHeader.GetSource();
-          std::vector<std::string> ip;
-          std::string ip_ = ss.str();
-          size_t pos = 0;
-          while ((pos = ip_.find(delimiter)) != std::string::npos) {
-               ip.push_back(ip_.substr(0, pos));
-               ip_.erase(0, pos + delimiter.length());
-          }
-
-          std::stringstream ss1;
-          ss1 << ip[1];
-          int ID2;
-          ss1 >> ID2;
-          //string temp(ss1.str().back());
-          std::cout << "I am " << ip[1] << std::endl;
-          string temp = ss1.str().substr(ss1.str().length() - 1, 1);
-          std::stringstream ss2;
-          ss2 << temp;
-          int ID;
-          ss2 >> ID;
-
+         int ID = index;
          if (previous.find(index-1) != previous.end()){
             if (not nodes[1].Get(index-1)->GetObject<Ipv4>()->IsUp(previous[index-1])){
               nodes[1].Get(index-1)->GetObject<Ipv4>()->SetUp(previous[index-1]);
