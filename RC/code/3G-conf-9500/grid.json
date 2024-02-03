@@ -5902,8 +5902,8 @@
         ],
         "MIM": [
                 {
-                        "NumberAttackers": 2,
-                        "listMIM": "6,9"
+                        "NumberAttackers": 3,
+                        "listMIM": "6,9,10"
                 },
                 {
                         "name": "MIM0",
@@ -6019,7 +6019,7 @@
                         "name": "MIM10",
                         "attack_val": "TRIP",
                         "real_val": "NA",
-                        "node_id": "microgrid_switch1",
+                        "node_id": "swt_ln2000001_sw",
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",

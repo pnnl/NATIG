@@ -830,10 +830,6 @@ main (int argc, char *argv[])
   {
     mimPort.push_back(master_port);
     auto ep_name = configObject["microgrid"][i]["name"].asString();
-    std::string ID2 = "SS_";
-    if (std::string(ep_name).find(ID2) != std::string::npos){
-        ep_name = "SS_"+std::to_string(i+1);
-    }
     std::cout << "Microgrid network node: " << ep_name << " " << Microgrid.GetN() << " " << configObject["microgrid"][i].size() << " " << i << std::endl;
     Ptr<Node> tempnode1 = Microgrid.Get(i); //star.GetSpokeNode (i);
     //std::cout << "hub:" << star.GetHubIpv4Address(i) << ", spike:" << star.GetSpokeIpv4Address(i) << std::endl;
@@ -854,14 +850,14 @@ main (int argc, char *argv[])
     dnp3Master.SetAttribute("JitterMinNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMin"].asString())));
     dnp3Master.SetAttribute("JitterMaxNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMax"].asString())));
     dnp3Master.SetAttribute("isMaster", BooleanValue (true));
-    dnp3Master.SetAttribute("Name", StringValue (cc_name+ep_name));
-    dnp3Master.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
+    dnp3Master.SetAttribute("Name", StringValue (cc_name+"_SS_"+std::to_string(i+1)));
+    dnp3Master.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_SS_"+std::to_string(i+1)+".csv"));
     dnp3Master.SetAttribute("MasterDeviceAddress", UintegerValue(1));
     dnp3Master.SetAttribute("StationDeviceAddress", UintegerValue(i+2));
     dnp3Master.SetAttribute("IntegrityPollInterval", UintegerValue(10));
     dnp3Master.SetAttribute("EnableTCP", BooleanValue (false));
   
-    Ptr<Dnp3ApplicationNew> master = dnp3Master.Install (hubNode.Get(0), std::string(cc_name+ep_name));
+    Ptr<Dnp3ApplicationNew> master = dnp3Master.Install (hubNode.Get(0), std::string(cc_name+"_SS_"+std::to_string(i+1)));
     dnpMasterApp.Add(master);
 
     Dnp3ApplicationHelperNew dnp3Outstation ("ns3::UdpSocketFactory", InetSocketAddress (tempnode1->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), port)); //star.GetSpokeIpv4Address (i), port));
@@ -869,13 +865,13 @@ main (int argc, char *argv[])
     dnp3Outstation.SetAttribute("RemoteAddress", AddressValue(hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal())); //star.GetHubIpv4Address(i)));
     dnp3Outstation.SetAttribute("RemotePort", UintegerValue(master_port));
     dnp3Outstation.SetAttribute("isMaster", BooleanValue (false));
-    dnp3Outstation.SetAttribute("Name", StringValue (ep_name));
-    dnp3Outstation.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
+    dnp3Outstation.SetAttribute("Name", StringValue ("SS_"+std::to_string(i+1)));
+    dnp3Outstation.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_SS_"+std::to_string(i+1)+".csv"));
     dnp3Outstation.SetAttribute("MasterDeviceAddress", UintegerValue(1));
     dnp3Outstation.SetAttribute("StationDeviceAddress", UintegerValue(i+2));
     dnp3Outstation.SetAttribute("EnableTCP", BooleanValue (false));
 
-    Ptr<Dnp3ApplicationNew> slave = dnp3Outstation.Install (tempnode1, std::string(ep_name));
+    Ptr<Dnp3ApplicationNew> slave = dnp3Outstation.Install (tempnode1, std::string("SS_"+std::to_string(i+1)));
     dnpOutstationApp.Add(slave);
     Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, master, std::stoi(configObject["Simulation"][0]["PollReqFreq"].asString()));
     // Simulator::Schedule(MilliSeconds(2005), &Dnp3HelicsApplication::send_control_binary, master,
@@ -908,11 +904,6 @@ main (int argc, char *argv[])
     for (int x = 0; x < val.size(); x++){ //std::stoi(configObject["MIM"][0]["NumberAttackers"].asString()); x++){
       int MIM_ID = std::stoi(val[x]) + 1; //x+1;
       auto ep_name = configObject["MIM"][MIM_ID]["name"].asString();
-      auto ep_name2 = configObject["microgrid"][MIM_ID]["name"].asString();
-      std::string ID2 = "SS_";
-      if (std::string(ep_name2).find(ID2) != std::string::npos){
-         ep_name2 = "SS_"+std::to_string(MIM_ID);
-      }
       Ptr<Node> tempnode = MIMNode.Get(MIM_ID-1); //star.GetSpokeNode (MIM_ID-1);
       Names::Add(ep_name, tempnode);
       std::string enamestring = ep_name;
@@ -935,7 +926,7 @@ main (int argc, char *argv[])
       }
       dnp3MIM1.SetAttribute("RemotePort", UintegerValue(mimPort[MIM_ID-1]));
 
-      dnp3MIM1.SetAttribute ("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name2+".csv"));
+      dnp3MIM1.SetAttribute ("PointsFilename", StringValue (pointFileDir+"/points_SS_"+std::to_string(MIM_ID)+".csv"));
       dnp3MIM1.SetAttribute("JitterMinNs", DoubleValue (500));
       dnp3MIM1.SetAttribute("JitterMaxNs", DoubleValue (1000));
       dnp3MIM1.SetAttribute("isMaster", BooleanValue (false));

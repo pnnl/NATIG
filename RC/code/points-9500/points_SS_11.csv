@@ -1,6 +1,7 @@
 BINARY,dg_microturb-1$parent,0
 BINARY,dg_microturb-1$phases,0
 BINARY,dg_microturb-1$power_out_A,0
+BINARY,swt_ln2000001_sw$status,0
 BINARY,dg_microturb-1$power_out_B,0
 BINARY,dg_microturb-1$power_out_C,0
 BINARY,dg_microturb-1$Gen_type,0
@@ -9,6 +10,7 @@ BINARY,dg_microturb-1$Rated_VA,0
 BINARY,dg_microturb-2$parent,0
 BINARY,dg_microturb-2$phases,0
 BINARY,dg_microturb-2$power_out_A,0
+BINARY,swt_ln2000701_sw$status,0
 BINARY,dg_microturb-2$power_out_B,0
 BINARY,dg_microturb-2$power_out_C,0
 BINARY,dg_microturb-2$Gen_type,0
@@ -29,7 +31,6 @@ BINARY,swt_ln2001mt2_sw$status,0
 BINARY,swt_ln2000001_sw$from,0
 BINARY,swt_ln2000001_sw$to,0
 BINARY,swt_ln2000001_sw$phases,0
-BINARY,swt_ln2000001_sw$status,0
 BINARY,swt_l5565_48332_sw$from,0
 BINARY,swt_l5565_48332_sw$to,0
 BINARY,swt_l5565_48332_sw$phases,0
@@ -45,7 +46,6 @@ BINARY,swt_ln2001ess2_sw$status,0
 BINARY,swt_ln2000701_sw$from,0
 BINARY,swt_ln2000701_sw$to,0
 BINARY,swt_ln2000701_sw$phases,0
-BINARY,swt_ln2000701_sw$status,0
 BINARY,swt_x8225_48332_sw$from,0
 BINARY,swt_x8225_48332_sw$to,0
 BINARY,swt_x8225_48332_sw$phases,0
