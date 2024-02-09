@@ -81,6 +81,7 @@ std::map<int, int> previous;
 std::map<int, std::map<int, std::vector<int>>> route_perf;
 std::map<int, std::string> monitor;
 std::map<int, int> interface;
+int period_routing = 200;
 void readMicroGridConfig(std::string fpath, Json::Value& configobj)
 {
 	    std::ifstream tifs(fpath);
