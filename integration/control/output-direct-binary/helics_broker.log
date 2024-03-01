@@ -1,2 +1,0 @@
-[2022-09-27 15:47:09.476] [console] [warning] commWarning||84855-DmoS0-VUKVR-9C3Xv-gRnlN (1)::unknown route and no broker, dropping message send_message:From ()(131072:4) To ns3/mg3 size 66 at 10
-[2022-09-27 15:47:09.476] [console] [warning] commWarning||84855-DmoS0-VUKVR-9C3Xv-gRnlN (1)::unknown route and no broker, dropping message send_message:From ()(131072:17) To ns3/substation size 196 at 10

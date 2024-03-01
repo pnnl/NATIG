@@ -135,44 +135,26 @@ RUN cd ${RD2C} \
 #    && pip3 install --trusted-host=files.pythonhosted.org helics==2.7.1 
 
 # ----------------------------------------------------
-# INSTALL Gridlab-D
+# DOWNLOAD Gridlab-D
 # ----------------------------------------------------
 
 RUN cd ${RD2C} \
    && git clone https://github.com/gridlab-d/gridlab-d.git -b v4.3 --single-branch \
    && cd ${RD2C}/gridlab-d/third_party \
    && tar -xzf xerces-c-3.2.0.tar.gz \
-   && cd ${RD2C}/gridlab-d/third_party/xerces-c-3.2.0 \
-   && ./configure \
-   && make \
-   && make install \
-   && cd ${RD2C}/gridlab-d \
-   && autoreconf -if \
-   && ./configure --with-helics=/usr/local --prefix=$GLD_INSTALL --enable-silent-rules 'CFLAGS=-g -O2 -w' 'CXXFLAGS=-g -O2 -w -std=c++14' 'LDFLAGS=-g -O2 -w' \
-   && make \
-   && make install 
 
 
 # ----------------------------------------------------
 # INSTALL NS-3
 # ----------------------------------------------------	
 
-
-RUN apt-get update && apt-get install -y libjsoncpp-dev
-
-RUN apt-get update && apt-get install -y gcc 
-
-RUN apt-get install -y openmpi-bin openmpi-common libopenmpi-dev libgtk2.0-dev
-
-
-ENV LDFLAGS="-ljsoncpp -L/usr/local/include/jsoncpp/"
+#Download NS3
 RUN cd $RD2C \
     && mkdir PUSH \
     && cd PUSH \
-    && git clone https://github.com/pnnl/NATIG.git \
-    && cd NATIG \
-    && ./build_ns3.sh "" ${RD2C} 
+    && git clone https://github.com/pnnl/NATIG.git 
 
+#Update code in NS3 and Gridlabd
 RUN cd $RD2C \
     && git clone https://github.com/pnnl/NATIG.git \
     && cd NATIG \
@@ -190,9 +172,37 @@ RUN cd $RD2C \
     && cp -r RC/code/helics-backup/model/dnp3-helics-application-Docker.cc ${RD2C}/ns-3-dev/contrib/helics/model/dnp3-helics-application.cc \
     && cp -r RC/code/internet/* ${RD2C}/ns-3-dev/src/internet/ \
     && cp -r RC/code/lte/* ${RD2C}/ns-3-dev/src/lte/ \
-    && cp -r RC/code/dnp3/model/dnp3-application-Docker.cc ${RD2C}/ns-3-dev/src/dnp3/model/dnp3-application.cc 
+    && cp -r RC/code/dnp3/model/dnp3-application-Docker.cc ${RD2C}/ns-3-dev/src/dnp3/model/dnp3-application.cc \
+    && cp -r RC/code/gridlabd/* ${RD2C}/gridlab-d/tape_file/ \
+    && cp -r RC/code/trigger.player ${RD2C}/integration/control/ 
+
+# Install Gridlabd
+RUN cd ${RD2C}/gridlab-d/third_party/xerces-c-3.2.0 \
+   && ./configure \
+   && make \
+   && make install \
+   && cd ${RD2C}/gridlab-d \
+   && autoreconf -if \
+   && ./configure --with-helics=/usr/local --prefix=$GLD_INSTALL --enable-silent-rules 'CFLAGS=-g -O2 -w' 'CXXFLAGS=-g -O2 -w -std=c++14' 'LDFLAGS=-g -O2 -w' \
+   && make \
+   && make install
+
+RUN apt-get update && apt-get install -y libjsoncpp-dev
+
+RUN apt-get update && apt-get install -y gcc
+
+RUN apt-get install -y openmpi-bin openmpi-common libopenmpi-dev libgtk2.0-dev
+
+#Finish installing NS3
+ENV LDFLAGS="-ljsoncpp -L/usr/local/include/jsoncpp/"
+RUN cd $RD2C/PUSH/NATIG \
+    && ./build_ns3.sh "" ${RD2C} 
 
 RUN apt-get update && apt-get install -y procps
+
+RUN cd ${RD2C}/integration/control/ \
+    && mkdir collected_data
+
 # ----------------------------------------------------
 # INSTALL Java
 # ----------------------------------------------------

@@ -1,3 +1,0 @@
-[2022-09-27 15:56:02.601] [console] [warning] commWarning||9735-YsPLQ-E2EU4-dhoTb-NVZkf (1)::unknown route and no broker, dropping message send_message:From ()(131072:4) To ns3/mg3 size 70 at 10
-[2022-09-27 15:56:02.601] [console] [warning] commWarning||9735-YsPLQ-E2EU4-dhoTb-NVZkf (1)::unknown route and no broker, dropping message send_message:From ()(131072:17) To ns3/substation size 200 at 10
-[2022-09-27 15:56:02.603] [console] [warning] commWarning||9735-YsPLQ-E2EU4-dhoTb-NVZkf (1)::unknown route and no broker, dropping message time_grant:From (1) Granted Time(10.001) to (131072)
