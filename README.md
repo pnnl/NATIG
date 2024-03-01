@@ -126,6 +126,16 @@ Once the code has started there are several ways to track the progress:
 
 3. run ` cat TP.txt ` to see the throughput monitoring file being populated
 
+## Getting an updated version of the code
+
+If you want to get an updated version of the NATIG repository run the following instructions (__Currently being tested__):
+NOTE: Make sure that there are no un-commited changes in the PUSH/NATIG folder. If you do have some changes just run ` git stash `
+NOTE2: before running ` git stash ` make sure that you have a copy of the config files that you changed somewhere else.
+```
+cd /rd2c/PUSH/NATIG/
+./update_workstation.sh
+```
+
 ## 5G configuration
 
 To enable 5G capabilities:

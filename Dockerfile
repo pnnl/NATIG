@@ -150,13 +150,14 @@ RUN cd ${RD2C} \
 
 #Download NS3
 RUN cd $RD2C \
+    && git clone https://github.com/nsnam/ns-3-dev-git.git \
+    && mv ns-3-dev-git ns-3-dev \
     && mkdir PUSH \
     && cd PUSH \
     && git clone https://github.com/pnnl/NATIG.git 
 
 #Update code in NS3 and Gridlabd
-RUN cd $RD2C \
-    && git clone https://github.com/pnnl/NATIG.git \
+RUN cd $RD2C/PUSH \
     && cd NATIG \
     && cp -r integration $RD2C \
     && cp -r RC/code/run.sh ${RD2C}/integration/control \
