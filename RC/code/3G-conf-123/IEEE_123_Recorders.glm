@@ -90,7 +90,7 @@ object recorder {
 object recorder {
 	name recorder_test_Vinv1;
 	parent load_42;
-	property voltage_A, voltage_B, voltage_C; 
+	property measured_frequency, voltage_A, voltage_B, voltage_C; 
         //remove Qref above if issue arrises
 	flags DELTAMODE;
 	interval 1;

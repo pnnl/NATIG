@@ -2152,7 +2152,7 @@ object load {
      name load_42;
      phases "ABCN";
      flags DELTAMODE;
-	 //frequency_measure_type PLL;
+     frequency_measure_type PLL;
      constant_power_A 20000+10000j;
      nominal_voltage 2401.7771;
 

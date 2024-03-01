@@ -1,7 +1,7 @@
 {
         "Simulation": [
                 {
-                        "SimTime": 35,
+                        "SimTime": 180,
                         "StartTime": 0.0,
                         "PollReqFreq": 1000,
                         "includeMIM": 1,
@@ -5902,8 +5902,8 @@
         ],
         "MIM": [
                 {
-                        "NumberAttackers": 3,
-                        "listMIM": "6,9,10"
+                        "NumberAttackers": 1,
+                        "listMIM": "10"
                 },
                 {
                         "name": "MIM0",
@@ -5913,8 +5913,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM1",
@@ -5924,8 +5924,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM2",
@@ -5935,19 +5935,19 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM3",
                         "attack_val": "TRIP",
                         "real_val": "NA",
-                        "node_id": "microgrid_switch1",
+                        "node_id": "swt_ln0504019_sw",
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 60,
+                        "End": 180
                 },
                 {
                         "name": "MIM4",
@@ -5957,8 +5957,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM5",
@@ -5968,8 +5968,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM6",
@@ -5979,8 +5979,8 @@
                         "point_id": "status,status,status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM7",
@@ -5990,8 +5990,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM8",
@@ -6001,8 +6001,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM9",
@@ -6012,8 +6012,8 @@
                         "point_id": "status,status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM10",
@@ -6023,8 +6023,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 60,
+                        "End": 180
                 }
         ],
         "controlCenter": {

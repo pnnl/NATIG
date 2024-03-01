@@ -1,10 +1,10 @@
 {
         "Simulation": [
                 {
-                        "SimTime": 35,
+                        "SimTime": 180,
                         "StartTime": 0.0,
-                        "PollReqFreq": 7,
-                        "includeMIM": 0,
+                        "PollReqFreq": 1000,
+                        "includeMIM": 1,
                         "UseDynTop": 0,
                         "MonitorPerf": 0
                 }
@@ -5878,23 +5878,21 @@
         ],
         "Controller": [
                 {
-                        "use": 1,
-			"actionFile": "AgentDecisions10.txt",
-                        "NodesControlled":[1,2,3,4]
+                        "use": 0
                 }
         ],
         "DDoS": [
                 {
                         "NumberOfBots": 4,
-                        "Active": 1,
+                        "Active": 0,
                         "Start": 10,
-                        "End": 25,
-                        "TimeOn": 25.0,
+                        "End": 35,
+                        "TimeOn": 35.0,
                         "TimeOff": 0.0,
-                        "PacketSize": 500,
-                        "Rate": "80Mb/s",
+                        "PacketSize": 1500,
+                        "Rate": "80480kb/s",
                         "NodeType": [
-                                "UE"
+                                "MIM"
                         ],
                         "NodeID": [
                                 2
@@ -5904,8 +5902,8 @@
         ],
         "MIM": [
                 {
-                        "NumberAttackers": 2,
-                        "listMIM": "6,9"
+                        "NumberAttackers": 3,
+                        "listMIM": "6,9,10"
                 },
                 {
                         "name": "MIM0",
@@ -5915,8 +5913,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM1",
@@ -5926,8 +5924,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM2",
@@ -5937,8 +5935,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM3",
@@ -5948,8 +5946,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM4",
@@ -5959,8 +5957,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM5",
@@ -5970,8 +5968,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM6",
@@ -5981,8 +5979,8 @@
                         "point_id": "status,status,status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM7",
@@ -5992,8 +5990,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM8",
@@ -6003,8 +6001,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM9",
@@ -6014,19 +6012,19 @@
                         "point_id": "status,status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 },
                 {
                         "name": "MIM10",
                         "attack_val": "TRIP",
                         "real_val": "NA",
-                        "node_id": "microgrid_switch1",
+                        "node_id": "swt_ln2000001_sw",
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 10,
-                        "End": 35
+                        "Start": 120,
+                        "End": 180
                 }
         ],
         "controlCenter": {
