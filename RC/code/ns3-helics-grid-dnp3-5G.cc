@@ -649,7 +649,7 @@ main (int argc, char *argv[])
   readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
 
   
-  HelicsHelper helicsHelper(9000);
+  HelicsHelper helicsHelper(6000);
   std::cout << "Calling Calling Message Federate Constructor" << std::endl; 
   helicsHelper.SetupApplicationFederate();
   std::string fedName = helics_federate->getName();
@@ -1097,7 +1097,7 @@ main (int argc, char *argv[])
                   int MIM_ID = std::stoi(val[x]) + 1; //x+1;
                   auto ep_name = configObject["MIM"][MIM_ID]["name"].asString();
                   std::string ID2 = "SS_";
-                  auto ep_name2 = configObject["microgrid"][i]["name"].asString();
+                  auto ep_name2 = configObject["microgrid"][0]["name"].asString();
                   if (std::string(ep_name2).find(ID2) != std::string::npos){
                       ep_name2 = "SS_"+std::to_string(MIM_ID);
                   }

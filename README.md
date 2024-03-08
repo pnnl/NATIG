@@ -44,6 +44,29 @@ Finally, when collecting data from recorders in gridlabd, with the IEEE 9500 bus
 
 ## Out of the box examples
 
+Table containing the status for the MIM examples:
+
+| example | Description | Development Stage | 
+|---|---|---|
+| 3G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using directly connected network | Works
+| 3G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using directly connected network | Works
+| 4G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 4G network | Not tested
+| 4G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 4G network | Routing Issue
+| 5G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 5G network | Not tested
+| 5G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 5G network | Routing Issue
+
+
+Table containing the status for the DDoS examples:
+
+| example | Description | Development Stage | 
+|---|---|---|
+| 3G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using directly connected network | Works
+| 3G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using directly connected network | Works
+| 4G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 4G network | Works
+| 4G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 4G network | Works
+| 5G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 5G network | Works
+| 5G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 5G network | Works
+
 4G or point to point example using a star topology.
 
 For 4G network:
