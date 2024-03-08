@@ -17,6 +17,8 @@ We demonstrate few attack scenarios in the default framework and provide ways to
 
 [How to stop the code](https://github.com/pnnl/NATIG/tree/master/README.md#How-to-stop-the-run)
 
+[How to update code] (https://github.com/pnnl/NATIG/tree/master/README.md#Getting-an-updated-version-of-the-code)
+
 [Citation](https://github.com/pnnl/NATIG/tree/master/README.md#Reference)
 
 ## How to get started
