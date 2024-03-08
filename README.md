@@ -44,6 +44,16 @@ Finally, when collecting data from recorders in gridlabd, with the IEEE 9500 bus
 
 ## Out of the box examples
 
+| Toplogy Type | Development Stage |
+|---|---|
+| 3G Star | Works
+| 3G Mesh | Not tested for MIM or DDoS
+| 3G Ring | Not tested for MIM or DDoS
+| 4G Mesh and Star hybrid | Works for DDoS, routing issue for MIM
+| 5G Mesh and Star hybrid | Works for DDoS, routing issue for MIM
+
+NOTE: Mesh and Start hybrid means that there is a Mesh topology connecting the micrigrids to the 4G/5G network in a all to all connection and a Star topology connecting the control center to the 4G/5G network. 
+
 Table containing the status for the MIM examples:
 
 | example | Description | Development Stage | 
