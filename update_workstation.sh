@@ -33,4 +33,4 @@ make install
 
 LDFLAGS="-ljsoncpp -L/usr/local/include/jsoncpp/"
 cd $RD2C/PUSH/NATIG 
-./build_ns3.sh "" ${RD2C}
+./build_ns3.sh $1 ${RD2C}
