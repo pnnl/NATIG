@@ -44,6 +44,8 @@ Finally, when collecting data from recorders in gridlabd, with the IEEE 9500 bus
 
 ## Out of the box examples
 
+The following table is for both the 9500 and 123 bus models:
+
 | Toplogy Type | Development Stage |
 |---|---|
 | 3G Star | Works
@@ -56,7 +58,7 @@ NOTE: Mesh and Start hybrid means that there is a Mesh topology connecting the m
 
 Table containing the status for the MIM examples:
 
-| example | Description | Development Stage | 
+| Example | Description | Development Stage | 
 |---|---|---|
 | 3G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using directly connected network | Works
 | 3G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using directly connected network | Works
@@ -68,7 +70,7 @@ Table containing the status for the MIM examples:
 
 Table containing the status for the DDoS examples:
 
-| example | Description | Development Stage | 
+| Example | Description | Development Stage | 
 |---|---|---|
 | 3G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using directly connected network | Works
 | 3G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using directly connected network | Works
