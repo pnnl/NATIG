@@ -50,9 +50,9 @@ Table containing the status for the MIM examples:
 |---|---|---|
 | 3G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using directly connected network | Works
 | 3G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using directly connected network | Works
-| 4G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 4G network | Not tested
+| 4G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 4G network | Routing Issue
 | 4G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 4G network | Routing Issue
-| 5G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 5G network | Not tested
+| 5G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 5G network | Routing Issue
 | 5G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 5G network | Routing Issue
 
 
@@ -111,9 +111,9 @@ To run this example in docker: ` sudo bash run.sh /rd2c/ 4G "" 9500 `
 
 To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 4G "" 123 `
 
-To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 4G RC 9500 `
+To run this example in a unix cluster using slurm: ` sbatch run.sh /rd2c/ 4G RC 9500 `
 
-To run this example in a unix cluster using slurm with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 4G RC 123 `
+To run this example in a unix cluster using slurm with the IEEE 123 model: ` sbatch run.sh /rd2c/ 4G RC 123 `
 
 Using base point to point connected star topology:
 
@@ -121,9 +121,9 @@ To run this example in docker: ` sudo bash run.sh /rd2c/ 3G "" 9500 `
 
 To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 3G "" 123 `
 
-To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 3G RC 9500 `
+To run this example in a unix cluster using slurm: ` sbatch run.sh /rd2c/ 3G RC 9500 `
 
-To run this example in a unix cluster using slurm with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 3G RC 123 `
+To run this example in a unix cluster using slurm with the IEEE 123 model: ` sbatch run.sh /rd2c/ 3G RC 123 `
 
 Interesting outputted data:
 
@@ -199,9 +199,9 @@ To run this example in docker: ` sudo bash run.sh /rd2c/ 5G "" 9500 `
 
 To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 5G "" 123 `
 
-To run this example in a unix cluster using slurm: ` sudo bash run.sh /rd2c/ 5G RC 9500 `
+To run this example in a unix cluster using slurm: ` sbatch run.sh /rd2c/ 5G RC 9500 `
 
-To run this example in a unix cluster using slurm with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 4G RC 123 `
+To run this example in a unix cluster using slurm with the IEEE 123 model: ` sbatch run.sh /rd2c/ 4G RC 123 `
 
 Interesting outputted data:
 
