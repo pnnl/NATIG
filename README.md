@@ -170,7 +170,10 @@ NOTE: Make sure that there are no un-commited changes in the PUSH/NATIG folder. 
 NOTE2: before running ` git stash ` make sure that you have a copy of the config files that you changed somewhere else.
 ```
 cd /rd2c/PUSH/NATIG/
-./update_workstation.sh
+# 5G disabled
+./update_workstation.sh 4G
+# 5G enabled
+./update_workstation.sh 5G
 ```
 
 ## 5G configuration
