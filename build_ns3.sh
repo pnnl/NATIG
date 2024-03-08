@@ -49,7 +49,7 @@ if [ "$1" == "5G" ]; then
     cd nr
     git checkout 5g-lena-v1.2.y
     cd ../../
-    cp -r ../PUSH/NATIG/patch/nr/* contrib/nr/
+    cp -r $2/PUSH/NATIG/patch/nr/* contrib/nr/
     sudo ./make.sh $2
 fi
 #sudo ./make.sh
