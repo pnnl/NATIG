@@ -32,6 +32,7 @@ then
   rm $helicsOutFile
 fi
 
+cp -r ../../PUSH/NATIG/RC/code/points-${4}/* config/
 
 if [[ "$2" == "4G" ]]
 then
