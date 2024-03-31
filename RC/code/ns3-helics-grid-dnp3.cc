@@ -554,6 +554,7 @@ main (int argc, char *argv[])
   if (verbose)
   {
     LogComponentEnable ("IntagrationExample", LOG_LEVEL_INFO);
+    LogComponentEnable ("Ipv4L3ProtocolMIM", LOG_LEVEL_INFO);
     // LogComponentEnable ("HelicsSimulatorImpl", LOG_LEVEL_LOGIC);
     LogComponentEnable ("Dnp3ApplicationNew", LOG_LEVEL_INFO);
     // LogComponentEnable ("HelicsApplication", LOG_LEVEL_LOGIC);
@@ -1012,7 +1013,7 @@ main (int argc, char *argv[])
     int UDP_SINK_PORT = master_port; //mimPort[2]-10;
     int MAX_BULK_BYTES = std::stof(configObject["DDoS"][0]["PacketSize"].asString()); //20971520000;
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
-
+    Time interPacketInterval{Seconds(1.0)};
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
 
     /*if (DDoS){
@@ -1029,10 +1030,32 @@ main (int argc, char *argv[])
     }*/
     Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
+    bool usePing = std::stoi(configObject["DDoS"][0]["usePing"].asString());
+
     if (DDoS){
             ApplicationContainer onOffApp[botNodes.GetN()];
-            for (int k = 0; k < botNodes.GetN(); ++k)
-            {
+	    if (usePing){
+	     for (int k = 0; k < botNodes.GetN(); ++k)
+	     {
+               if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){	
+                 V4PingHelper pingHelper(hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal());
+	         pingHelper.SetAttribute("Interval", TimeValue(interPacketInterval));
+	         pingHelper.SetAttribute("Size", UintegerValue(MAX_BULK_BYTES));
+                 ApplicationContainer apps = pingHelper.Install(botNodes.Get(k));
+                 apps.Start(Seconds(BOT_START));
+ 	         apps.Stop(Seconds(BOT_STOP));
+	       }else  if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
+                  V4PingHelper pingHelper(Microgrid.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal());
+		  pingHelper.SetAttribute("Interval", TimeValue(interPacketInterval));
+		  pingHelper.SetAttribute("Size", UintegerValue(MAX_BULK_BYTES));
+		  ApplicationContainer apps = pingHelper.Install(botNodes.Get(k));
+		  apps.Start(Seconds(BOT_START));
+		  apps.Stop(Seconds(BOT_STOP));
+	       }
+	      }
+	    }else{
+              for (int k = 0; k < botNodes.GetN(); ++k)
+              {
                 if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
                 OnOffHelper onoff("ns3::UdpSocketFactory", Address(InetSocketAddress(Microgrid.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), UDP_SINK_PORT))); //remoteHostAddr, UDP_SINK_PORT)));
                 onoff.SetConstantRate(DataRate(DDOS_RATE));
@@ -1054,18 +1077,21 @@ main (int argc, char *argv[])
                         PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
                              Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
                         ApplicationContainer UDPSinkApp = UDPsink.Install(Microgrid.Get(k)); //remoteHost);
-                        UDPSinkApp.Start(Seconds(0.0));
+                        UDPSinkApp.Start(Seconds(BOT_START));
                         UDPSinkApp.Stop(Seconds(BOT_STOP));
                 }
-            }
-            if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
+              }
+              if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
                         PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
                              Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
                         ApplicationContainer UDPSinkApp = UDPsink.Install(hubNode.Get(0));
-                        UDPSinkApp.Start(Seconds(0.0));
+                        UDPSinkApp.Start(Seconds(BOT_START));
                         UDPSinkApp.Stop(Seconds(BOT_STOP));
 
-            }
+              }
+	    }
+              
+	    
     }
 
     std::cout << "Done Setting up the bots " << std::endl;

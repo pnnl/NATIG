@@ -4,7 +4,7 @@
                         "SimTime": 180,
                         "StartTime": 0.0,
                         "PollReqFreq": 1000,
-                        "includeMIM": 1,
+                        "includeMIM": 0,
                         "UseDynTop": 0,
                         "MonitorPerf": 0
                 }
@@ -5884,13 +5884,14 @@
         "DDoS": [
                 {
                         "NumberOfBots": 4,
-                        "Active": 0,
+                        "Active": 1,
                         "Start": 10,
                         "End": 35,
                         "TimeOn": 35.0,
                         "TimeOff": 0.0,
                         "PacketSize": 1500,
                         "Rate": "80480kb/s",
+			"usePing": 1,
                         "NodeType": [
                                 "MIM"
                         ],
@@ -6023,7 +6024,7 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 60,
+                        "Start": 1,
                         "End": 180
                 }
         ],

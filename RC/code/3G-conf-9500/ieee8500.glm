@@ -98,7 +98,7 @@ object recorder {
 }
 
 object recorder {
-	parent swt_ln4625876_sw;
+	parent swt_ln2000001_sw;
 	file "collected_data/microgrid_switch0.csv";
 	property phase_A_state,phase_B_state,phase_C_state;
 	flags DELTAMODE;
