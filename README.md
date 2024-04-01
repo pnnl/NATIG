@@ -388,7 +388,7 @@ To automatically generate the input json files use the get\_config.py from the g
 1. Helics parameters: Helics broker setup parameters (ex: IP address and port number for helics setup)
 2. Endpoint: Gridlabd endpoint
 
-NOTE: to change the helics broker's port the gridlabd\_config.json and the ns3-*.cc need to be updated. All 3 of the files have a reference to the port used by the helics broker. 
+NOTE: to change the helics broker's port the gridlabd\_config.json needs to be updated. All 3 of the files have a reference to the port used by the helics broker. 
 
 ## Simulated attacks
 
