@@ -148,7 +148,7 @@ Interesting outputted data:
 
   - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Total received bytes since the start of the simulation , Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
 
-##DDoS applications that the attacker can use:
+## DDoS applications that the attacker can use:
 
 When setting usePing to 1, the attacker is sending numerous ping packets to the victim node using the ipv4 protocol. When using that option the attacker does not rely on a specific port being opened. In this case the attacker is conducting what is called a ping attack (https://www.researchgate.net/publication/222619629_PING_attack_-_How_bad_is_it)
 
