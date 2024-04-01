@@ -1175,10 +1175,11 @@ main (int argc, char *argv[])
     bool usePing = std::stoi(configObject["DDoS"][0]["usePing"].asString());
     Time interPacketInterval2{Seconds(1.0)};
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
-    
+    int numThreads = std::stoi(configObject["DDoS"][0]["threadsPerAttacker"].asString()); 
     if (DDoS){
 	    ApplicationContainer onOffApp[botNodes.GetN()];
-	     if (usePing){
+	    for (int t = 0; t < numThreads; t++){
+	    if (usePing){
 		     for (int k = 0; k < botNodes.GetN(); ++k)
 		     {
 			     Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (botNodes.Get(k)->GetObject<Ipv4> ());
@@ -1216,9 +1217,9 @@ main (int argc, char *argv[])
 				     apps.Stop(Seconds(BOT_STOP));
 			     }
 		     }
-	     }else{
-            for (int k = 0; k < botNodes.GetN(); ++k)
-            {
+	    }else{
+              for (int k = 0; k < botNodes.GetN(); ++k)
+              {
                 Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (botNodes.Get(k)->GetObject<Ipv4> ());
                 if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
                 remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(k)->GetObject<Ipv4>()->GetAddress(k+1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), ueNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
@@ -1270,15 +1271,17 @@ main (int argc, char *argv[])
                         UDPSinkApp.Stop(Seconds(BOT_STOP));
 
                 }
-            }
-            if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
+              }
+              if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
                         PacketSinkHelper UDPsink("ns3::UdpSocketFactory",
                              Address(InetSocketAddress(Ipv4Address::GetAny(), UDP_SINK_PORT)));
                         ApplicationContainer UDPSinkApp = UDPsink.Install(remoteHost);
                         UDPSinkApp.Start(Seconds(0.0));
                         UDPSinkApp.Stop(Seconds(BOT_STOP));
 
-            }
+               }
+	       UDP_SINK_PORT += 1;
+	     }
 	     }
     }
     std::cout << "Done Setting up the bots " << std::endl;
