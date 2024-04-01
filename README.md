@@ -113,10 +113,13 @@ PacketSize: 1500,
 
 Rate: "40480kb/s",
 
+usePing: 1,
+
 legitNodeUsedByBots: UE, (This is the node that the bots conducting the DDoS attack connect to)
 
 endPoint: MIM (Refers to the end point of the attack. Usefull if you want to attack multiple links)
 ```
+
 MIM --> Middle node between the UE and the substation/Control center
 
 Using 4G as the communication protocol:
@@ -144,6 +147,12 @@ Interesting outputted data:
 1. TP.txt this file contains the performance of each path full path between the control center and the substation. To read this file only take the 20 last inputs per timesteps. if the number of substation changes, only read the last 2 X the number of substations rows per timesteps.
 
   - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Total received bytes since the start of the simulation , Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
+
+##DDoS applications that the attacker can use:
+
+When setting usePing to 1, the attacker is sending numerous ping packets to the victim node using the ipv4 protocol. When using that option the attacker does not rely on a specific port being opened. In this case the attacker is conducting what is called a ping attack (https://www.researchgate.net/publication/222619629_PING_attack_-_How_bad_is_it)
+
+When setting usePing to 0, the attacker is sending numerous packets filled with random data to the target node. The attacker in this case is more visible since the target victim has a port that is used by the attacker to receive the data.  
 
 ## How to stop the run?
 
@@ -205,6 +214,8 @@ End: 35,
 PacketSize: 1500,
 
 Rate: "40480kb/s",
+
+usePing: 1,
 
 legitNodeUsedByBots: UE, (This is the node that the bots conducting the DDoS attack connect to)
 
