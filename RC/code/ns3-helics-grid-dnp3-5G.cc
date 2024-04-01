@@ -649,7 +649,7 @@ main (int argc, char *argv[])
   readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
 
   
-  HelicsHelper helicsHelper(6000);
+  HelicsHelper helicsHelper(std::stoi(helicsConfigObject["brokerPort"].asString()));
   std::cout << "Calling Calling Message Federate Constructor" << std::endl; 
   helicsHelper.SetupApplicationFederate();
   std::string fedName = helics_federate->getName();
