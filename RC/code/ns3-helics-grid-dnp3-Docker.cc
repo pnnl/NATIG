@@ -1032,8 +1032,11 @@ main (int argc, char *argv[])
 
     bool usePing = std::stoi(configObject["DDoS"][0]["usePing"].asString());
 
+    int numThreads = std::stoi(configObject["DDoS"][0]["threadsPerAttacker"].asString());
+
     if (DDoS){
             ApplicationContainer onOffApp[botNodes.GetN()];
+	    for (int t = 0; t < numThreads; t++){
 	    if (usePing){
 	     for (int k = 0; k < botNodes.GetN(); ++k)
 	     {
@@ -1089,6 +1092,8 @@ main (int argc, char *argv[])
                         UDPSinkApp.Stop(Seconds(BOT_STOP));
 
               }
+	      UDP_SINK_PORT += 1;
+	    }
 	    }
               
 	    

@@ -1429,9 +1429,11 @@ main (int argc, char *argv[])
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
     bool usePing = std::stoi(configObject["DDoS"][0]["usePing"].asString());
     Time interPacketInterval2{Seconds(1.0)};
+    int numThreads = std::stoi(configObject["DDoS"][0]["threadsPerAttacker"].asString());
     if (DDoS){
 	    ApplicationContainer onOffApp[botNodes.GetN()];
-	     if (usePing){
+	    for (int t = 0; t < numThreads; t++){
+	    if (usePing){
 		     for (int k = 0; k < botNodes.GetN(); ++k)
 		     {
 			     Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (botNodes.Get(k)->GetObject<Ipv4> ());
@@ -1530,6 +1532,8 @@ main (int argc, char *argv[])
                         UDPSinkApp.Stop(Seconds(BOT_STOP));
 
                 }
+		UDP_SINK_PORT += 1;
+	    }
 	    }
     }
 

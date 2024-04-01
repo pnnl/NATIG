@@ -5884,6 +5884,7 @@
         "DDoS": [
                 {
                         "NumberOfBots": 4,
+			"threadsPerAttacker": 4,
                         "Active": 1,
                         "Start": 10,
                         "End": 35,
