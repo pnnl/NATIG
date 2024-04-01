@@ -36,9 +36,9 @@ We demonstrate few attack scenarios in the default framework and provide ways to
 Once the setup is done you can run the out of the box examples
 1. go to the control folder inside the integration folder that is located in the home rd2c folder (full path: _/rd2c/integration/control_)
 2. make sure that all TP*.txt files are removed by running ` rm -r TP*.txt `
-3. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_ _[3G/4G/5G]_ _[9500/123]_
+3. run sudo bash run.sh _Full path of work directory (example for docker: /rd2c/)_  _[3G|4G|5G]_ _[RC|emptyString]_ _[9500|123]_ _[conf|noconf]_
 
-**Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G "" 9500 ` . Change the 3rd parameter to RC when running of docker in a unix cluster that uses slurm. The 4th parameter is the model number that will be used by gridlabd for the simulation.**
+**Note: example command for docker to run 4G example: ` sudo bash run.sh /rd2c/ 4G "" 9500 conf ` . Change the 3rd parameter to RC when running of docker in a unix cluster that uses slurm. The 4th parameter is the model number that will be used by gridlabd for the simulation.**
 
 When refering to the 3G example, we are talking about topologies that just use a combination of point to point connections, CSMA connections and wifi connections. There is no 4G or 5G in these examples. 
 
@@ -126,23 +126,39 @@ MIM --> Middle node between the UE and the substation/Control center
 
 Using 4G as the communication protocol:
 
-To run this example in docker: ` sudo bash run.sh /rd2c/ 4G "" 9500 `
+To run this example in docker and overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 4G "" 9500 conf `
 
-To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 4G "" 123 `
+To run this example in docker and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 4G "" 9500 noconf `
 
-To run this example in a unix cluster using slurm: ` sbatch run.sh /rd2c/ 4G RC 9500 `
+To run this example in docker with the IEEE 123 model and overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 4G "" 123 conf `
 
-To run this example in a unix cluster using slurm with the IEEE 123 model: ` sbatch run.sh /rd2c/ 4G RC 123 `
+To run this example in docker with the IEEE 123 model and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 4G "" 123 noconf `
+
+To run this example in a unix cluster using slurm and overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 4G RC 9500 conf `
+
+To run this example in a unix cluster using slurm and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 4G RC 9500 noconf `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model and overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 4G RC 123 conf `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 4G RC 123 noconf `
 
 Using base point to point connected star topology:
 
-To run this example in docker: ` sudo bash run.sh /rd2c/ 3G "" 9500 `
+To run this example in docker and overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 3G "" 9500 conf `
 
-To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 3G "" 123 `
+To run this example in docker and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 3G "" 9500 noconf `
 
-To run this example in a unix cluster using slurm: ` sbatch run.sh /rd2c/ 3G RC 9500 `
+To run this example in docker with the IEEE 123 model and overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 3G "" 123 conf `
 
-To run this example in a unix cluster using slurm with the IEEE 123 model: ` sbatch run.sh /rd2c/ 3G RC 123 `
+To run this example in docker with the IEEE 123 model and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 3G "" 123 noconf `
+
+To run this example in a unix cluster using slurm and overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 3G RC 9500 conf `
+
+To run this example in a unix cluster using slurm and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 3G RC 9500 noconf `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model and overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 3G RC 123 conf `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 3G RC 123 noconf `
 
 Interesting outputted data:
 
@@ -229,13 +245,21 @@ endPoint: MIM (Refers to the end point of the attack. Usefull if you want to att
 ```
 MIM --> Middle node between the UE and the substation
 
-To run this example in docker: ` sudo bash run.sh /rd2c/ 5G "" 9500 `
+To run this example in docker and overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 5G "" 9500 conf `
 
-To run this example in docker with the IEEE 123 model: ` sudo bash run.sh /rd2c/ 5G "" 123 `
+To run this example in docker and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 5G "" 9500 noconf `
 
-To run this example in a unix cluster using slurm: ` sbatch run.sh /rd2c/ 5G RC 9500 `
+To run this example in docker with the IEEE 123 model and overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 5G "" 123 conf `
 
-To run this example in a unix cluster using slurm with the IEEE 123 model: ` sbatch run.sh /rd2c/ 4G RC 123 `
+To run this example in docker with the IEEE 123 model and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 5G "" 123 noconf `
+
+To run this example in a unix cluster using slurm and overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 5G RC 9500 conf `
+
+To run this example in a unix cluster using slurm and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 5G RC 9500 noconf `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model and overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 5G RC 123 conf `
+
+To run this example in a unix cluster using slurm with the IEEE 123 model and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 5G RC 123 noconf `
 
 Interesting outputted data:
 
@@ -305,11 +329,11 @@ Step 4: run the make.sh bash script located in the ns-3-dev folder with the loca
 
 If your system has slurm nodes:
 
-Command to run the simulation: ` sbatch --exclusive run.sh _location of RC folder_ `
+Command to run the simulation: ` sbatch --exclusive run.sh _location of RC folder_ _[3G|4G|5G]_ _[RC|emptyString]_ _[9500|123]_ _[conf|noconf]_ `
 
 If your system does not have slurm nodes:
 
-Command to run the simulation: ` ./run.sh _location of RC folder_ `
+Command to run the simulation: ` ./run.sh _location of RC folder_  _[3G|4G|5G]_ _[RC|emptyString]_ _[9500|123]_ _[conf|noconf]_ `
 
 ## Available configurations
 Using the configuration files, a user can create a ring topology that uses wifi as a connection type, for example. Currently with the exception of 5G and 4G a user can mix and match any connection types with any topologies.
@@ -364,7 +388,7 @@ To automatically generate the input json files use the get\_config.py from the g
 1. Helics parameters: Helics broker setup parameters (ex: IP address and port number for helics setup)
 2. Endpoint: Gridlabd endpoint
 
-NOTE: to change the helics broker's port, the run.sh, the gridlabd\_config.json and the ns3-*.cc need to be updated. All 3 of the files have a reference to the port used by the helics broker. 
+NOTE: to change the helics broker's port the gridlabd\_config.json and the ns3-*.cc need to be updated. All 3 of the files have a reference to the port used by the helics broker. 
 
 ## Simulated attacks
 

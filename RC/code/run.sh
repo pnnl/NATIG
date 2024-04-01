@@ -32,24 +32,31 @@ then
   rm $helicsOutFile
 fi
 
-cp -r ../../PUSH/NATIG/RC/code/points-${4}/* config/
-
 if [[ "$2" == "4G" ]]
 then
-cp -r ../../PUSH/NATIG/RC/code/4G-conf-${4}/*.json config/
-cp -r ../../PUSH/NATIG/RC/code/4G-conf-${4}/*.glm .
+if [[ "$5" == "conf" ]]
+then
+    cp -r ../../PUSH/NATIG/RC/code/4G-conf-${4}/*.json config/
+    cp -r ../../PUSH/NATIG/RC/code/4G-conf-${4}/*.glm .
+fi
 modelName="ns3-helics-grid-dnp3-4G"
 fi
 if [[ "$2" == "5G" ]]
 then
-cp -r ../../PUSH/NATIG/RC/code/5G-conf-${4}/*.json config/
-cp -r ../../PUSH/NATIG/RC/code/5G-conf-${4}/*.glm .
+if [[ "$5" == "conf" ]]
+then
+    cp -r ../../PUSH/NATIG/RC/code/5G-conf-${4}/*.json config/
+    cp -r ../../PUSH/NATIG/RC/code/5G-conf-${4}/*.glm .
+fi
 modelName="ns3-helics-grid-dnp3-5G"
 fi
 if [[ "$2" == "3G" ]]
 then
-cp -r ../../PUSH/NATIG/RC/code/3G-conf-${4}/*.json config/
-cp -r ../../PUSH/NATIG/RC/code/3G-conf-${4}/*.glm .
+if [[ "$5" == "conf" ]]
+then
+    cp -r ../../PUSH/NATIG/RC/code/3G-conf-${4}/*.json config/
+    cp -r ../../PUSH/NATIG/RC/code/3G-conf-${4}/*.glm .
+fi
 modelName="ns3-helics-grid-dnp3"
 fi
 
