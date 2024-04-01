@@ -231,6 +231,7 @@
             "TimeOff": 0.0,
             "PacketSize": 1500,
             "Rate": "40480kb/s",
+	    "usePing": 1,
             "NodeType": [
                       "UE"
             ],

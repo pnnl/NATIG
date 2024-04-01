@@ -1172,11 +1172,51 @@ main (int argc, char *argv[])
     int UDP_SINK_PORT = mimPort[2]-10;
     int MAX_BULK_BYTES = std::stof(configObject["DDoS"][0]["PacketSize"].asString()); //20971520000;
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
-
+    bool usePing = std::stoi(configObject["DDoS"][0]["usePing"].asString());
+    Time interPacketInterval2{Seconds(1.0)};
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
     
     if (DDoS){
 	    ApplicationContainer onOffApp[botNodes.GetN()];
+	     if (usePing){
+		     for (int k = 0; k < botNodes.GetN(); ++k)
+		     {
+			     Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (botNodes.Get(k)->GetObject<Ipv4> ());
+			     if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
+				     remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(k)->GetObject<Ipv4>()->GetAddress(k+1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), ueNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);		
+			     }
+
+
+			     else if (configObject["DDoS"][0]["endPoint"].asString().find("MIM") != std::string::npos){
+				     remoteHostStaticRouting->AddNetworkRouteTo (MIM.Get(k)->GetObject<Ipv4>()->GetAddress(k+1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), ueNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
+			     }
+			     else if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
+				     remoteHostStaticRouting->AddNetworkRouteTo (remoteHostAddr, Ipv4Mask ("255.255.0.0"), ueNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
+			     }
+			     if (configObject["DDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
+				     V4PingHelper pingHelper(remoteHostAddr);
+				     pingHelper.SetAttribute("Interval", TimeValue(interPacketInterval2));
+				     pingHelper.SetAttribute("Size", UintegerValue(MAX_BULK_BYTES));
+				     ApplicationContainer apps = pingHelper.Install(botNodes.Get(k));
+				     apps.Start(Seconds(BOT_START));
+				     apps.Stop(Seconds(BOT_STOP));
+			     }else  if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
+				     V4PingHelper pingHelper(subNodes.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal());
+				     pingHelper.SetAttribute("Interval", TimeValue(interPacketInterval2));
+				     pingHelper.SetAttribute("Size", UintegerValue(MAX_BULK_BYTES));
+				     ApplicationContainer apps = pingHelper.Install(botNodes.Get(k));
+				     apps.Start(Seconds(BOT_START));
+				     apps.Stop(Seconds(BOT_STOP));
+			     }else if (configObject["DDoS"][0]["endPoint"].asString().find("MIM") != std::string::npos){
+				     V4PingHelper pingHelper(MIM.Get(k)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal());
+				     pingHelper.SetAttribute("Interval", TimeValue(interPacketInterval2));
+				     pingHelper.SetAttribute("Size", UintegerValue(MAX_BULK_BYTES));
+				     ApplicationContainer apps = pingHelper.Install(botNodes.Get(k));
+				     apps.Start(Seconds(BOT_START));
+				     apps.Stop(Seconds(BOT_STOP));
+			     }
+		     }
+	     }else{
             for (int k = 0; k < botNodes.GetN(); ++k)
             {
                 Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (botNodes.Get(k)->GetObject<Ipv4> ());
@@ -1239,6 +1279,7 @@ main (int argc, char *argv[])
                         UDPSinkApp.Stop(Seconds(BOT_STOP));
 
             }
+	     }
     }
     std::cout << "Done Setting up the bots " << std::endl;
     int mon = std::stoi(configObject["Simulation"][0]["MonitorPerf"].asString());
