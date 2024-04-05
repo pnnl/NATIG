@@ -131,20 +131,22 @@ def build(bld):
     if 'helics' in bld.env['MODULES_NOT_BUILT']:
         return
 
-    module = bld.create_ns3_module('helics', ['core', 'internet','dnp3'])
+    module = bld.create_ns3_module('helics', ['core', 'internet', 'dnp3']) #Dnp3 needed by NATIG
     module.source = [
         'model/helics.cc',
         'model/helics-application.cc',
-        'model/dnp3-helics-application.cc',
+        #NATIG
         'model/dnp3-application-new.cc',
+        ####
         'model/helics-filter-application.cc',
         'model/helics-static-sink-application.cc',
         'model/helics-static-source-application.cc',
         'model/helics-simulator-impl.cc',
         'model/helics-id-tag.cc',
         'helper/helics-helper.cc',
-        'helper/dnp3-helics-helper.cc',
+        #NATIG
         'helper/dnp3-application-helper-new.cc',
+        ####
         ]
     module_test = bld.create_ns3_module_test_library('helics')
     module_test.source = [
@@ -159,16 +161,18 @@ def build(bld):
     headers.source = [
         'model/helics.h',
         'model/helics-application.h',
-        'model/dnp3-helics-application.h',
+        #NATIG
         'model/dnp3-application-new.h',
+        ####
         'model/helics-filter-application.h',
         'model/helics-static-sink-application.h',
         'model/helics-static-source-application.h',
         'model/helics-simulator-impl.h',
         'model/helics-id-tag.h',
         'helper/helics-helper.h',
-        'helper/dnp3-helics-helper.h',
+        #NATIG
         'helper/dnp3-application-helper-new.h',
+        ####
         ]
 
     if bld.env.ENABLE_EXAMPLES:

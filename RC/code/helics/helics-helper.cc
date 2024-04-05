@@ -25,7 +25,7 @@ HelicsHelper::HelicsHelper()
 : broker("")
 , name("ns3")
 , core("zmq")
-, port(23404)
+, port(12345)
 , timedelta(1.0)
 , coreinit("")
 {
@@ -34,18 +34,20 @@ HelicsHelper::HelicsHelper()
     m_factory_source.SetTypeId (HelicsStaticSourceApplication::GetTypeId ());
 }
 
+//NATIG code
 HelicsHelper::HelicsHelper(int port)
-	: broker("")
-	  , name("ns3")
-	  , core("zmq")
-	  , port(port)
-	  , timedelta(1.0)
-	  , coreinit("")
+: broker("")
+, name("ns3")
+, core("zmq")
+, port(port)
+, timedelta(1.0)
+, coreinit("")
 {
-	    m_factory_filter.SetTypeId (HelicsFilterApplication::GetTypeId ());
-	        m_factory_sink.SetTypeId (HelicsStaticSinkApplication::GetTypeId ());
-		    m_factory_source.SetTypeId (HelicsStaticSourceApplication::GetTypeId ());
+	m_factory_filter.SetTypeId (HelicsFilterApplication::GetTypeId ());
+	m_factory_sink.SetTypeId (HelicsStaticSinkApplication::GetTypeId ());
+	m_factory_source.SetTypeId (HelicsStaticSourceApplication::GetTypeId ());
 }
+//-----------------------
 
 void
 HelicsHelper::SetupFederate(void) {

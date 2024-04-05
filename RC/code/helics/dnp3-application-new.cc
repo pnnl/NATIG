@@ -29,9 +29,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include </people/belo700/RD2C/workspace/include/json/json.h>
-#include </people/belo700/RD2C/workspace/include/json/forwards.h>
-#include </people/belo700/RD2C/workspace/include/json/writer.h>
+#include <jsoncpp/json/json.h>
+#include <jsoncpp/json/forwards.h>
+#include <jsoncpp/json/writer.h>
 
 using namespace std;
 

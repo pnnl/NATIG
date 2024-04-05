@@ -39,8 +39,7 @@ cp -r ../PUSH/NATIG/RC/code/internet/* src/internet/
 cp -r ../PUSH/NATIG/RC/code/lte/* src/lte/
 cp -r ../PUSH/NATIG/RC/code/point-to-point-layout/* src/point-to-point-layout/
 cp -r ../PUSH/NATIG/RC/code/dnp3/model/dnp3-application-Docker.cc src/dnp3/model/dnp3-application.cc 
-cp -r ../PUSH/NATIG/RC/code/helics-backup/model/dnp3-application-new-Docker.cc contrib/helics/model/dnp3-application-new.cc 
-cp -r ../PUSH/NATIG/RC/code/helics-backup/model/dnp3-helics-application-Docker.cc contrib/helics/model/dnp3-helics-application.cc
+./build_helics.sh
 sudo ./make.sh $2
 if [ "$1" == "5G" ]; then
     echo "installing 5G"

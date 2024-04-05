@@ -19,7 +19,9 @@ namespace ns3 {
 class HelicsHelper {
 public:
   HelicsHelper ();
+  //NATIG code
   HelicsHelper (int port);
+  //-------------------------
 
   void SetupFederate (void);
   void SetupFederate (int argc, char **argv);
