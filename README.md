@@ -46,23 +46,27 @@ Finally, when collecting data from recorders in gridlabd, with the IEEE 9500 bus
 
 ## Labels used to describe experiments
 
+### Experiment labels
+
 Non-cellular Networks:
 
-3G: This label is used to describe directly connected networks. These networks are networks that make use of ethernet and fiber connections to connect individual nodes in a network to one another. 
+**3G**: This label is used to describe directly connected networks. These networks are networks that make use of ethernet and fiber connections to connect individual nodes in a network to one another. 
 
 Cellular Networks:
 
-4G: These are cellular networks that use LTE architecture to transfer data between the control center and the microgrids.
+**4G**: These are cellular networks that use LTE architecture to transfer data between the control center and the microgrids.
 
-5G: This cellular network example leverages the New Radio core, developed by the LENA group, to simulate a simplified version of a standalone 5G network as described in research literature.
+**5G**: This cellular network example leverages the New Radio core, developed by the LENA group, to simulate a simplified version of a standalone 5G network as described in research literature.
 
-Grid Models being simulated
+### IEEE 9500 bus model
 
 The IEEE 9500 bus model simulates a medium-voltage distribution system. An example of such a system is a suburban neighborhood with a mix of houses, apartment buildings, and a small shopping center. 
 
 Composition of a medium-voltage distribution system: 
 
 The power for such a system originates at a high-voltage substation, likely several miles away. The voltage at this substation could be anywhere from 34.5 kV to 138 kV, depending on the local grid configuration. A large transformer located at the edge of the neighborhood steps down the high voltage to a medium voltage level, typically between 12.4 kV and 25 kV. Underground cables, insulated for the medium voltage level, run along main roads or easements throughout the neighborhood.  These cables are the "backbone" of the system, delivering power to various points. At regular intervals along these main feeders, there will be pad-mounted transformers. These transformers further step down the voltage to a low-voltage level (usually 480 V or 240 V) suitable for powering homes and businesses. From the pad-mounted transformers, overhead or underground lines (depending on local regulations and aesthetics) distribute the low voltage power to individual buildings. These lines connect to transformers on utility poles outside each building, which may further reduce the voltage to levels usable by appliances (typically 120 V).
+
+### IEEE 123 bus model
 
 The IEEE 123 bus model simulates a radial distribution system. An example of such a system is a power grid covering a rural town with a mix of farms, houses, and a small school.
 
