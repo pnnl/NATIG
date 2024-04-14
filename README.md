@@ -44,6 +44,17 @@ When refering to the 3G example, we are talking about topologies that just use a
 
 Finally, when collecting data from recorders in gridlabd, with the IEEE 9500 bus model the files get fully populated at the end of the run. _currently under investigation_
 
+## Labels used to describe experiments
+
+Non-cellular Networks:
+3G: This label is used to describe directly connected networks. These networks are networks that make use of ethernet and fiber connections to connect individual nodes in a network to one another. 
+
+Cellular Networks:
+4G: These are cellular networks that use LTE architecture to transfer data between the control center and the microgrids.
+
+5G: This cellular network example leverages the New Radio core, developed by the LENA group, to simulate a simplified version of a standalone 5G network as described in research literature.
+
+
 ## Out of the box examples
 
 The following table is for both the 9500 and 123 bus models:
