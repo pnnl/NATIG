@@ -64,6 +64,18 @@ Composition of a medium-voltage distribution system:
 
 The power for such a system originates at a high-voltage substation, likely several miles away. The voltage at this substation could be anywhere from 34.5 kV to 138 kV, depending on the local grid configuration. A large transformer located at the edge of the neighborhood steps down the high voltage to a medium voltage level, typically between 12.4 kV and 25 kV. Underground cables, insulated for the medium voltage level, run along main roads or easements throughout the neighborhood.  These cables are the "backbone" of the system, delivering power to various points. At regular intervals along these main feeders, there will be pad-mounted transformers. These transformers further step down the voltage to a low-voltage level (usually 480 V or 240 V) suitable for powering homes and businesses. From the pad-mounted transformers, overhead or underground lines (depending on local regulations and aesthetics) distribute the low voltage power to individual buildings. These lines connect to transformers on utility poles outside each building, which may further reduce the voltage to levels usable by appliances (typically 120 V).
 
+The IEEE 123 bus model simulates a radial distribution system. An example of such a system is a power grid covering a rural town with a mix of farms, houses, and a small school.
+
+Composition of a radial distribution system:
+
+This is a simplified type of power grid where electricity flows from a single source (like a substation) outwards to various consumers like homes and businesses. Unlike a meshed network, there are no redundant paths for electricity to flow. While the specific voltage might vary depending on the model variation, it typically represents a medium-voltage distribution system. This means the voltage level is likely in the range of a few kilovolts (kV) to tens of kV. The IEEE 123 bus model is known for being unbalanced, meaning the loads on each of the three phases (conductors) can be unequal. This is a more realistic representation of real-world distribution systems where loads can vary depending on the types of consumers connected.
+
+Similar to the IEEE 9500 bus model, the power originates at a substation several miles away, likely stepping down the voltage from a high-voltage transmission grid (around 34.5 kV to 138 kV) to a medium voltage level (around 12.4 kV to 25 kV). Once the power has been generated, it is sent through a single overhead power line, insulated for medium voltage, that runs from the substation towards the town, acting as the backbone of the system. At key points along the main feeder, transformers are located on utility poles. These transformers step down the voltage again to a low voltage level (typically 480 V or 240 V) suitable for powering homes and businesses. From these transformers, smaller overhead or underground lines branch out, reaching individual buildings. These lines connect to transformers on poles outside each building, further reducing the voltage to levels usable by appliances (typically 120 V).
+
+IEEE 123 vs IEEE 9500 bus models:
+
+Compared to the more complex IEEE 9500 bus model, the 123 bus system represents a smaller and less geographically expansive area. It's often used for studying specific aspects of distribution system behavior, such as voltage regulation, power losses, or protection schemes.
+
 ## Out of the box examples
 
 The following table is for both the 9500 and 123 bus models:
