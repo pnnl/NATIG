@@ -46,17 +46,23 @@ Finally, when collecting data from recorders in gridlabd, with the IEEE 9500 bus
 
 ## Labels used to describe experiments
 
-### Experiment labels
+### Execution environmnent
+
+**RC**: This label is used to signal the run script that the slurm system will be used so the main run file needs to sleep instead of ending right after the start of the run. Use this label when you want to use the slurm system.
+
+**_Empty string_**: This label is used to signal the run script that docker is used and therefore the main script can stop after the subscripts have started.
+
+### Communication types labels
 
 Non-cellular Networks:
 
-**3G**: This label is used to describe directly connected networks. These networks are networks that make use of ethernet and fiber connections to connect individual nodes in a network to one another. 
+**3G**: This label is used to describe directly connected networks. These networks are networks that make use of ethernet and fiber connections to connect individual nodes in a network to one another. We used the 3G label for this example to keep the labeling consistent with the other experiments.  
 
 Cellular Networks:
 
 **4G**: These are cellular networks that use LTE architecture to transfer data between the control center and the microgrids.
 
-**5G**: This cellular network example leverages the New Radio core, developed by the LENA group, to simulate a simplified version of a standalone 5G network as described in research literature.
+**5G**: This cellular network example leverages the New Radio core, developed by the LENA group, to simulate a simplified version of a non-standalone 5G network as described in research literature.
 
 ### IEEE 9500 bus model
 
