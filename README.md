@@ -62,7 +62,7 @@ Cellular Networks:
 
 **4G**: These are cellular networks that use LTE architecture to transfer data between the control center and the microgrids.
 
-**5G**: This cellular network example leverages the New Radio core, developed by the LENA group, to simulate a simplified version of a non-standalone 5G network as described in research literature.
+**5G**: This cellular network example leverages the New Radio core, developed by the LENA group, to simulate a simplified version of a non-standalone 5G network as described in research literature with minimal use of the LTE framework.
 
 ### IEEE 9500 bus model
 
