@@ -2,14 +2,14 @@
         "Channel": [
          {
             "P2PDelay": "2ms",
-            "CSMAdelay": "6560",
+            "CSMAdelay": "3260",
             "dataRate": "5Mbps",
             "jitterMin": 10,
             "jitterMax": 100,
             "WifiPropagationDelay": "ConstantSpeedPropagationDelayModel",
             "WifiRate": "DsssRate1Mbps",
             "WifiStandard": "80211b",
-            "P2PRate": "150Mb/s",
+            "P2PRate": "60Mb/s",
 	    "MTU": 1500,
 	    "delay": 0
         }
@@ -18,14 +18,14 @@
          {
             "MinX": 0,
             "MinY": 0,
-            "DeltaX": 40,
-            "DeltaY": 80,
-            "GridWidth": 10,
-	    "distance": 15,
+            "DeltaX": 100,
+            "DeltaY": 100,
+            "GridWidth": 11,
+	    "distance": 11,
 	    "GnBH": 10.0,
 	    "UEH": 1.5,
             "LayoutType": "RowFirst",
-            "SetPos": 1
+            "SetPos": 0
         }
       ],
       "5GSetup": [
@@ -54,25 +54,30 @@
           {
 		  "name":0,
 		  "connections": [
+			1,
+			2,
 			3,
-			5
+			4
 		  ],
-		  "UseCSMA":0,
-		  "UseWifi":1,
-		  "x":10,
-		  "y":20,
-		  "error":"0.001"
+		  "UseCSMA": 1,
+                  "MTU": 1500,
+                  "UseWifi": 0,
+                  "x": 2,
+                  "y": 50,
+                  "error": "0.001"
             
 	  },
 	  {
                   "name":1,
 		  "connections":[
 			0,
-		        2
+		        2,
+			3,
+			4
 			
 		  ],
-		  "UseCSMA":0,
-		  "UseWifi":1,
+		  "UseCSMA":1,
+		  "UseWifi":0,
 		  "x":100,
 		  "y":200,
 		  "error":"0.001"
@@ -80,11 +85,13 @@
 	  {
                   "name":2,
 		  "connections":[
+			0,
 			1,
+			3,
 			4
 		  ],
-		  "UseCSMA":0,
-		  "UseWifi":1,
+		  "UseCSMA":1,
+		  "UseWifi":0,
 		  "x":200,
 		  "y":50,
 		  "error":"0.001"
@@ -92,12 +99,14 @@
 	  {
                   "name":3,
 		  "connections":[
-			4,
-			5
+			0,
+			1,
+			2,
+			4
 		  ],
-		  "UseCSMA":0,
+		  "UseCSMA":1,
 		  "MTU":1500,
-		  "UseWifi":1,
+		  "UseWifi":0,
 		  "x":300,
 		  "y":400,
 		  "error":"0.001"
@@ -105,26 +114,16 @@
 	  {
                   "name":4,
 	          "connections":[
+			0,
 			1,
-			5
+			2,
+			3
 		  ],
-	          "UseCSMA":0,
+	          "UseCSMA":1,
 	          "MTU":1600,
-	          "UseWifi":1,
+	          "UseWifi":0,
 		  "x":50,
 		  "y":350,
-		  "error":"0.001"
-	  },
-	  {
-                  "name":5,
-		  "connections":[
-                        0,
-			4
-		  ],
-		  "UseCSMA":0,
-		  "UseWifi":1,
-		  "x":250,
-		  "y":250,
 		  "error":"0.001"
 	  }
     ]
