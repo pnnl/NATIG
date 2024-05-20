@@ -1,11 +1,11 @@
 {
         "Simulation": [
                 {
-                        "SimTime": 180,
+                        "SimTime": 35,
                         "StartTime": 0.0,
-                        "PollReqFreq": 1000,
+                        "PollReqFreq": 7,
                         "includeMIM": 0,
-                        "UseDynTop": 0,
+                        "UseDynTop": 1,
                         "MonitorPerf": 0
                 }
         ],
@@ -5878,23 +5878,24 @@
         ],
         "Controller": [
                 {
-                        "use": 0
+                        "use": 1,
+			"actionFile": "AgentDecisions11.txt",
+                        "NodesControlled":[1,2,3,4]
                 }
         ],
-        "DDoS": [
+	"DDoS": [
                 {
-                        "NumberOfBots": 4,
-			"threadsPerAttacker": 4,
+                        "NumberOfBots": 16,
+                        "threadsPerAttacker": 4,
                         "Active": 1,
                         "Start": 10,
-                        "End": 35,
-                        "TimeOn": 35.0,
+                        "End": 25,
+                        "TimeOn": 15.0,
                         "TimeOff": 0.0,
                         "PacketSize": 1500,
-                        "Rate": "80480kb/s",
-			"usePing": 1,
+                        "Rate": "80Mb/s",
                         "NodeType": [
-                                "MIM"
+                                "UE"
                         ],
                         "NodeID": [
                                 2
@@ -5904,8 +5905,8 @@
         ],
         "MIM": [
                 {
-                        "NumberAttackers": 1,
-                        "listMIM": "9"
+                        "NumberAttackers": 2,
+                        "listMIM": "6,9"
                 },
                 {
                         "name": "MIM0",
@@ -5915,8 +5916,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM1",
@@ -5926,8 +5927,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM2",
@@ -5937,19 +5938,19 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM3",
                         "attack_val": "TRIP",
                         "real_val": "NA",
-                        "node_id": "swt_ln0504019_sw",
+                        "node_id": "microgrid_switch1",
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 60,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM4",
@@ -5959,8 +5960,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM5",
@@ -5970,8 +5971,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM6",
@@ -5981,8 +5982,8 @@
                         "point_id": "status,status,status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM7",
@@ -5992,8 +5993,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM8",
@@ -6003,8 +6004,8 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM9",
@@ -6014,19 +6015,19 @@
                         "point_id": "status,status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 120,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 },
                 {
                         "name": "MIM10",
                         "attack_val": "TRIP",
                         "real_val": "NA",
-                        "node_id": "swt_ln2000001_sw",
+                        "node_id": "microgrid_switch1",
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
-                        "Start": 60,
-                        "End": 180
+                        "Start": 10,
+                        "End": 35
                 }
         ],
         "controlCenter": {
