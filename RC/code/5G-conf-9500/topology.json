@@ -2,7 +2,7 @@
         "Channel": [
                 {
                         "P2PDelay": "2ms",
-                        "CSMAdelay": "6560",
+                        "CSMAdelay": "3260",
                         "dataRate": "5Mbps",
                         "jitterMin": 10,
                         "jitterMax": 100,
@@ -11,17 +11,17 @@
                         "WifiStandard": "80211b",
                         "P2PRate": "150Mb/s",
                         "MTU": 1500,
-                        "delay": 0
+                        "delay": 0.1 
                 }
         ],
-	"Gridlayout": [
+        "Gridlayout": [
                 {
                         "MinX": 0,
                         "MinY": 0,
-                        "DeltaX": 20,
+                        "DeltaX": 50,
                         "DeltaY": 20,
                         "GridWidth": 11,
-                        "distance": 11,
+			"distance": 11,
                         "GnBH": 10.0,
                         "UEH": 1.5,
                         "LayoutType": "RowFirst",
@@ -30,11 +30,11 @@
         ],
         "5GSetup": [
                 {
-                        "S1uLinkDelay": 0,
+                        "S1uLinkDelay": 0.01,
                         "N1Delay": 0.01,
                         "N2Delay": 0.01,
                         "Srs": 40,
-                        "UeRow": 2,
+			"UeRow": 2,
                         "UeCol": 4,
                         "GnBRow": 4,
                         "GnBCol": 8,

@@ -218,7 +218,9 @@
     ],
     "Controller": [
         {
-            "use": 0
+             "use": 1,
+             "actionFile": "AgentDecisions11.txt",
+             "NodesControlled":[1,2,3,4] 
         }
     ],
     "DDoS": [
