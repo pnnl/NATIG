@@ -177,7 +177,7 @@ RUN cd $RD2C/PUSH \
     && cp -r RC/code/dnp3/model/dnp3-simulator-impl.* ${RD2C}/ns-3-dev/src/dnp3/model/ \
     && cp -r RC/code/dnp3/model/tcptest* ${RD2C}/ns-3-dev/src/dnp3/model/ \
     && cp -r RC/code/dnp3/model/dnp3-mim-* ${RD2C}/ns-3-dev/src/dnp3/model/ \  
-    && cp -r RC/code/applications/model/fncs-application.* ${RD2C}/ns-3-dev/src/applications/model/ \
+    #&& cp -r RC/code/applications/model/fncs-application.* ${RD2C}/ns-3-dev/src/applications/model/ \
     && cp -r RC/code/internet/* ${RD2C}/ns-3-dev/src/internet/ \
     && cp -r RC/code/lte/* ${RD2C}/ns-3-dev/src/lte/ \
     && cp -r RC/code/gridlabd/* ${RD2C}/gridlab-d/tape_file/ \
