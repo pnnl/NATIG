@@ -534,8 +534,11 @@ main (int argc, char *argv[])
   Json::Value topologyConfigObject;
   int numBots = 0;
 
+  uint32_t rngRun = 1;
+
   // Command line arguments
   CommandLine cmd (__FILE__);
+  cmd.AddValue ("RngRun", "Seed for random generator", rngRun);
   cmd.AddValue ("numNodePairs", "Number of eNodeBs + UE pairs", numNodePairs);
   cmd.AddValue ("simTime", "Total duration of the simulation", simTime);
   cmd.AddValue ("distance", "Distance between eNBs [m]", distance);
@@ -556,6 +559,10 @@ main (int argc, char *argv[])
   cmd.AddValue("pointFileDir", "Points file path", pointFileDir);
   cmd.AddValue("pcapFileDir", "PCAP output file path", pcapFileDir);
   cmd.Parse (argc, argv);
+
+  // Set random seed and run number
+  RngSeedManager::SetSeed (12345); // Arbitrary seed value
+  RngSeedManager::SetRun (rngRun);
 
   //ConfigStore inputConfig;
   //inputConfig.ConfigureDefaults ();

@@ -490,6 +490,9 @@ main (int argc, char *argv[])
   // HELICS FILTER config file calling
   // -------------------------------------------------------------------------------
 
+  uint32_t rngRun = 1;
+  cmd.AddValue ("RngRun", "Seed for random generator", rngRun);
+
   std::cout << "number of args: " << argc << std::endl;
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
   cmd.AddValue("verbose", "Tell echo applications to log if true", verbose);
@@ -499,6 +502,11 @@ main (int argc, char *argv[])
   cmd.AddValue("pointFileDir", "Points file path", pointFileDir);
   cmd.AddValue("pcapFileDir", "PCAP output file path", pcapFileDir);
   cmd.Parse(argc, argv);
+
+  // Set random seed and run number
+  RngSeedManager::SetSeed (12345); // Arbitrary seed value
+  RngSeedManager::SetRun (rngRun);
+
 
   if (verbose)
   {

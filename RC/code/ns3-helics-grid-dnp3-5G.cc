@@ -570,7 +570,11 @@ main (int argc, char *argv[])
   int numBots = 4;
 
   // Command line arguments
+  uint32_t rngRun = 1;
+
+  // Command line arguments
   CommandLine cmd (__FILE__);
+  cmd.AddValue ("RngRun", "Seed for random generator", rngRun);
   cmd.AddValue ("numNodePairs", "Number of eNodeBs + UE pairs", numNodePairs);
   cmd.AddValue ("simTime", "Total duration of the simulation", simTime);
   cmd.AddValue ("distance", "Distance between eNBs [m]", distance);
@@ -592,6 +596,9 @@ main (int argc, char *argv[])
   cmd.AddValue("pcapFileDir", "PCAP output file path", pcapFileDir);
   cmd.Parse (argc, argv);
 
+  // Set random seed and run number
+  RngSeedManager::SetSeed (12345); // Arbitrary seed value
+  RngSeedManager::SetRun (rngRun);
 
   // parse again so you can override default values from the command line
   cmd.Parse(argc, argv);
