@@ -32,6 +32,12 @@ then
   rm $helicsOutFile
 fi
 
+#Copying the points file to the config file
+if [[ "$5" == "conf" ]]
+then
+cp ../../PUSH/NATIG/RC/code/points-${4}/* config/
+fi
+
 if [[ "$2" == "4G" ]]
 then
 if [[ "$5" == "conf" ]]
