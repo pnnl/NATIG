@@ -73,6 +73,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <bits/stdc++.h>
+#include <ctime>
 
 // Network Topology
 //
@@ -503,8 +504,17 @@ main (int argc, char *argv[])
   cmd.AddValue("pcapFileDir", "PCAP output file path", pcapFileDir);
   cmd.Parse(argc, argv);
 
+  readMicroGridConfig(configFileName, configObject);
+  readMicroGridConfig(helicsConfigFileName, helicsConfigObject);
+  readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
+  
   // Set random seed and run number
-  RngSeedManager::SetSeed (12345); // Arbitrary seed value
+  int StaticSeed = std::stoi(configObject["Simulation"][0]["StaticSeed"].asString());
+  if (StaticSeed == 1){
+     RngSeedManager::SetSeed (std::stoi(configObject["Simulation"][0]["RandomSeed"].asString())); //12345); // Arbitrary seed value
+  }else{
+     RngSeedManager::SetSeed (std::time(NULL));
+  }
   RngSeedManager::SetRun (rngRun);
 
 
@@ -523,11 +533,8 @@ main (int argc, char *argv[])
   std::cout << "Helics configuration file: " << helicsConfigFileName.c_str() << std::endl;
   std::cout << "MicroGrid configuration file: " << configFileName.c_str() << std::endl;
 
-  readMicroGridConfig(configFileName, configObject);
-  readMicroGridConfig(helicsConfigFileName, helicsConfigObject);
-  readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
 
-  HelicsHelper helicsHelper(9000);
+  HelicsHelper helicsHelper(std::stoi(helicsConfigObject["brokerPort"].asString()));
   std::cout << "Calling Calling Message Federate Constructor" << std::endl;
   helicsHelper.SetupApplicationFederate();
 

@@ -6,7 +6,9 @@
                         "PollReqFreq": 5,
                         "includeMIM": 0,
                         "UseDynTop": 1,
-                        "MonitorPerf": 0
+                        "MonitorPerf": 0,
+			"StaticSeed": 0,
+			"RandomSeed": 777
                 }
         ],
         "microgrid": [

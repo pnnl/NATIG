@@ -30,6 +30,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <numeric>
+#include <ctime>
 #include "ns3/core-module.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/internet-module.h"
@@ -565,7 +566,12 @@ main (int argc, char *argv[])
   readMicroGridConfig(helicsConfigFileName, helicsConfigObject);
   readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
   // Set random seed and run number
-  RngSeedManager::SetSeed (std::stoi(configObject["Simulation"][0]["RandomSeed"].asString())); //12345); // Arbitrary seed value
+  int StaticSeed = std::stoi(configObject["Simulation"][0]["StaticSeed"].asString());
+  if (StaticSeed == 1){
+      RngSeedManager::SetSeed (std::stoi(configObject["Simulation"][0]["RandomSeed"].asString())); //12345); // Arbitrary seed value
+  }else{
+      RngSeedManager::SetSeed (std::time(NULL)); 
+  }
   RngSeedManager::SetRun (rngRun);
 
   //ConfigStore inputConfig;
