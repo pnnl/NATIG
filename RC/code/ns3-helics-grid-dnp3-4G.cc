@@ -560,15 +560,18 @@ main (int argc, char *argv[])
   cmd.AddValue("pcapFileDir", "PCAP output file path", pcapFileDir);
   cmd.Parse (argc, argv);
 
+
+  readMicroGridConfig(configFileName, configObject);
+  readMicroGridConfig(helicsConfigFileName, helicsConfigObject);
+  readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
   // Set random seed and run number
-  RngSeedManager::SetSeed (12345); // Arbitrary seed value
+  RngSeedManager::SetSeed (std::stoi(configObject["Simulation"][0]["RandomSeed"].asString())); //12345); // Arbitrary seed value
   RngSeedManager::SetRun (rngRun);
 
   //ConfigStore inputConfig;
   //inputConfig.ConfigureDefaults ();
 
   // parse again so you can override default values from the command line
-  cmd.Parse(argc, argv);
 
   Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue (1024 * 1024 * 1024)); //999999999));
   GlobalValue::Bind("SimulatorImplementationType", StringValue("ns3::RealtimeSimulatorImpl"));
@@ -590,11 +593,11 @@ main (int argc, char *argv[])
   std::cout << "Helics configuration file: " << helicsConfigFileName.c_str() << std::endl;
   std::cout << "MicroGrid configuration file: " << configFileName.c_str() << std::endl;
 
-  readMicroGridConfig(configFileName, configObject);
-  readMicroGridConfig(helicsConfigFileName, helicsConfigObject);
-  readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
+  //readMicroGridConfig(configFileName, configObject);
+  //readMicroGridConfig(helicsConfigFileName, helicsConfigObject);
+  //readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
 
-  HelicsHelper helicsHelper(9000);
+  HelicsHelper helicsHelper(std::stoi(helicsConfigObject["brokerPort"].asString()));
   std::cout << "Calling Calling Message Federate Constructor" << std::endl;
   helicsHelper.SetupApplicationFederate();
 
