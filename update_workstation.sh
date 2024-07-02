@@ -42,6 +42,11 @@ cp -r RC/code/internet/* ${RD2C}/ns-3-dev/src/internet/
 cp -r RC/code/lte/* ${RD2C}/ns-3-dev/src/lte/ 
 cp -r RC/code/gridlabd/* ${RD2C}/gridlab-d/tape_file/ 
 cp -r RC/code/trigger.player ${RD2C}/integration/control/
+cp -r /rd2c/PUSH/NATIG/RC/code/helics/helics-helper* /rd2c/ns-3-dev/contrib/helics/helper/
+cp -r /rd2c/PUSH/NATIG/RC/code/helics/dnp3-application-helper-new.* /rd2c/ns-3-dev/contrib/helics/helper/
+cp -r /rd2c/PUSH/NATIG/RC/code/helics/dnp3-application-new* /rd2c/ns-3-dev/contrib/helics/model/
+cp -r /rd2c/PUSH/NATIG/RC/code/helics/wscript /rd2c/ns-3-dev/contrib/helics/
+
 
 cd ${RD2C}/gridlab-d/third_party/xerces-c-3.2.0 
 ./configure 
