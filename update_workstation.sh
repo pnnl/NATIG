@@ -3,6 +3,22 @@
 git pull
 RD2C=/rd2c
 
+read -p "Do you want to save your current setup? [y/n] " answer
+
+echo "Input 1: ${answer}"
+
+if [[ $answer == [yY] || $answer == [yY][eE][sS] ]]
+then
+	    dt=$(date '+%d-%m-%Y-%H:%M:%S')
+	    echo "Saving setup in $dt"
+	    mkdir $dt
+	    cp /rd2c/integration/control/*.cc $dt
+	    cp /rd2c/integration/control/config/grid.json $dt
+	    cp /rd2c/integration/control/config/gridlabd_config.json $dt
+	    cp /rd2c/integration/control/config/topology.json $dt
+	    cp /rd2c/integration/control/*.glm $dt
+fi
+
 cp -r integration $RD2C 
 cp -r RC/code/run.sh ${RD2C}/integration/control 
 cp -r RC/code/ns3-helics-grid-dnp3-4G-Docker.cc ${RD2C}/integration/control/ns3-helics-grid-dnp3-4G.cc  
