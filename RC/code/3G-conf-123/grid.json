@@ -7,7 +7,7 @@
             "UseDynTop": 1,
             "MonitorPerf": 0,
 	    "StaticSeed": 0,
-	    "RandomSeed": 777
+	    "RandomSeed": 111
         }
     ],
     "microgrid": [

@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --time=64:15:00
 
+#SBATCH --time=64:15:00
 # ==== set root and output
 export RD2C=$1
 export FNCS_INSTALL=${RD2C}
@@ -10,11 +10,16 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${FNCS_INSTALL}/lib64
 export PATH=$PATH:${FNCS_INSTALL}/include
 export GLPATH=${RD2C}/lib/gridlabd:${RD2C}/lib
 
+
 export OMPI_ALLOW_RUN_AS_ROOT=1
 export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
+
+
 ROOT_PATH="${PWD}" # "/rd2c/integration/control"
 OUT_DIR="${ROOT_PATH}/output"
+
+
 if test ! -d ${OUT_DIR}
 then
   echo "==== Simulation output folder does not exist yet. Creating ... ===="
@@ -32,7 +37,6 @@ then
   rm $helicsOutFile
 fi
 
-#Copying the points file to the config file
 if [[ "$5" == "conf" ]]
 then
 cp ../../PUSH/NATIG/RC/code/points-${4}/* config/
@@ -70,7 +74,12 @@ fi
 v2=$( grep 'brokerPort' ${PWD}/config/gridlabd_config.json | sed -r 's/^[^:]*:(.*)$/\1/' | sed 's/,//' | sed 's/ //' )
 
 cd ${ROOT_PATH} && \
+if [[ "$6" == "v2" ]]
+then
 helics_broker --slowresponding --federates=2 --port=$v2 --loglevel=${helicsLOGlevel} >> ${helicsOutFile} 2>&1 & \
+else
+helics_broker --slowresponding --federates=2 --port=9000 --loglevel=${helicsLOGlevel} >> ${helicsOutFile} 2>&1 & \
+fi
  #helics_app tracer test.txt --config-file endpoints.txt --loglevel 7 --timedelta 1 >> tracer.txt 2>&1 & \
 cd -
 

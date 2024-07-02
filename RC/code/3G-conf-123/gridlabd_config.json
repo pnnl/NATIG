@@ -5,7 +5,7 @@
     "period": 1,
     "slow_responding": true,
     "broker": "127.0.0.1:9000",
-    "brokerPort": 9000,
+    "brokerPort":9000,
     "broker_rank":0,
     "endpoints": [
         {

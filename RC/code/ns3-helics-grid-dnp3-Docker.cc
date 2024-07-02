@@ -14,6 +14,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Author: Joon-Seok Kim <joonseok.kim@pnnl.gov>
+ * Author: Oceane Bel
  */
 
 #include "ns3/core-module.h"
