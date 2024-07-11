@@ -301,8 +301,9 @@ private:
   std::string m_attack_max;
   std::string m_attack_min;
   uint16_t m_attackType;
-  uint16_t m_attackStartTime;
-  uint16_t m_attackEndTime;
+  std::string m_attackStartTime;
+  std::string m_attackEndTime;
+  std::string RealVal;
   bool m_attack_on;
   bool m_respond;
   bool m_offline;

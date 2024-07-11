@@ -1,13 +1,13 @@
 {
         "Simulation": [
                 {
-                        "SimTime": 35,
+                        "SimTime": 150,
                         "StartTime": 0.0,
-                        "PollReqFreq": 5,
+                        "PollReqFreq": 10,
                         "includeMIM": 0,
-                        "UseDynTop": 1,
-                        "MonitorPerf": 0,
-			"StaticSeed": 0,
+                        "UseDynTop": 0,
+                        "MonitorPerf": 1,
+			"StaticSeed": 1,
 			"RandomSeed": 777
                 }
         ],
@@ -5880,30 +5880,30 @@
         ],
         "Controller": [
                 {
-                        "use": 1,
+                        "use": 0,
 			"actionFile": "AgentDecisions11.txt",
                         "NodesControlled":[1,2,3,4]
                 }
         ],
         "DDoS": [
                 {
-                        "NumberOfBots": 100,
-			"threadsPerAttacker": 4,
+                        "NumberOfBots": 50,
+			"threadsPerAttacker": 1,
                         "Active": 1,
 			"usePing": 0,
-                        "Start": 10,
-                        "End": 25,
+                        "Start": 50,
+                        "End": 100,
                         "TimeOn": 15.0,
                         "TimeOff": 0.0,
                         "PacketSize": 1500,
-                        "Rate": "300Mb/s",
+                        "Rate": "80Mb/s",
                         "NodeType": [
-                                "MIM"
+                                "subNode"
                         ],
                         "NodeID": [
-                                2
+                                6
                         ],
-                        "endPoint": "CC"
+                        "endPoint": "MIM"
                 }
         ],
         "MIM": [

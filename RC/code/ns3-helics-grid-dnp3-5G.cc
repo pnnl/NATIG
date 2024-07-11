@@ -1125,6 +1125,7 @@ main (int argc, char *argv[])
 		   dnp3MIM1.SetAttribute("IntegrityPollInterval", UintegerValue (10));
 		   dnp3MIM1.SetAttribute("EnableTCP", BooleanValue (false));
 		   dnp3MIM1.SetAttribute("AttackSelection", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"])));
+		   dnp3MIM1.SetAttribute("RealVal", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-real_val"]));
 		   
 		   if (std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 2 || std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 4){
 			   if(attack["MIM-"+std::to_string(MIM_ID)+"-scenario_id"] == "b"){
@@ -1146,8 +1147,8 @@ main (int argc, char *argv[])
 			   dnp3MIM1.SetAttribute("PointID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-point_id"])); 
 		   }
 		   
-		   dnp3MIM1.SetAttribute("AttackStartTime", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-Start"]))); 
-		   dnp3MIM1.SetAttribute("AttackEndTime", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-End"]))); 
+		   dnp3MIM1.SetAttribute("AttackStartTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-Start"])); 
+		   dnp3MIM1.SetAttribute("AttackEndTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-End"])); 
 		   dnp3MIM1.SetAttribute("mitmFlag", BooleanValue(true));
 		   Ptr<Dnp3ApplicationNew> mim = dnp3MIM1.Install (tempnode, enamestring);
 		   ApplicationContainer dnpMIMApp(mim);

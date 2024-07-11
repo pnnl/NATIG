@@ -1,9 +1,9 @@
 {
     "Simulation":[{
-	    "SimTime": 35,
+	    "SimTime": 180,
             "StartTime": 0.0,
             "PollReqFreq": 10,
-            "includeMIM": 0,
+            "includeMIM": 1,
             "UseDynTop": 0,
             "MonitorPerf": 0,
 	    "StaticSeed": 0,
@@ -220,7 +220,7 @@
     ],
     "Controller": [
         {
-             "use": 1,
+             "use": 0,
              "actionFile": "AgentDecisions11.txt",
              "NodesControlled":[1,2,3,4] 
         }
@@ -229,7 +229,7 @@
         {
             "NumberOfBots": 4,
 	    "threadsPerAttacker": 4,
-            "Active": 1,
+            "Active": 0,
             "Start": 10,
             "End": 35,
             "TimeOn": 25.0,
@@ -265,7 +265,7 @@
 	{
             "name": "MIM2",
 	    "attack_val": "TRIP",
-	    "real_val": "NA",
+	    "real_val": "CLOSE",
 	    "node_id": "microgrid_switch4",
 	    "point_id": "status",
 	    "scenario_id": "b",
@@ -276,7 +276,7 @@
 	{
             "name": "MIM3",
 	    "attack_val": "TRIP,TRIP",
-	    "real_val": "NA",
+	    "real_val": "CLOSE,CLOSE",
 	    "node_id": "microgrid_switch2,microgrid_switch3",
 	    "point_id": "status,status",
 	    "scenario_id": "b",

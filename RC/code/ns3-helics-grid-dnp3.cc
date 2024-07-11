@@ -14,6 +14,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Author: Joon-Seok Kim <joonseok.kim@pnnl.gov>
+ * Author: Oceane Bel
  */
 
 #include "ns3/core-module.h"
@@ -854,6 +855,7 @@ main (int argc, char *argv[])
     if (std::string(ep_name).find(IDx) != std::string::npos){
         ep_name = "SS_"+std::to_string(i+1);
     }
+    std::cout << ep_name << std::endl;
     interface[i] = i+1;
     Dnp3ApplicationHelperNew dnp3Master ("ns3::UdpSocketFactory", InetSocketAddress (hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal(), master_port));  //star.GetHubIpv4Address(i), master_port));
 
@@ -917,7 +919,7 @@ main (int argc, char *argv[])
         epName.erase(pos, fedName.length()+1);
       }
     std::cout << "Endpoint name: " << epName << std::endl;
-  }
+ }
 
   //Adding the MIM node
   //Adding the Dnp3 application to man in the middle attack
@@ -934,6 +936,12 @@ main (int argc, char *argv[])
       if (ring){
           ID = 1;
       }
+   
+      auto ep_name2 = configObject["microgrid"][MIM_ID-1]["name"].asString();
+      std::string IDx = "SS_";
+      if (std::string(ep_name2).find(IDx) != std::string::npos){
+	      ep_name2 = "SS_"+std::to_string(i+1);
+      }
 
 
       ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal(); //star.GetHubIpv4Address(MIM_ID-1);
@@ -948,7 +956,7 @@ main (int argc, char *argv[])
       }
       dnp3MIM1.SetAttribute("RemotePort", UintegerValue(mimPort[MIM_ID-1]));
 
-      dnp3MIM1.SetAttribute ("PointsFilename", StringValue (pointFileDir+"/points_SS_"+std::to_string(MIM_ID)+".csv"));
+      dnp3MIM1.SetAttribute ("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name2+".csv"));
       dnp3MIM1.SetAttribute("JitterMinNs", DoubleValue (500));
       dnp3MIM1.SetAttribute("JitterMaxNs", DoubleValue (1000));
       dnp3MIM1.SetAttribute("isMaster", BooleanValue (false));
@@ -958,6 +966,8 @@ main (int argc, char *argv[])
       dnp3MIM1.SetAttribute("IntegrityPollInterval", UintegerValue (10));
       dnp3MIM1.SetAttribute("EnableTCP", BooleanValue (false));
       dnp3MIM1.SetAttribute("AttackSelection", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"])));
+
+      dnp3MIM1.SetAttribute("RealVal", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-real_val"]));
 
       if (std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 2 || std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 4){
          if(attack["MIM-"+std::to_string(MIM_ID)+"-scenario_id"] == "b"){
@@ -979,8 +989,8 @@ main (int argc, char *argv[])
          dnp3MIM1.SetAttribute("PointID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-point_id"])); 
       }
 
-      dnp3MIM1.SetAttribute("AttackStartTime", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-Start"]))); 
-      dnp3MIM1.SetAttribute("AttackEndTime", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-End"]))); 
+      dnp3MIM1.SetAttribute("AttackStartTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-Start"])); 
+      dnp3MIM1.SetAttribute("AttackEndTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-End"])); 
       dnp3MIM1.SetAttribute("mitmFlag", BooleanValue(true));
       Ptr<Dnp3ApplicationNew> mim = dnp3MIM1.Install (tempnode, enamestring);
       ApplicationContainer dnpMIMApp(mim);
@@ -1129,9 +1139,9 @@ main (int argc, char *argv[])
     for (int i = 0; i < hubNode.GetN(); i++){
         endpointNodes.Add (hubNode.Get (i));
     }
-    /*for (int i = 0; i < MIMNode.GetN(); i++){
+    for (int i = 0; i < MIMNode.GetN(); i++){
         endpointNodes.Add (MIMNode.Get (i));
-    }*/
+    }
     for (int i = 0; i < Microgrid.GetN(); i++){
         endpointNodes.Add (Microgrid.Get (i));
     }
