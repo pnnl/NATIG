@@ -528,11 +528,51 @@ Ipv4L3ProtocolMIM::IsDestinationAddress (Ipv4Address address, uint32_t iif) cons
 		  //return true;
       }
 
-     std::stringstream s2;
-     s2 << address;
-     if (address == victimAddr or (s2.str().find("172.17.0.3") != std::string::npos and victimAddr != Ipv4Address("102.102.102.102"))) {
+
+      std::string line;
+      std::string loc = std::getenv("RD2C");
+      std::string loc1 = loc + "/integration/control/add.txt";
+      std::ifstream myfile (loc1.c_str());
+      std::map<Ipv4Address, std::vector<std::string>> mymap;
+      std::string delimiter = ": ";
+      if (myfile.is_open())
+      {
+	      while ( std::getline (myfile,line) )
+	      {
+		      size_t pos = 0;
+		      std::string token;
+		      while ((pos = line.find(delimiter)) != std::string::npos) {
+			      token = line.substr(0, pos);
+			      line.erase(0, pos + delimiter.length());
+			      Ipv4Address temp = Ipv4Address(token.c_str());
+			      if (mymap.find(temp) == mymap.end()) {
+				      mymap[temp] = std::vector<std::string>();
+			      }
+			      mymap[temp].push_back(line);
+			      
+		      }
+	      }
+	      myfile.close();
+	      std::stringstream s2;
+	      s2 << address;
+	      std::string ip;
+	      if (mymap.find(address) != mymap.end()) {
+	          ip = mymap[address][0]; //choose the first ID found
+	      }else{
+                  ip = s2.str();   
+	      }
+	      NS_LOG_UNCOND("I am in the if statement " << address << " " << ip.c_str());
+	      if (Ipv4Address (ip.c_str()) == victimAddr){
+		       NS_LOG_INFO("Ipv4L3ProtocolMIM::IsDestinationAddress >>> Packet Captured by MIM!!!!");
+		       return true;
+	      }
+      }else{
+         std::stringstream s2;
+         s2 << address;
+         if (address == victimAddr){ // or  (s2.str().find("172.22.0.3") != std::string::npos) or (s2.str().find("172.17.0.3") != std::string::npos) or (s2.str().find("172.27.0.3") != std::string::npos)) {
 		NS_LOG_INFO("Ipv4L3ProtocolMIM::IsDestinationAddress >>> Packet Captured by MIM!!!!");
         	return true;
+          }
       }
       if (address == iaddr.GetBroadcast ()){
           NS_LOG_LOGIC ("For me (interface broadcast address)");
