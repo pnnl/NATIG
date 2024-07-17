@@ -986,23 +986,24 @@ main (int argc, char *argv[])
                   int MIM_ID = std::stoi(val[x]) + 1; //x+1;
                   auto ep_name = configObject["MIM"][MIM_ID]["name"].asString();
                   std::string ID2 = "SS_";
-                  auto ep_name2 = configObject["microgrid"][i]["name"].asString();
+                  auto ep_name2 = configObject["microgrid"][MIM_ID-1]["name"].asString();
                   if (std::string(ep_name2).find(ID2) != std::string::npos){
                       ep_name2 = "SS_"+std::to_string(MIM_ID);
                   }
+		  std::cout << "adding node " << ep_name2 << std::endl;
                   Ptr<Node> tempnode = MIM.Get(MIM_ID-1); //star.GetSpokeNode (MIM_ID-1);
                   Names::Add(ep_name, tempnode);
                   std::string enamestring = ep_name;
                   Ptr<Ipv4> ip = Names::Find<Node>(enamestring)->GetObject<Ipv4>();
-                  int ID = MIM_ID;
+                  int ID = MIM_ID-1;
 
 
-                  ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = remoteHostAddr; //subNodes.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(); //remoteHostAddr; //hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal(); //star.GetHubIpv4Address(MIM_ID-1);
-                   Dnp3ApplicationHelperNew dnp3MIM1 ("ns3::UdpSocketFactory", InetSocketAddress (tempnode->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), port)); //star.GetSpokeIpv4Address(MIM_ID-1),port)); 
+                  ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = ueNodes.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();//remoteHostAddr; //subNodes.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(); //remoteHostAddr; //hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal(); //star.GetHubIpv4Address(MIM_ID-1);
+                   Dnp3ApplicationHelperNew dnp3MIM1 ("ns3::UdpSocketFactory", InetSocketAddress (tempnode->GetObject<Ipv4>()->GetAddress(MIM_ID,0).GetLocal(), port)); //star.GetSpokeIpv4Address(MIM_ID-1),port)); 
                    dnp3MIM1.SetAttribute("LocalPort", UintegerValue(port));
-                   dnp3MIM1.SetAttribute("RemoteAddress", AddressValue(remoteHostAddr)); //star.GetHubIpv4Address(MIM_ID-1)));
+                   dnp3MIM1.SetAttribute("RemoteAddress", AddressValue(ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr)); //AddressValue(remoteHostAddr)); //star.GetHubIpv4Address(MIM_ID-1)));
                    if(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 3 || std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 4){
-                           dnp3MIM1.SetAttribute("RemoteAddress2", AddressValue(subNodes.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal())); //remoteHostAddr)); //inter.GetAddress(x)));
+                           dnp3MIM1.SetAttribute("RemoteAddress2", AddressValue(subNodes.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(MIM_ID,0).GetLocal())); //remoteHostAddr)); //inter.GetAddress(x)));
                    }
                    dnp3MIM1.SetAttribute("RemotePort", UintegerValue(mimPort[MIM_ID-1]));
 
@@ -1012,7 +1013,7 @@ main (int argc, char *argv[])
                    dnp3MIM1.SetAttribute("isMaster", BooleanValue (false));
                    dnp3MIM1.SetAttribute ("Name", StringValue (enamestring));
                    dnp3MIM1.SetAttribute("MasterDeviceAddress", UintegerValue(1));
-                   dnp3MIM1.SetAttribute("StationDeviceAddress", UintegerValue(2+x));
+                   dnp3MIM1.SetAttribute("StationDeviceAddress", UintegerValue(2));
                    dnp3MIM1.SetAttribute("IntegrityPollInterval", UintegerValue (10));
                    dnp3MIM1.SetAttribute("EnableTCP", BooleanValue (false));
                    dnp3MIM1.SetAttribute("AttackSelection", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"])));
