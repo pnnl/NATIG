@@ -803,11 +803,11 @@ main (int argc, char *argv[])
           if (configObject["DDoS"][0]["NodeType"][0].asString().find("CC") != std::string::npos){
               botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), remoteHostContainer.Get(0));
           }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("subNode") != std::string::npos){
-              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), subNodes.Get(int(((i%numThreads)+6)%MIM.GetN())));
+              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), subNodes.Get(int(((i%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString()))%MIM.GetN())));
           }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
-              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), ueNodes.Get(int(((i%numThreads)+6)%MIM.GetN())));
+              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), ueNodes.Get(int(((i%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString()))%MIM.GetN())));
           }else{
-              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), MIM.Get(int(((i%numThreads)+6)%MIM.GetN()))); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
+              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), MIM.Get(int(((i%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString()))%MIM.GetN()))); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
           }
   }
 
@@ -1138,26 +1138,26 @@ main (int argc, char *argv[])
             for (int k = 0; k < botNodes.GetN(); ++k)
             {
                 Ptr<Node> tempnode = ueNodes.Get((k%numThreads)+6);
-                int intID = (k%numThreads)+6+1;
+                int intID = (k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString())+1;
                 if (configObject["DDoS"][0]["NodeType"][0].asString().find("CC") != std::string::npos){
                     tempnode = remoteHostContainer.Get(0);
                     intID = 1;
                 }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("subNode") != std::string::npos){
-                    tempnode = subNodes.Get((k%numThreads)+6);
+                    tempnode = subNodes.Get((k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString()));
                 }
 
                 Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (botNodes.Get(k)->GetObject<Ipv4> ());
                 if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
-                    remoteHostStaticRouting->AddNetworkRouteTo (inter.GetAddress((k%numThreads)+6), Ipv4Mask ("255.255.0.0"), inter_bots.GetAddress(k),1); //gateway, 1);
+                    remoteHostStaticRouting->AddNetworkRouteTo (inter.GetAddress((k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString())), Ipv4Mask ("255.255.0.0"), inter_bots.GetAddress(k),1); //gateway, 1);
                 }
                 else if (configObject["DDoS"][0]["endPoint"].asString().find("UE") != std::string::npos){
-                    remoteHostStaticRouting->AddNetworkRouteTo (inter_MIM.GetAddress((k%numThreads)+6), Ipv4Mask ("255.255.0.0"), inter_bots.GetAddress(k),1); //gateway, 1);
+                    remoteHostStaticRouting->AddNetworkRouteTo (inter_MIM.GetAddress((k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString())), Ipv4Mask ("255.255.0.0"), inter_bots.GetAddress(k),1); //gateway, 1);
                 }
                 remoteHostStaticRouting->AddNetworkRouteTo (remoteHostAddr, Ipv4Mask ("255.255.0.0"), inter_bots.GetAddress(k) ,1);
 
 
                 if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
-                    InetSocketAddress dst = InetSocketAddress(inter.GetAddress((k%numThreads)+6));
+                    InetSocketAddress dst = InetSocketAddress(inter.GetAddress((k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString())));
                     OnOffHelper onoff = OnOffHelper ("ns3::Ipv4RawSocketFactory", dst);
                     onoff.SetConstantRate(DataRate(DDOS_RATE));
                     onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
@@ -1165,7 +1165,7 @@ main (int argc, char *argv[])
                     onOffApp[k] = onoff.Install(botNodes.Get(k));
                 }
                 else if (configObject["DDoS"][0]["endPoint"].asString().find("UE") != std::string::npos){
-                    InetSocketAddress dst = InetSocketAddress(inter_MIM.GetAddress((k%numThreads)+6));
+                    InetSocketAddress dst = InetSocketAddress(inter_MIM.GetAddress((k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString())));
                     OnOffHelper onoff = OnOffHelper ("ns3::Ipv4RawSocketFactory", dst);
                     onoff.SetConstantRate(DataRate(DDOS_RATE));
                     onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+str_on_time+"]"));
@@ -1183,16 +1183,16 @@ main (int argc, char *argv[])
                 onOffApp[k].Start(Seconds(BOT_START));
                 onOffApp[k].Stop(Seconds(BOT_STOP));
                 if (configObject["DDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
-                        InetSocketAddress dst = InetSocketAddress (inter.GetAddress((k%numThreads)+6));
+                        InetSocketAddress dst = InetSocketAddress (inter.GetAddress((k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString())));
                         PacketSinkHelper UDPsink = PacketSinkHelper ("ns3::Ipv4RawSocketFactory", dst);
-                        ApplicationContainer UDPSinkApp = UDPsink.Install(subNodes.Get((k%numThreads)+6)); //remoteHost);
+                        ApplicationContainer UDPSinkApp = UDPsink.Install(subNodes.Get((k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString()))); //remoteHost);
                         UDPSinkApp.Start(Seconds(BOT_START));
                         UDPSinkApp.Stop(Seconds(BOT_STOP));
                 }
                 else if (configObject["DDoS"][0]["endPoint"].asString().find("UE") != std::string::npos){
-                        InetSocketAddress dst = InetSocketAddress (inter_MIM.GetAddress((k%numThreads)+6));
+                        InetSocketAddress dst = InetSocketAddress (inter_MIM.GetAddress((k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString())));
                         PacketSinkHelper UDPsink = PacketSinkHelper ("ns3::Ipv4RawSocketFactory", dst);
-                        ApplicationContainer UDPSinkApp = UDPsink.Install(ueNodes.Get((k%numThreads)+6)); //remoteHost);
+                        ApplicationContainer UDPSinkApp = UDPsink.Install(ueNodes.Get((k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString()))); //remoteHost);
                         UDPSinkApp.Start(Seconds(BOT_START));
                         UDPSinkApp.Stop(Seconds(BOT_STOP));
 
