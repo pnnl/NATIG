@@ -50,6 +50,11 @@
 #include "ns3/helics-application.h"
 #include "helics/helics.hpp"
 
+#include <json/json.h>
+#include <json/forwards.h>
+#include <json/writer.h>
+
+
 namespace ns3 {
 
 class Address;
@@ -244,6 +249,7 @@ private:
   void save_data(Ptr<Socket> socket, Ptr<Packet> packet, Address from);
   void handle_inside(Ptr<Socket> socket);
   void handle_MIM(Ptr<Socket> socket);
+  void readMicroGridConfig(std::string fpath, Json::Value& configobj);
   void handle_normal(Ptr<Socket> socket);
   void set_attack(bool state);
   void send_directly(Ptr<Packet> packet);
@@ -301,9 +307,13 @@ private:
   std::string m_attack_max;
   std::string m_attack_min;
   uint16_t m_attackType;
+  uint16_t MIM_ID;
   std::string m_attackStartTime;
   std::string m_attackEndTime;
+  std::vector<string> StartVect;
+  std::vector<string> StopVect;
   std::string RealVal;
+  std::string configFile; 
   bool m_attack_on;
   bool m_respond;
   bool m_offline;

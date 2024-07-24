@@ -269,6 +269,10 @@ Dnp3ApplicationNew::GetTypeId (void)
 		    StringValue ("NA"),
 		    MakeStringAccessor (&Dnp3ApplicationNew::RealVal),
 		    MakeStringChecker())
+    .AddAttribute ("AttackConf", "The config file that contains the attack parameters",
+		    StringValue ("NA"),
+		    MakeStringAccessor (&Dnp3ApplicationNew::configFile),
+		    MakeStringChecker())
     .AddAttribute ("AttackStartTime", "Attack start time in seconds",
                      StringValue ("0"),
                      MakeStringAccessor (&Dnp3ApplicationNew::m_attackStartTime),
@@ -283,6 +287,10 @@ Dnp3ApplicationNew::GetTypeId (void)
                StringValue (),
                MakeStringAccessor (&Dnp3ApplicationNew::m_name),
                MakeStringChecker ())
+    .AddAttribute ("ID", "Int representing the ID of the MIM attacker",
+		     UintegerValue (0),
+		     MakeUintegerAccessor (&Dnp3ApplicationNew::MIM_ID),
+		     MakeUintegerChecker<uint16_t> ())
     .AddAttribute ("OutFileName",
                    "The name of the output file",
                    StringValue (),
@@ -553,20 +561,25 @@ void Dnp3ApplicationNew::makeUdpConnection(void) {
     std::cout << "I am printing here 2 " << m_attackEndTime << std::endl;
     timer_end.push_back(std::stof(m_attackEndTime));
 
+    std::cout << "My name is: " << std::endl;
+    std::cout << m_name << std::endl;
     for (int index = 0; index < timer.size(); index ++){
     if(m_isMaster == true) {
 
         startMaster();
         if(m_name.find("Inside") != std::string::npos or m_name.find("MIM") != std::string::npos){
-            NS_LOG_INFO("I'm MIM or Insider Master");
+            NS_LOG_UNCOND("I'm MIM or Insider Master");
             if(timer[index])
             {
                 //Schedule for start of the attack (in seconds)
+		std::cout << "Start threads ----------------------" << std::endl;
                 Simulator::Schedule(Seconds(timer[index]), &Dnp3ApplicationNew::set_attack, this, true); //virtual method
+		StartVect.push_back(std::to_string(timer[index]));
             }
             if(timer_end[index]) {
                 //Schedule for end of the attack (in seconds)
                 Simulator::Schedule(Seconds(timer_end[index]), &Dnp3ApplicationNew::set_attack, this, false); //virtual method
+		StopVect.push_back(std::to_string(timer_end[index]));
             }
         }
 
@@ -579,15 +592,18 @@ void Dnp3ApplicationNew::makeUdpConnection(void) {
 		  //Simulator::Schedule(Seconds(31), &Dnp3Application::send_control_analog, this, Dnp3Application::SELECT_OPERATE, 0, 3);
 		  //Simulator::Schedule(Seconds(41), &Dnp3Application::send_control_analog, this, Dnp3Application::DIRECT, 0, 5);
 		//}
-                NS_LOG_INFO("I'm MIM or Insider Outstation");
+                NS_LOG_UNCOND("I'm MIM or Insider Outstation");
                 if(timer[index])
                 {
                     //Schedule for start of the attack (in seconds)
+		    std::cout << "start threads " << timer[index] << std::endl;
                     Simulator::Schedule(Seconds(timer[index]), &Dnp3ApplicationNew::set_attack, this, true); //virtual method
+		    StartVect.push_back(std::to_string(timer[index]));
                 }
                 if(timer_end[index]) {
                     //Schedule for end of the attack (in seconds)
                     Simulator::Schedule(Seconds(timer_end[index]), &Dnp3ApplicationNew::set_attack, this, false); //virtual method
+		    StopVect.push_back(std::to_string(timer_end[index]));
                 }
         }
 	//m_socket->SetRecvCallback( MakeCallback(&Dnp3Application::HandleRead, this));
@@ -805,6 +821,13 @@ void Dnp3ApplicationNew::HandleAccept (Ptr<Socket> s, const Address& from)
   m_socketList.push_back (s);
   startOutstation(s);
   NS_LOG_INFO("In Handle Accept");
+}
+
+void Dnp3ApplicationNew::readMicroGridConfig(std::string fpath, Json::Value& configobj)
+{
+           std::ifstream tifs(fpath);
+           Json::Reader configreader;
+           configreader.parse(tifs, configobj);
 }
 
 // implementation of EventInterface
@@ -1675,6 +1698,7 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 					   int ID_point = 0;
 					   bool bin = false;
 					   bool analog = false;
+					   std::cout << "I will look through the available point during ATTACK 3" << std::endl;
 					   for (int qq = 0; qq < nodesPoints.size(); qq++){
 					      std::cout << "Searching for point " << nodesPoints[qq]  << " qq = " << qq<< std::endl;
 					      std::cout << "Number of points " << nodesPoints.size() << std::endl;
@@ -1775,9 +1799,10 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 					     for (int qq = 0; qq < nodesPoints.size(); qq++){
 						 std::cout << "Searching for point " << nodesPoints[qq]  << " qq = " << qq<< std::endl;
 						 std::cout << "Number of points " << nodesPoints.size() << std::endl;
+						 std::cout << "Number of unique_id " << unique_id.size() << " " << unique_id_bin.size() << std::endl;
 						 for (int i = 0; i < unique_id.size(); i++){
 							 if(unique_id[i].find(nodesPoints[qq]) != std::string::npos){  
-								 std::cout << "Found point " << nodesPoints[qq] << " : " << unique_id[i] << std::endl;
+								 std::cout << "Found point " << nodesPoints[qq] << " : " << unique_id[i] << " i: " << i << std::endl;
 								 ID_point = i;
 							 }
 						 }
@@ -1888,6 +1913,43 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 						std::cout << "Found Binary point " << nodesPoints[qq] << " : " << unique_id_bin[i] << ": " << i << std::endl;
 						ID_point = i;
 					}
+				}
+				//Enabling updates to the start and end time of the future attacks
+				if (configFile.find("NA") == std::string::npos){
+			            Json::Value configObject;
+                                    readMicroGridConfig(configFile, configObject);
+
+				    std::map<std::string, std::string> attack;
+
+				     for (uint32_t j = 1; j < configObject["MIM"].size(); j++){
+					     for(const auto& item : configObject["MIM"][j].getMemberNames() ){
+						     std::string ID = "MIM-"+std::to_string(j)+"-"+item;
+						     std::string my_str = configObject["MIM"][j][item].asString();
+						     my_str.erase(remove(my_str.begin(), my_str.end(), '"'), my_str.end());
+						     std::cout << "This is the keys value: " << ID << "  and the value is " << my_str << std::endl;
+						     attack.insert(pair<std::string,std::string >(ID, my_str));
+					     }
+					     
+				     }	     
+                                     // If start is not in start vector then trigger start update
+                                     // attack["MIM-"+std::to_string(MIM_ID)+"-Start"]
+				     if (std::find(StartVect.begin(), StartVect.end(), attack["MIM-"+std::to_string(MIM_ID)+"-Start"]) == StartVect.end()) {
+				           std::cout << attack["MIM-"+std::to_string(MIM_ID)+"-Start"] << " is not in the vector.\n";
+					   std::cout << "Start threads ----------------------" << std::endl;
+					   Simulator::Schedule(Seconds(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-Start"])), &Dnp3ApplicationNew::set_attack, this, true);
+					   StartVect.push_back(attack["MIM-"+std::to_string(MIM_ID)+"-Start"]);
+				     } else {
+					     std::cout << attack["MIM-"+std::to_string(MIM_ID)+"-Start"] << " is in the vector.\n";
+				     }
+
+				     if (std::find(StopVect.begin(), StopVect.end(), attack["MIM-"+std::to_string(MIM_ID)+"-End"]) == StopVect.end()) {
+					     std::cout << attack["MIM-"+std::to_string(MIM_ID)+"-End"] << " is not in the vector.\n";
+					     std::cout << "End threads ----------------------" << std::endl;
+					     Simulator::Schedule(Seconds(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-End"])), &Dnp3ApplicationNew::set_attack, this, true);
+					     StopVect.push_back(attack["MIM-"+std::to_string(MIM_ID)+"-End"]);
+				     } else {
+					     std::cout << attack["MIM-"+std::to_string(MIM_ID)+"-End"] << " is in the vector.\n";
+				     }
 				}
 				if (!real_val[qq].empty() && std::find_if(real_val[qq].begin(),real_val[qq].end(), [](unsigned char c) { return !std::isdigit(c); }) == real_val[qq].end()){
 				    std::cout << real_val[qq] << std::endl;

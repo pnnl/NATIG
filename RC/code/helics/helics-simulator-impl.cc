@@ -312,9 +312,9 @@ HelicsSimulatorImpl::Schedule (Time const &delay, EventImpl *event)
   NS_ASSERT_MSG (SystemThread::Equals (m_main), "Simulator::Schedule Thread-unsafe invocation!");
 
   Time tAbsolute = delay + TimeStep (m_currentTs);
-  if (!tAbsolute.IsPositive()){
+  /*if (!tAbsolute.IsPositive()){
        tAbsolute = delay;
-  }
+  }*/
   NS_LOG_INFO ("m_currentTs='" << m_currentTs << "' tAbsolute='" << tAbsolute << "'");
 
   NS_ASSERT (tAbsolute.IsPositive ());
