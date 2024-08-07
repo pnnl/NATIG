@@ -259,8 +259,10 @@
 	    "point_id": "Qref",
 	    "scenario_id": "a",
 	    "attack_type": 4,
-	    "Start": 120,
-	    "End": 180
+	    "Start": 50,
+	    "End": 100,
+	    "PointStart": "50",
+	    "PointStop": "100"
         },
 	{
             "name": "MIM2",
@@ -270,8 +272,10 @@
 	    "point_id": "status",
 	    "scenario_id": "b",
 	    "attack_type": 3,
-	    "Start": 120,
-	    "End": 180
+	    "Start": 50,
+	    "End": 100,
+	    "PointStart": "50",
+	    "PointStop": "100"
 	},
 	{
             "name": "MIM3",
@@ -281,8 +285,10 @@
 	    "point_id": "status,status",
 	    "scenario_id": "b",
 	    "attack_type": 3,
-	    "Start": 120,
-	    "End": 180
+	    "Start": 50,
+	    "End": 100,
+	    "PointStart": "50,50",
+	    "PointStop": "100,100"
 	},
 	{
             "name": "MIM4",
@@ -293,7 +299,9 @@
 	    "scenario_id": "b",
 	    "attack_type": 3,
 	    "Start": 120,
-	    "End": 180
+	    "End": 180,
+	    "PointStart": "120",
+	    "PointStop": "180"
 	}
     ],
     "controlCenter": {

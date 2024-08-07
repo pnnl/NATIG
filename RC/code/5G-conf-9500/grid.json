@@ -5919,7 +5919,9 @@
                         "scenario_id": "b",
                         "attack_type": "3",
                         "Start": 10,
-                        "End": 35
+                        "End": 35,
+			"PointStart": "10",
+	                "PointStop": "35"
                 },
                 {
                         "name": "MIM1",
@@ -5930,7 +5932,9 @@
                         "scenario_id": "b",
                         "attack_type": "3",
                         "Start": 10,
-                        "End": 35
+                        "End": 35,
+			"PointStart": "10",
+	                "PointStop": "35"
                 },
                 {
                         "name": "MIM2",
@@ -5941,7 +5945,9 @@
                         "scenario_id": "b",
                         "attack_type": "3",
                         "Start": 10,
-                        "End": 35
+                        "End": 35,
+			"PointStart": "10",
+	                "PointStop": "35"
                 },
                 {
                         "name": "MIM3",
@@ -5952,7 +5958,9 @@
                         "scenario_id": "b",
                         "attack_type": "3",
                         "Start": 10,
-                        "End": 35
+                        "End": 35,
+			"PointStart": "10",
+	                "PointStop": "35"
                 },
                 {
                         "name": "MIM4",
@@ -5963,7 +5971,9 @@
                         "scenario_id": "b",
                         "attack_type": "3",
                         "Start": 10,
-                        "End": 35
+                        "End": 35,
+			"PointStart": "10",
+	                "PointStop": "35"
                 },
                 {
                         "name": "MIM5",
@@ -5974,7 +5984,9 @@
                         "scenario_id": "b",
                         "attack_type": "3",
                         "Start": 10,
-                        "End": 35
+                        "End": 35,
+			"PointStart": "10",
+	                "PointStop": "35"
                 },
                 {
                         "name": "MIM6",
@@ -5985,7 +5997,9 @@
                         "scenario_id": "b",
                         "attack_type": "3",
                         "Start": 10,
-                        "End": 35
+                        "End": 35,
+			"PointStart": "10,10,10",
+	                "PointStop": "35,35,35"
                 },
                 {
                         "name": "MIM7",
@@ -5996,7 +6010,9 @@
                         "scenario_id": "b",
                         "attack_type": "3",
                         "Start": 10,
-                        "End": 35
+                        "End": 35,
+			"PointStart": "10",
+	                "PointStop": "35"
                 },
                 {
                         "name": "MIM8",
@@ -6007,7 +6023,9 @@
                         "scenario_id": "b",
                         "attack_type": "3",
                         "Start": 10,
-                        "End": 35
+                        "End": 35,
+			"PointStart": "10",
+	                "PointStop": "35"
                 },
                 {
                         "name": "MIM9",
@@ -6018,7 +6036,9 @@
                         "scenario_id": "b",
                         "attack_type": "3",
                         "Start": 10,
-                        "End": 35
+                        "End": 35,
+			"PointStart": "10,10",
+	                "PointStop": "35,35"
                 },
                 {
                         "name": "MIM10",
@@ -6029,7 +6049,9 @@
                         "scenario_id": "b",
                         "attack_type": "3",
                         "Start": 10,
-                        "End": 35
+                        "End": 35,
+			"PointStart": "10",
+	                "PointStop": "35"
                 }
         ],
         "controlCenter": {
