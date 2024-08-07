@@ -768,12 +768,12 @@ void Outstation::control(AppHeader::FunctionCode fn)
        }
       //retrieve subclass
       /*Bit32AnalogOutput a = obj_p->value;*/
-      // NS_LOG_INFO("obj_p index: " << obj_p->index << " a index: " << a.index);
+       std::cout << "obj_p index: " << obj_p->index << std::endl; //<< " a index: " << a.index);
 
       //format string to successfully publish
 
 
-      key = stationName + "/" + analog_pt_names[obj_p->index];
+      key = stationName + "/" + analog_pt_names[obj_p->index-2];
       //key = analog_pt_names[obj_p->index];
 
 

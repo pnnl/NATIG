@@ -187,6 +187,8 @@ public:
     void send_device_attribute_request(DnpIndex_t index);
     void periodic_poll(int count);
     void attack_data(int freq);
+    void GetStartStopArray();
+    std::vector<float> GetTime(std::map<std::string, std::string> attack, std::string tag);
     void periodic_poll_Integrity(int pollRate); //create perodic integrity polls
     void periodic_poll_Binary(int pollRate); //create perodic binary polls
     void periodic_poll_Analog(int pollRate); //crete perodic analog polls

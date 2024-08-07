@@ -5880,7 +5880,7 @@
         ],
         "Controller": [
                 {
-                        "use": 1,
+                        "use": 0,
 			"actionFile": "AgentDecisions11.txt",
                         "NodesControlled":[1,2,3,4]
                 }
@@ -5889,7 +5889,7 @@
                 {
                         "NumberOfBots": 16,
                         "threadsPerAttacker": 2,
-                        "Active": 1,
+                        "Active": 0,
                         "Start": 10,
                         "End": 25,
                         "TimeOn": 15.0,
