@@ -51,6 +51,8 @@ cp -r ../PUSH/NATIG/RC/code/lte/* src/lte/
 cp -r /rd2c/PUSH/NATIG/RC/code/helics/helics-helper* /rd2c/ns-3-dev/contrib/helics/helper/
 cp -r /rd2c/PUSH/NATIG/RC/code/helics/dnp3-application-helper-new.* /rd2c/ns-3-dev/contrib/helics/helper/
 cp -r /rd2c/PUSH/NATIG/RC/code/helics/dnp3-application-new* /rd2c/ns-3-dev/contrib/helics/model/
+cp -r /rd2c/PUSH/NATIG/RC/code/helics/dnp3-application-new-Docker.cc /rd2c/ns-3-dev/contrib/helics/model/dnp3-application-new.cc
+cp -r /rd2c/PUSH/NATIG/RC/code/helics/dnp3-application-new-Docker.h /rd2c/ns-3-dev/contrib/helics/model/dnp3-application-new.h
 cp -r /rd2c/PUSH/NATIG/RC/code/helics/wscript /rd2c/ns-3-dev/contrib/helics/
 sudo ./make.sh $2
 if [ "$1" == "5G" ]; then
