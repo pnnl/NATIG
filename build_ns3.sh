@@ -2,17 +2,17 @@
 
 if [ -d "/rd2c/test" ]
 then
-    rm -r /rd2c/test/
+    rm -rf /rd2c/test/
 fi
 
 if [ -d "/rd2c/ns-3-dev" ]
 then
-    rm -r /rd2c/ns-3-dev/
+    rm -rf /rd2c/ns-3-dev/
 fi
 
 if [ -d "/rd2c/ns-3-dev-git" ]
 then
-    rm -r /rd2c/ns-3-dev-git/
+    rm -rf /rd2c/ns-3-dev-git/
 fi
 
 cd ../../
@@ -33,6 +33,25 @@ cp -r ../PUSH/NATIG/RC/code/internet/internet-stack-helper-MIM.* src/internet/he
 cp -r ../PUSH/NATIG/RC/code/internet/wscript src/internet/
 cp -r ../PUSH/NATIG/RC/code/lte/* src/lte/
 cp -r ../PUSH/NATIG/RC/code/point-to-point-layout/* src/point-to-point-layout/
+mkdir src/dnp3/
+cp -r ../PUSH/NATIG/RC/code/dnp3/crypto src/dnp3
+cp -r ../PUSH/NATIG/RC/code/dnp3/dnplib src/dnp3
+cp -r ../PUSH/NATIG/RC/code/dnp3/examples src/dnp3
+cp -r ../PUSH/NATIG/RC/code/dnp3/helper src/dnp3
+mkdir src/dnp3/model
+cp -r ../PUSH/NATIG/RC/code/dnp3/wscript src/dnp3/
+cp -r ../PUSH/NATIG/RC/code/dnp3/model/dnp3-application.h src/dnp3/model/
+cp -r ../PUSH/NATIG/RC/code/dnp3/model/dnp3-application-Docker.cc src/dnp3/model/dnp3-application.cc
+cp -r ../PUSH/NATIG/RC/code/dnp3/model/dnp3-application-Docker.cc src/dnp3/model/dnp3-application.cc
+cp -r ../PUSH/NATIG/RC/code/dnp3/model/dnp3-simulator-impl.* src/dnp3/model/
+cp -r ../PUSH/NATIG/RC/code/dnp3/model/tcptest* src/dnp3/model/
+cp -r ../PUSH/NATIG/RC/code/dnp3/model/dnp3-mim-* src/dnp3/model/
+cp -r ../PUSH/NATIG/RC/code/internet/* src/internet/
+cp -r ../PUSH/NATIG/RC/code/lte/* src/lte/
+cp -r /rd2c/PUSH/NATIG/RC/code/helics/helics-helper* /rd2c/ns-3-dev/contrib/helics/helper/
+cp -r /rd2c/PUSH/NATIG/RC/code/helics/dnp3-application-helper-new.* /rd2c/ns-3-dev/contrib/helics/helper/
+cp -r /rd2c/PUSH/NATIG/RC/code/helics/dnp3-application-new* /rd2c/ns-3-dev/contrib/helics/model/
+cp -r /rd2c/PUSH/NATIG/RC/code/helics/wscript /rd2c/ns-3-dev/contrib/helics/
 sudo ./make.sh $2
 if [ "$1" == "5G" ]; then
     echo "installing 5G"
