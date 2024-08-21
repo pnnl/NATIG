@@ -190,7 +190,7 @@ void Datalink::processRxdLpdu()
 	// this LPDU is for us
 	if ( rxLpdu.getPrimaryBit() == 0)
 	{ 
-	    std::cout << "THIS IS WRONG!!!!" << "\n";
+	    //std::cout << "THIS IS WRONG!!!!" << "\n";
 	    // this is a response - check to see if we are expecting anything
 	    // it should be one of four vaild response function codes
 	    if (func == ACK)
@@ -246,11 +246,11 @@ void Datalink::processRxdLpdu()
 	{
 	    // this is an initiated transaction 
 	    // it should be one of five vaild function codes
-		std::cout << "I AM IN THE CORRECT FUNCTION :) " << CONFIRMED_USER_DATA << " " << func << "\n";
+		//std::cout << "I AM IN THE CORRECT FUNCTION :) " << CONFIRMED_USER_DATA << " " << func << "\n";
 	    switch( func)
 	    {
 		case RESET_LINK:
-                    std::cout << "Reseting the link" << "\n";
+                    //std::cout << "Reseting the link" << "\n";
 		    stats.increment( RX_RESET_LINK);
 
 		    if (rxLpdu.getFcv() == 0)
@@ -265,7 +265,7 @@ void Datalink::processRxdLpdu()
 		    break;
 
 		case TEST_LINK:
-                    std::cout << "Testing the link" << "\n";
+                    //std::cout << "Testing the link" << "\n";
 		    stats.increment( RX_TEST_LINK);
 
 		    if ( linkReset == 1)
@@ -288,7 +288,7 @@ void Datalink::processRxdLpdu()
 		    break;
 
 		case CONFIRMED_USER_DATA:
-                    std::cout << "I found data!!!! " << rxLpdu.getFcv() << " " << linkReset << "\n";
+                    //std::cout << "I found data!!!! " << rxLpdu.getFcv() << " " << linkReset << "\n";
 		    stats.increment( RX_USER_DATA_CONFIRM);
 
 		    if ( linkReset == 1)
@@ -317,7 +317,7 @@ void Datalink::processRxdLpdu()
 		    break;
                                 
 		case UNCONFIRMED_USER_DATA:
-                    std::cout << "UNCONFIRMED!!!! " << rxLpdu.getFcv() << "\n";
+                    //std::cout << "UNCONFIRMED!!!! " << rxLpdu.getFcv() << "\n";
 		    stats.increment( RX_USER_DATA_NO_CONFIRM);
 		    if (rxLpdu.getFcv() == 0)
 			// fill in user data for application layer use

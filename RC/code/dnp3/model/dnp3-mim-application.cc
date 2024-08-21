@@ -783,7 +783,7 @@ void Dnp3Application::handle_normal(Ptr<Socket> socket) {
 
         DnpStat_t state;
         if (m_isMaster == true) {
-          cout << "Master HandleRead Recieved: " << temp << endl;
+          // cout << "Master HandleRead Recieved: " << temp << endl;
           state = m_p->rxData(&buf, timeRxd);
         } else {
           cout << "Outstation HandleRead" << temp << endl;

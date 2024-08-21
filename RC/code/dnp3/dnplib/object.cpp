@@ -49,14 +49,14 @@ void DnpObject::encode(Bytes& data) const
 
 void DnpObject::decode(Bytes& data) noexcept(true)
 {
-    cout << "Decode not implemented?" << endl;
+    //cout << "Decode not implemented?" << endl;
     // must be implemented by the derived class
     //throw(__LINE__);
 }
 
 void DnpObject::decode(Bytes& data, uint32_t objectSize) noexcept(true)
 {
-    cout << "Decode not implemented?" << endl;
+    //cout << "Decode not implemented?" << endl;
     // must be implemented by the derived class
     //throw(__LINE__);
 }
@@ -89,14 +89,14 @@ void DnpFloatObject::encode(Bytes& data) const
 
 void DnpFloatObject::decode(Bytes& data) noexcept(true)
 {
-    cout << "Decode not implemented?" << endl;
+    //cout << "Decode not implemented?" << endl;
     // must be implemented by the derived class
     //throw(__LINE__);
 }
 
 void DnpFloatObject::decode(Bytes& data, uint32_t objectSize) noexcept(true)
 {
-    cout << "Decode not implemented?" << endl;
+    //cout << "Decode not implemented?" << endl;
     // must be implemented by the derived class
     //throw(__LINE__);
 }
@@ -297,12 +297,12 @@ Bit16AnalogFloatInput::Bit16AnalogFloatInput(float v, uint8_t flag,DnpIndex_t in
 void Bit16AnalogFloatInput::encode(Bytes& data) const
 {
     appendUINT8(data, flag);
-    cout << "Analog float: " << value << endl;
+    //cout << "Analog float: " << value << endl;
     //appendINT32(data, value);
     //data = value;
     appendFloat(data, value);
     //appendINT32(data, value);
-    cout << "Analog2: " << value << endl;
+    //cout << "Analog2: " << value << endl;
 }
 
 void Bit16AnalogFloatInput::decode(Bytes& data) noexcept(true)

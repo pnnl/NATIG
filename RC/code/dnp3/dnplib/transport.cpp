@@ -168,7 +168,7 @@ DnpAddr_t TransportFunction::rxSegment( const Lpdu::UserData& segment)
     DnpAddr_t returnValue = FRAGMENT_NOT_FOUND;
     //DnpAddr_t returnValue = Address();
     auto tt = segment.src; //stnInfoMap.begin()->first;
-    std::cout << "mymap.size() is " << stnInfoMap.begin()->first << " src " << segment.src  << '\n';
+    //std::cout << "mymap.size() is " << stnInfoMap.begin()->first << " src " << segment.src  << '\n';
     /*if (segment.src == 65535 and stnInfoMap.size() == 1){
       segment.src = 1;
     }*/
@@ -177,7 +177,7 @@ DnpAddr_t TransportFunction::rxSegment( const Lpdu::UserData& segment)
     {
 	// we don't know who this is so just use the first one
 	// for stats purposes
-	std::cout << "In the first if statement" << std::endl;
+	//std::cout << "In the first if statement" << std::endl;
 	info = stnInfoMap.begin()->second;  // pair of (addr, info)
         info.stats_p->increment(TransportStats::RX_UNAUTH_SEG);
     }
@@ -192,16 +192,16 @@ DnpAddr_t TransportFunction::rxSegment( const Lpdu::UserData& segment)
         bool fir = th.getFirst();
 
 	info.stats_p->logNormal("Rx %s", th.str(strbuf, sizeof(strbuf)));
-        std::cout << "Found some entries" << std::endl;
+        //std::cout << "Found some entries" << std::endl;
         if (fir)
 	{
-            std::cout << "if fir" << std::endl;
+            //std::cout << "if fir" << std::endl;
 	    info.session_p->rxFragment.clear();
 
             // check no session exists
             if (info.session_p->inProgress)
 	    {
-		std::cout << "session is in progress" << std::endl;
+		//std::cout << "session is in progress" << std::endl;
 //TODO: Figure out why this keeps sending
                 //info.stats_p->increment(TransportStats::RX_ROUGE_SEG);
                 // discard existing erroneus session
@@ -211,15 +211,15 @@ DnpAddr_t TransportFunction::rxSegment( const Lpdu::UserData& segment)
 	    // add the app part of the segment to our app fragment
 	    info.session_p->rxFragment.insert(info.session_p->rxFragment.end(),
 					      ++data.begin(), data.end());
-            std::cout << "insert fragment" << std::endl;
+            //std::cout << "insert fragment" << std::endl;
 	    if (fin){
-                std::cout << "if fin" << std::endl;
+                //std::cout << "if fin" << std::endl;
 		// this is the first and last segment in the transaction
 		// so it is a complete fragment
 		returnValue = info.addr;
 	    }else
 	    {
-		std::cout << "else fin == 0" << std::endl;
+		//std::cout << "else fin == 0" << std::endl;
 		// fin is 0
 		// create new session
 		// note this is the only place where we add new sessions
@@ -230,12 +230,12 @@ DnpAddr_t TransportFunction::rxSegment( const Lpdu::UserData& segment)
 	}
         else
 	{
-            std::cout << "else fir == 0" << std::endl;
+            //std::cout << "else fir == 0" << std::endl;
 	    // fir is 0
             // check session exists
             if (!info.session_p->inProgress)
 	    {
-		std::cout << "If the session is not in progress" << std::endl;
+		//std::cout << "If the session is not in progress" << std::endl;
 //TODO: Figure out why this is sending all the time
                 //info.stats_p->increment(TransportStats::RX_ROUGE_SEG);
 		//info.stats_p->logAbnormal(0,"fir=0, fin=%d, session not found",fin);
@@ -245,11 +245,11 @@ DnpAddr_t TransportFunction::rxSegment( const Lpdu::UserData& segment)
 	    }
 	    else
 	    {
-		 std::cout << "else the sesssion is in progress" << std::endl;
+		 //std::cout << "else the sesssion is in progress" << std::endl;
 		// check sequenceNumber
 		if (info.session_p->nextSeqNum == th.getSeqNum())
 		{
-		    std::cout << "if info.session_p->nextSeqNum" << std::endl;
+		    //std::cout << "if info.session_p->nextSeqNum" << std::endl;
 		    // sequence number is good
 		    // add the app part of the segment to our app fragment
 		    info.session_p->rxFragment.insert(
@@ -258,7 +258,7 @@ DnpAddr_t TransportFunction::rxSegment( const Lpdu::UserData& segment)
 
 		    if (fin)
 		    {
-			std::cout << "if fin and session is in progress" << std::endl;
+			//std::cout << "if fin and session is in progress" << std::endl;
 			// fir = 0 and fin = 1
 			// close session, this is final segment of the fragment
 			info.session_p->inProgress = false;
@@ -266,7 +266,7 @@ DnpAddr_t TransportFunction::rxSegment( const Lpdu::UserData& segment)
 		    }
 		    else
 		    {
-			std::cout << "else update expected seqNum" << std::endl;
+			//std::cout << "else update expected seqNum" << std::endl;
 			// update expected seqNum
 			info.session_p->nextSeqNum = th.getSeqNum();
 			th.incrementSeqNum( info.session_p->nextSeqNum);
@@ -274,7 +274,7 @@ DnpAddr_t TransportFunction::rxSegment( const Lpdu::UserData& segment)
 		}
 		else
 		{
-	            std::cout << "fir=0, fin=d, seqNum not right" << std::endl;
+	            //std::cout << "fir=0, fin=d, seqNum not right" << std::endl;
 		    info.stats_p->increment(TransportStats::RX_BAD_TH_SEQ_NUM);
 		    info.stats_p->logAbnormal( 0,
 		      "fir=0, fin=%d, seqNum not right. Expexted %d, got: %d",

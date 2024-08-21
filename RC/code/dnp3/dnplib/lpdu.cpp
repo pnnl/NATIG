@@ -406,7 +406,7 @@ bool Lpdu::buildFromBytes(Bytes& data)
                     { 
                         if (checkCrc( j, 18) == 0)
                         {
-			    std::cout << "CRC 1" << std::endl;
+			    //std::cout << "CRC 1" << std::endl;
                             stats_p->increment( CRC_ERRORS);
                             reset();
                             break;
@@ -422,7 +422,7 @@ bool Lpdu::buildFromBytes(Bytes& data)
                         assert(remainderBytes >= 3);
                         if(!checkCrc(ab.end()-remainderBytes,remainderBytes))
                         {
-			    std::cout << "CRC 2" << std::endl;	
+			    //std::cout << "CRC 2" << std::endl;	
                             stats_p->increment( CRC_ERRORS);
                             reset();
                             break;
@@ -544,7 +544,7 @@ int Lpdu::checkDatalinkHeader()
         result = 0;
     if (checkCrc(ab.begin(), HEADER_SIZE) == 0)
     {
-	std::cout << "CRC 3" << std::endl;
+	//std::cout << "CRC 3" << std::endl;
         stats_p->increment( CRC_ERRORS);
         result = 0;
     }
@@ -557,11 +557,11 @@ int Lpdu::checkCrc( Bytes::const_iterator j, int len)
     unsigned int crc1 = 0;
     unsigned int crc2 = 0;
     assert (len > 2); /* can't check crc on nothing */
-    std::cout << "len " << len << std::endl;
+    //std::cout << "len " << len << std::endl;
     crc1 = calculateCrc( j, len-2);
     crc2 = ((*(j+len-1)) << 8) + (*(j+len-2));
-    std::cout << "crc1 " << crc1 << std::endl;
-    std::cout << "crc2 " << crc2 << std::endl;
+    //std::cout << "crc1 " << crc1 << std::endl;
+    //std::cout << "crc2 " << crc2 << std::endl;
     if (crc1 == crc2)
         return 1;
     else

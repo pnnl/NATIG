@@ -122,7 +122,7 @@ Endpoint::send (const Lpdu& lpdu, Address remote_addr, uint16_t remote_port)
   //copy(lpdu.ab.begin(), lpdu.ab.end(), data);
   p = Create<Packet> (buffer, lpdu.ab.size());
   //p = Create<Packet> ((const uint8_t *)data, lpdu.ab.size());
-  cout << "Sending data: " << buffer << endl;
+  // cout << "Sending data: " << buffer << endl;
   delete [] buffer;
 
   // call to the trace sinks before the packet is actually sent,
@@ -138,19 +138,19 @@ Endpoint::send (const Lpdu& lpdu, Address remote_addr, uint16_t remote_port)
   if (ss.str() == "00-00-00"){
       //remote_addr = Ipv4Address("172.17.0.3");
       //remote_port = 20000;
-      cout << "The remote address is " << remote_addr << endl;
+      // cout << "The remote address is " << remote_addr << endl;
   }
 
   if (Ipv4Address::IsMatchingType (remote_addr))
     {
-      cout << "Remote addr: " << remote_addr << " remote port " << remote_port << endl;
+      // cout << "Remote addr: " << remote_addr << " remote port " << remote_port << endl;
       InetSocketAddress address = GetInet(remote_addr, remote_port);
-      cout << "IPV4!!!!!!!!!!!!! " << address.GetIpv4() << endl;
+      // cout << "IPV4!!!!!!!!!!!!! " << address.GetIpv4() << endl;
       if (tcp) {
         int (Socket::*fp)(Ptr<Packet>, uint32_t)  = &Socket::Send;
         Simulator::Schedule(NanoSeconds (delay_ns), fp, m_socket, p, 0); //virtual method
       } else {
-	cout << "UDP" << endl;
+	//cout << "UDP" << endl;
         int (Socket::*fp)(Ptr<Packet>, uint32_t, const Address&) = &Socket::SendTo;
         Simulator::Schedule(NanoSeconds (delay_ns), fp, m_socket, p, 0, address); //virtual method
 	//Simulator::Schedule(Seconds(101), fp, m_socket, p, 0, address);
@@ -158,7 +158,7 @@ Endpoint::send (const Lpdu& lpdu, Address remote_addr, uint16_t remote_port)
     }
   else if (Ipv6Address::IsMatchingType (remote_addr))
     {
-      cout << "IPV6:::Remote addr6: " << remote_addr << " remote port " << remote_port << endl;      
+      // cout << "IPV6:::Remote addr6: " << remote_addr << " remote port " << remote_port << endl;      
       Inet6SocketAddress address = GetInet6(remote_addr, remote_port);
       if (tcp) {
         int (Socket::*fp)(Ptr<Packet>, uint32_t)  = &Socket::Send;

@@ -116,7 +116,7 @@ Outstation::Outstation( OutstationConfig& outstationConfig,
     stationInfo.addr      = masterAddr;
    
 
-    std::cout << "I AM SETTING THE STATIONMAP!!!!!! " << masterAddr << "\n";
+    //std::cout << "I AM SETTING THE STATIONMAP!!!!!! " << masterAddr << "\n";
 
 
     StationInfoMap stationInfoMap;
@@ -188,7 +188,7 @@ Outstation::Outstation( OutstationConfig& outstationConfig,
     char name[Stats::MAX_USER_NAME_LEN];
 //    addr.CopyTo((unsigned char*)name);
     snprintf(name, sizeof(name), "OS  %5d ", addr);
-    std::cout << "THE OS ADDRESS IS EQUAL TO " << addr << "\n";
+    //std::cout << "THE OS ADDRESS IS EQUAL TO " << addr << "\n";
     stats = Stats( name, addr, outstationConfig.debugLevel_p,
 		   statElements, NUM_STATS, eventInterface_p,
 		   EventInterface::AP_AB_ST);
@@ -283,7 +283,7 @@ DnpStat_t Outstation::rxData(Bytes* buf,
         if (segment.data.size() > 0)
         {
             // this data has completed a segment
-            std::cout << "Outstation: src = " << segment.src << "\n";
+            //std::cout << "Outstation: src = " << segment.src << "\n";
             addr = tf_p->rxSegment( segment);
             if (addr != TransportFunction::FRAGMENT_NOT_FOUND) //To check
             {
@@ -528,11 +528,11 @@ void Outstation::read(map<string, float> analog_points,
         }
         else if (oh.grp == 0) //Handle device attribute request
         {
-            std::cout << "got_group_0" << std::endl;
-            std::cout << (uint)(oh.var) << std::endl;
+            //std::cout << "got_group_0" << std::endl;
+            //std::cout << (uint)(oh.var) << std::endl;
             //cout << "Im here" << endl;
             if (oh.var == 0xf1) {
-                std::cout << "correct_variation_of_group_0" << std::endl;
+                //std::cout << "correct_variation_of_group_0" << std::endl;
                 sendDeviceAttributes = true;
             }
         }
@@ -581,7 +581,7 @@ void Outstation::read(map<string, float> analog_points,
     }
     if(sendDeviceAttributes)
     {
-        std::cout << "sending_device_attributes" << std::endl;
+        //std::cout << "sending_device_attributes" << std::endl;
         
         int fir;
         int fin;
@@ -664,7 +664,7 @@ void Outstation::write()
 	catch (int e)
 	{
 	    stats.increment( RX_UNPARSABLE_DATA);
-	    std::cout << "Error 1" << std::endl;
+	    //std::cout << "Error 1" << std::endl;
 	    stats.logAbnormal(0, "Caught exception line# %d", e);
 	    parseOk = false;
 	    break;
@@ -678,7 +678,7 @@ void Outstation::write()
 	    if (session.rxFragment.size() > 0)
 	    {
 		stats.logAbnormal(0, "Format not expected");
-		std::cout << "Error 2" << std::endl;
+		//std::cout << "Error 2" << std::endl;
 		parseOk = false;
 		break;
 	    }
@@ -718,12 +718,12 @@ void Outstation::write()
 
 void Outstation::control(AppHeader::FunctionCode fn)
 {
-    for(int listIndex = 0; listIndex < analog_pt_names.size(); listIndex++) {
+    /*for(int listIndex = 0; listIndex < analog_pt_names.size(); listIndex++) {
         cout << "VICTORTEST6 A" << listIndex << ":   " << analog_pt_names[listIndex] << endl;
     }
     for(int listIndex = 0; listIndex < binary_pt_names.size(); listIndex++) {
         cout << "VICTORTEST6 B" << listIndex << ":   " << binary_pt_names[listIndex] << endl;
-    }
+    }*/
     NS_LOG_INFO("INSIDE CONTROL");
     initResponse( 1, 1, 0, 0);
     // append a copy of the control request (which happens to be the
@@ -758,7 +758,7 @@ void Outstation::control(AppHeader::FunctionCode fn)
     }
     else if(pt == EventInterface::AO){
       if (Bit32AnalogOutput* a = dynamic_cast<Bit32AnalogOutput*>(obj_p)) {
-          cout << "Requested value:" << a->request/1000 << " , Status: " << a->status << endl;  // request << ", Status:" << a->status << endl;
+          //cout << "Requested value:" << a->request/1000 << " , Status: " << a->status << endl;  // request << ", Status:" << a->status << endl;
           //set value and its type
           value = to_string(a->request/1000);
           value_type = "int";
@@ -768,7 +768,7 @@ void Outstation::control(AppHeader::FunctionCode fn)
        }
       //retrieve subclass
       /*Bit32AnalogOutput a = obj_p->value;*/
-       std::cout << "obj_p index: " << obj_p->index << std::endl; //<< " a index: " << a.index);
+       //std::cout << "obj_p index: " << obj_p->index << std::endl; //<< " a index: " << a.index);
 
       //format string to successfully publish
 
@@ -781,9 +781,9 @@ void Outstation::control(AppHeader::FunctionCode fn)
 
       //set value
       //value = to_string(a.request);
-      cout << "VICTORTEST4: value = " << value << endl;
+      //cout << "VICTORTEST4: value = " << value << endl;
       
-      cout << "key: " << key <<endl;
+      //cout << "key: " << key <<endl;
       
 
     }
@@ -795,12 +795,12 @@ void Outstation::control(AppHeader::FunctionCode fn)
       else{
         value = "CLOSED";
       }*/
-      cout << "I am in the Binary event "<< endl;
+      //cout << "I am in the Binary event "<< endl;
       if (ControlOutputRelayBlock* a = dynamic_cast<ControlOutputRelayBlock*>(obj_p)) {
          value_type = "string";
-	 cout << "a->outputCode: " << a->outputCode << endl;
-	 cout << "obj_p->index: " << obj_p->index << endl;
-	 cout << "TRIP: " << ControlOutputRelayBlock::Code::TRIP << endl;
+	 //cout << "a->outputCode: " << a->outputCode << endl;
+	 //cout << "obj_p->index: " << obj_p->index << endl;
+	 //cout << "TRIP: " << ControlOutputRelayBlock::Code::TRIP << endl;
          if(a->outputCode == ControlOutputRelayBlock::Code::TRIP){
              value = "OPEN";
          }
@@ -820,7 +820,7 @@ void Outstation::control(AppHeader::FunctionCode fn)
       key = stationName + "/" + binary_pt_names[obj_p->index];
       //key = binary_pt_names[obj_p->index];
 
-      cout<<"key: " << key <<endl;
+      //cout<<"key: " << key <<endl;
 
     }
     else if(pt == EventInterface::NONE){
@@ -861,7 +861,7 @@ void Outstation::control(AppHeader::FunctionCode fn)
     if(fn == AppHeader::DIR_OPERATE_NO_RESP){
 
       #ifdef FNCS
-      cout << "VICTORTEST key: " << key << "  |  value: " << value << endl;
+      //cout << "VICTORTEST key: " << key << "  |  value: " << value << endl;
       //fncs::publish(key, value);
       #endif
       // NS_LOG_INFO("Here in direct operate no response");
@@ -883,7 +883,7 @@ void Outstation::control(AppHeader::FunctionCode fn)
     else if (fn == AppHeader::OPERATE || fn == AppHeader::DIR_OPERATE ){
       // NS_LOG_INFO("Here in operate and direct operate");
       #ifdef FNCS
-      cout << "VICTORTEST2 key: " << key << "  |  value: " << value << endl;
+      //cout << "VICTORTEST2 key: " << key << "  |  value: " << value << endl;
       //fncs::publish(key, value);
       #endif
       publishCallback(key, value, value_type);
@@ -951,7 +951,7 @@ void Outstation::transmitModData(std::vector<uint8_t> a, Lpdu::UserData data, ma
    for (int j = 0; j < a.size()-1; j++){
        if (a[j] == 0x1e and a[j+1] == 0x05){
            sd = j - 4;
-	   std::cout << "SD: " << sd << std::endl;
+	   //std::cout << "SD: " << sd << std::endl;
 	   //break;
        }
    }
@@ -959,7 +959,7 @@ void Outstation::transmitModData(std::vector<uint8_t> a, Lpdu::UserData data, ma
        oh = ObjectHeader(30, 5, ObjectHeader::ONE_OCTET_START_STOP_INDEXES, analog_points.size(), 0, (analog_points.size()-1));
        oh.encode(txFragment); 
    }*/
-   std::cout << "The start of the packet is at " << sd << std::endl;
+   //std::cout << "The start of the packet is at " << sd << std::endl;
    //if (a[sd] != 0x01){
    //    txFragment.push_back(0x01);
    //}
@@ -967,7 +967,7 @@ void Outstation::transmitModData(std::vector<uint8_t> a, Lpdu::UserData data, ma
    //if (sd > 0){
    int i = sd;
    //for (int i = sd; i < a.size(); i++){
-   std::cout << "txFragment size is " << txFragment.size() << std::endl;
+   // std::cout << "txFragment size is " << txFragment.size() << std::endl;
    while(i < a.size()){
 	 if (a[i] == 0x01 && a[i+1] == 0x02){
 	     f = true;
@@ -1129,9 +1129,9 @@ void Outstation::transmitAnalogData(map<string, float> analog_points){
 
 void Outstation::CreateBinaryData(map<string, uint16_t> bin_points)
 {
-    for(int listIndex = 0; listIndex < binary_pt_names.size(); listIndex++) {
+    /*for(int listIndex = 0; listIndex < binary_pt_names.size(); listIndex++) {
         cout << "VICTORTEST5 B" << listIndex << ":   " << binary_pt_names[listIndex] << endl;
-    }
+    }*/
     
     int stop_index, range_field_size, flag;
     if(binary_pt_names.size() > 0){

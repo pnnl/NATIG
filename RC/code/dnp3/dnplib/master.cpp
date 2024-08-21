@@ -141,7 +141,7 @@ DnpStat_t Master::rxData(Bytes* buf, Uptime_t timeRxd)
 	    //segment.dest = 2;
 
             //Strip the transport layer stuff
-	    std::cout << "Master: src = " << segment.src << "\n";
+	    //std::cout << "Master: src = " << segment.src << "\n";
             addr = tf_p->rxSegment( segment);
 
 
@@ -165,8 +165,8 @@ DnpStat_t Master::rxDataIN(Lpdu::UserData data, Bytes* buf, Uptime_t timeRxd)
     //stn_p->changeState(Station::IDLE);
     //completedTransaction(); 
     NS_LOG_INFO("\tPreliminary rxData");
-    std::cout << "POLLING!!!!!!!!HHHHHH!!!!!!!!!!!" << std::endl;
-    std::cout << "INSIDER :)" << std::endl;
+    //std::cout << "POLLING!!!!!!!!HHHHHH!!!!!!!!!!!" << std::endl;
+    //std::cout << "INSIDER :)" << std::endl;
     initRequest( AppHeader::READ);
 
     stn_p->lastTxSeqNum = ah.getSeqNum();
@@ -178,10 +178,10 @@ DnpStat_t Master::rxDataIN(Lpdu::UserData data, Bytes* buf, Uptime_t timeRxd)
     stn_p->stats.increment(Station::TX_READ_REQUEST);
 
     parseResponseObjects(stn_p->session.rxFragment);
-    std::cout << "The data in the txFragment HERE!!" << stn_p->txFragment.size() << std::endl;
-    for(int i = 0; i < stn_p->txFragment.size(); i++){
+    //std::cout << "The data in the txFragment HERE!!" << stn_p->txFragment.size() << std::endl;
+    /*for(int i = 0; i < stn_p->txFragment.size(); i++){
         std::cout << stn_p->txFragment[i] << std::endl;
-    }
+    }*/
     transmitEmpty(data);
 
     //stn_p->changeState( Station::POLL_RESP);
@@ -636,7 +636,7 @@ DnpStat_t Master::startNewTransaction()
     //NS_LOG_INFO("master state" << stn_p->stats.get(Station::STATE));
     assert (stn_p->stats.get(Station::STATE) == Station::IDLE);
 
-    std::cout << "starting a new transaction" << std::endl;
+    //std::cout << "starting a new transaction" << std::endl;
 
     ii = stn_p->stats.get(Station::IIN);
     if ( ii & InternalIndications::DEVICE_RESTART)
@@ -731,7 +731,7 @@ DnpStat_t Master::getAttribute(DnpIndex_t index)
     //assert (stn_p->stats.get(Station::STATE) == Station::IDLE);
 
     // perform the select
-    std::cout << "GETATTRIBUTE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    //std::cout << "GETATTRIBUTE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     initRequest( AppHeader::READ);
     stn_p->sendIntegrityPoll = 0;
 
@@ -823,7 +823,7 @@ DnpStat_t Master::direct_operate(bool response, Bit32AnalogOutput& ao)
 void Master::sendEmptyPollRequest(Lpdu::UserData data, AppSeqNum_t seq) {
     //initRequest(AppHeader::READ);
     //stn_p->changeState(Station::IDLE);
-    std::cout << "I AM SENDING AN EMPTY POLL REQUEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    //std::cout << "I AM SENDING AN EMPTY POLL REQUEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     //stn_p->stats.logNormal("Begin Transaction ------------------------------");
     //stn_p->txFragment.clear();
     //completedTransaction();
@@ -855,7 +855,7 @@ DnpStat_t Master::poll( PollType pollType)
     // don't call this method if we are in the mide of a transaction
     //assert(stn_p->stats.get(Station::STATE) == Station::IDLE);
     stn_p->stats.logNormal("Begin Transaction ------------------------------");
-    std::cout << "POLLING!!!!!!!!!!!!!!!!!!!" << std::endl;
+    //std::cout << "POLLING!!!!!!!!!!!!!!!!!!!" << std::endl;
     initRequest( AppHeader::READ);
 
     if (pollType == AUTO)
@@ -882,10 +882,10 @@ DnpStat_t Master::poll( PollType pollType)
         stn_p->stats.increment(Station::TX_EVENT_POLL);
     }
     stn_p->stats.increment(Station::TX_READ_REQUEST);
-    std::cout << "The data in the txFragment " << stn_p->txFragment.size() << std::endl;
-    for(int i = 0; i < stn_p->txFragment.size(); i++){
+    //std::cout << "The data in the txFragment " << stn_p->txFragment.size() << std::endl;
+    /*for(int i = 0; i < stn_p->txFragment.size(); i++){
         std::cout << stn_p->txFragment[i] << std::endl;
-    }
+    }*/
     transmit();
 
     stn_p->changeState( Station::POLL_RESP);

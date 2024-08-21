@@ -174,8 +174,8 @@ void appendINT16(Bytes& data, int16_t val)
 
 void appendFloat(Bytes& data, float val) {
     unsigned char* c = reinterpret_cast<unsigned char*>(&val);
-    cout << "I will be adding " << val << endl;
-    cout << "The deque value is " << data.size() << endl;
+    //cout << "I will be adding " << val << endl;
+    //cout << "The deque value is " << data.size() << endl;
     /*if (data.size() > 4){
       data[-4] = c[0];
       data[-3] = c[1];

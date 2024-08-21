@@ -70,7 +70,7 @@ Dnp3ApplicationHelper::Install (NodeContainer c) const
 Ptr<Dnp3Application>
 Dnp3ApplicationHelper::Install (Ptr<Node> node, const std::string &name)
 {
-  cout << "App name" << name << endl;
+  //cout << "App name" << name << endl;
   return InstallPriv (node, name);
 }
 

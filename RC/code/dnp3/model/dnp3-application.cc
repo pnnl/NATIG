@@ -29,9 +29,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include </people/belo700/RD2C/workspace/include/json/json.h>
-#include </people/belo700/RD2C/workspace/include/json/forwards.h>
-#include </people/belo700/RD2C/workspace/include/json/writer.h>
+#include <jsoncpp/json/json.h>
+#include <jsoncpp/json/forwards.h>
+#include <jsoncpp/json/writer.h>
 
 using namespace std;
 
@@ -1147,7 +1147,7 @@ void Dnp3Application::handle_normal(Ptr<Socket> socket) {
 
         DnpStat_t state;
         if (m_isMaster == true) {
-          cout << "Master HandleRead Recieved: " << temp << endl;
+          //cout << "Master HandleRead Recieved: " << temp << endl;
           state = m_p->rxData(&buf, timeRxd);
         } else {
           cout << "Outstation HandleRead" << temp << endl;
