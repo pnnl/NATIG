@@ -86,6 +86,36 @@ IEEE 123 vs IEEE 9500 bus models:
 
 Compared to the more complex IEEE 9500 bus model, the 123 bus system represents a smaller and less geographically expansive area. It's often used for studying specific aspects of distribution system behavior, such as voltage regulation, power losses, or protection schemes.
 
+## Performance of out of the box examples
+
+For the following 3 tables the poll request is sent every 15ms. The experiments were ran in docker on a computer running a 2.6 GHz 6-Core Intel Core i7 processor with 16 GB 2667 MHz DDR4 memory. 
+
+The following time data was collected for a simulation of 60 simulated seconds and with the debug print statements active
+| topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
+|---|---|---|---|---|---|
+| 4G LTE | 9500 | 45 | 121 | No attacks | 34369.21 |
+| 4G LTE | 9500 | 45 | 121 | DDoS with 2 attackers | 41737.71 |
+| 4G LTE | 9500 | 45 | 121 | MIM with 2 attacker | 35085.39 |  
+| 4G LTE | 123 | 17 | 16 | No attack | 4372.48 |
+| 4G LTE | 123 | 17 | 16 | DDoS with 1 attackers | 14684.11 |
+| 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 5796.20 |
+
+The following data is the same amount of simulated seconds but with no print lines but data collection is still active
+| 4G LTE | 9500 | 45 | 121 | no attacker | 30048.81 | 
+| 4G LTE | 9500 | 45 | 121 | DDoS with 2 attackers | 24697.42 |
+| 4G LTE | 9500 | 45 | 121 | MIM with 2 attackers | 36660.07 |
+| 4G LTE | 123 | 17 | 16 | no attack | 4868.21 |
+| 4G LTE | 123 | 17 | 16 | DDoS with 1 attacker | 19900.36 |
+| 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 2794.67 |
+
+The following data is the same amount of simulated seconds but with no print statement or data collection
+| 4G LTE | 9500 | 45 | 121 | no attack | 26244.69 |
+| 4G LTE | 9500 | 45 | 121 | DDoS with 2 attackers | 36607.44 |
+| 4G LTE | 9500 | 45 | 121 | MIM with 2 attackers | 24107.69 | 
+| 4G LTE | 123 | 17 | 16 | no attack | 4098.09 |
+| 4G LTE | 123 | 17 | 16 | DDoS with 1 attacker | 8354.13 | 
+| 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 2683.45 |   
+
 ## Out of the box examples
 
 The following table is for both the 9500 and 123 bus models:
