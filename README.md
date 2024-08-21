@@ -101,6 +101,8 @@ The following time data was collected for a simulation of 60 simulated seconds a
 | 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 5796.20 |
 
 The following data is the same amount of simulated seconds but with no print lines but data collection is still active
+| topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
+|---|---|---|---|---|---|
 | 4G LTE | 9500 | 45 | 121 | no attacker | 30048.81 | 
 | 4G LTE | 9500 | 45 | 121 | DDoS with 2 attackers | 24697.42 |
 | 4G LTE | 9500 | 45 | 121 | MIM with 2 attackers | 36660.07 |
@@ -109,6 +111,8 @@ The following data is the same amount of simulated seconds but with no print lin
 | 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 2794.67 |
 
 The following data is the same amount of simulated seconds but with no print statement or data collection
+| topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
+|---|---|---|---|---|---|
 | 4G LTE | 9500 | 45 | 121 | no attack | 26244.69 |
 | 4G LTE | 9500 | 45 | 121 | DDoS with 2 attackers | 36607.44 |
 | 4G LTE | 9500 | 45 | 121 | MIM with 2 attackers | 24107.69 | 
