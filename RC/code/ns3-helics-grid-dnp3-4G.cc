@@ -163,8 +163,8 @@ void PrintRoutingTable (Ptr<Node>& n)
 
     routing = routingHelper.GetStaticRouting (ipv6);
 
-    std::cout << "Routing table of " << n << " : " << std::endl;
-    std::cout << "Destination\t" << "Gateway\t" << "Interface\t" << std::endl;
+    //std::cout << "Routing table of " << n << " : " << std::endl;
+    //std::cout << "Destination\t" << "Gateway\t" << "Interface\t" << std::endl;
 
     nbRoutes = routing->GetNRoutes ();
     for (uint32_t i = 0; i < nbRoutes; i++)
@@ -314,8 +314,8 @@ void Throughput (){
                 PacketJitter << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets));
                 features.push_back(PacketJitter.str());
 		if (ID > 0){
-                    std::cout << "I am HERE -------------------------- " << ss1.str() << std::endl;
-                    std::cout << "Choosing interface " << std::to_string(interface[ID2]) << "for" << std::to_string(ID) << std::endl;
+                    //std::cout << "I am HERE -------------------------- " << ss1.str() << std::endl;
+                    //std::cout << "Choosing interface " << std::to_string(interface[ID2]) << "for" << std::to_string(ID) << std::endl;
                     if (route_perf.find(ID2) == route_perf.end()){
                           std::map<int, std::vector<int>> xxx;
                           route_perf[ID2] = xxx;
@@ -363,8 +363,8 @@ void updateUETable(NodeContainer subNodes, NodeContainer ueNodes){
     }
   }
 
-  std::cout << "The translation table" << std::endl;
-  std::cout << addrTrans.str().c_str() << std::endl;
+  //std::cout << "The translation table" << std::endl;
+  //std::cout << addrTrans.str().c_str() << std::endl;
 
   FILE * addFile;
   std::string loc = std::getenv("RD2C");
@@ -376,7 +376,7 @@ void updateUETable(NodeContainer subNodes, NodeContainer ueNodes){
           fprintf(addFile, addrTrans.str().c_str());
           fclose (addFile);
   }
-  std::cout << "end" << std::endl;
+  //std::cout << "end" << std::endl;
 }
 
 void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, NodeContainer MIM, NodeContainer ueNodes, Ipv4Address gateway){
@@ -438,7 +438,7 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
 }
 
 void changeRoute (std::vector<NodeContainer> nodes, Ipv4Address gateway, int index, std::string fileID) { 
-          std::cout << "Getting the available interfaces" << std::endl;
+          //std::cout << "Getting the available interfaces" << std::endl;
           Ipv4StaticRoutingHelper ipv4RoutingHelper;
           Ptr<Ipv4> ipv4_2 = nodes[1].Get(0)->GetObject<Ipv4>();
           std::string delimiter = ".";
@@ -456,7 +456,7 @@ void changeRoute (std::vector<NodeContainer> nodes, Ipv4Address gateway, int ind
           ss1 << ip[1];
           int ID2;
           ss1 >> ID2;
-          std::cout << "I am " << ip[1] << std::endl;
+          //std::cout << "I am " << ip[1] << std::endl;
           string temp = ss1.str(); //.substr(ss1.str().length() - 2);
           if (ss1.str().length() > 2){
                 temp = ss1.str().substr(ss1.str().length() - 2);
@@ -479,8 +479,8 @@ void changeRoute (std::vector<NodeContainer> nodes, Ipv4Address gateway, int ind
           NewIndex = interface[ID];
           while (std::getline(infile, line))
           {
-	       std::cout << "Please print something!!" << std::endl;
-	       std::cout << line << std::endl;
+	       //std::cout << "Please print something!!" << std::endl;
+	       //std::cout << line << std::endl;
                std::string delimiter = ":";
                size_t pos = 0;
 	       pos = line.find(delimiter);
@@ -492,12 +492,12 @@ void changeRoute (std::vector<NodeContainer> nodes, Ipv4Address gateway, int ind
 	       for (int x = 0; x < nodes[1].GetN() ; x++){
                    nodes[1].Get(ID)->GetObject<Ipv4>()->SetUp(x+1);
                }
-	       std::cout << nodes[1].GetN() << std::endl;
-               std::cout << nodes[1].Get(ID)->GetObject<Ipv4>() << std::endl;
-               std::cout << nodes[1].Get(ID)->GetObject<Ipv4>()->GetNInterfaces() << std::endl;
-	       std::cout << "LOOOOOOOOKKKKKEEEE BELOW!!!" << std::endl;
-	       std::cout << NewIndex << std::endl;
-	       std::cout << interface[ID] << std::endl;
+	       //std::cout << nodes[1].GetN() << std::endl;
+               //std::cout << nodes[1].Get(ID)->GetObject<Ipv4>() << std::endl;
+               //std::cout << nodes[1].Get(ID)->GetObject<Ipv4>()->GetNInterfaces() << std::endl;
+	       //std::cout << "LOOOOOOOOKKKKKEEEE BELOW!!!" << std::endl;
+	       //std::cout << NewIndex << std::endl;
+	       //std::cout << interface[ID] << std::endl;
                if (NewIndex != interface[ID]){ //itx->first]){
                     previous[ID] = interface[ID];
                     nodes[1].Get(ID)->GetObject<Ipv4>()->SetDown(interface[ID]);
@@ -591,20 +591,20 @@ main (int argc, char *argv[])
      Config::SetDefault ("ns3::LteHelper::EnbComponentCarrierManager", StringValue ("ns3::RrComponentCarrierManager"));
    }
 
-  LogComponentEnable("Dnp3Application", LOG_LEVEL_INFO);
-  LogComponentEnable ("Dnp3SimulatorImpl", LOG_LEVEL_INFO); 
-  LogComponentEnable ("Ipv4L3ProtocolMIM", LOG_LEVEL_INFO);
+  //LogComponentEnable("Dnp3Application", LOG_LEVEL_INFO);
+  //LogComponentEnable ("Dnp3SimulatorImpl", LOG_LEVEL_INFO); 
+  //LogComponentEnable ("Ipv4L3ProtocolMIM", LOG_LEVEL_INFO);
 
 
-  std::cout << "Helics configuration file: " << helicsConfigFileName.c_str() << std::endl;
-  std::cout << "MicroGrid configuration file: " << configFileName.c_str() << std::endl;
+  //std::cout << "Helics configuration file: " << helicsConfigFileName.c_str() << std::endl;
+  //std::cout << "MicroGrid configuration file: " << configFileName.c_str() << std::endl;
 
   //readMicroGridConfig(configFileName, configObject);
   //readMicroGridConfig(helicsConfigFileName, helicsConfigObject);
   //readMicroGridConfig(topologyConfigFileName, topologyConfigObject);
 
   HelicsHelper helicsHelper(std::stoi(helicsConfigObject["brokerPort"].asString()));
-  std::cout << "Calling Calling Message Federate Constructor" << std::endl;
+  //std::cout << "Calling Calling Message Federate Constructor" << std::endl;
   helicsHelper.SetupApplicationFederate();
 
   std::string fedName = helics_federate->getName();
@@ -757,7 +757,7 @@ main (int argc, char *argv[])
 
   std::vector<NodeContainer> csmaSubNodes;
   for (int i = 0; i < subNodes.GetN(); i++){
-    std::cout << "Creating the csma nodes" << std::endl;
+    //std::cout << "Creating the csma nodes" << std::endl;
     for (int j = 0; j < ueNodes.GetN(); j++){
         NodeContainer csmaSubNodes_temp (ueNodes.Get(i), MIM.Get(i), subNodes.Get(j));
         csmaSubNodes.push_back(csmaSubNodes_temp);
@@ -850,7 +850,7 @@ main (int argc, char *argv[])
 		  std::string ID = "MIM-"+std::to_string(j)+"-"+item;
 		  std::string my_str = configObject["MIM"][j][item].asString();
 		  my_str.erase(remove(my_str.begin(), my_str.end(), '"'), my_str.end());
-		  std::cout << "This is the keys value: " << ID << "  and the value is " << my_str << std::endl;
+		  //std::cout << "This is the keys value: " << ID << "  and the value is " << my_str << std::endl;
 		  attack.insert(pair<std::string,std::string >(ID, my_str));
 	  }
 	  
@@ -888,7 +888,7 @@ main (int argc, char *argv[])
             ss1 << ip[1];
             //int IDx;
             //ss1 >> IDx;
-            std::cout << "I am " << ip[1] << std::endl;
+            //std::cout << "I am " << ip[1] << std::endl;
             string temp = ss1.str();
             /*if (ss1.str().length() > 2){
                 temp = ss1.str().substr(ss1.str().length() - 2);
@@ -910,10 +910,10 @@ main (int argc, char *argv[])
             if (std::string(ep_name).find(IDx) != std::string::npos){
                 ep_name = "SS_"+std::to_string(i+1);
             }
-            std::cout << "Microgrid network node: " << ep_name << " " << subNodes.GetN() << " " << configObject["microgrid"][i].size() << " " << i << std::endl;
+            //std::cout << "Microgrid network node: " << ep_name << " " << subNodes.GetN() << " " << configObject["microgrid"][i].size() << " " << i << std::endl;
              Ptr<Node> tempnode1 = subNodes.Get(i);
              auto cc_name = configObject["controlCenter"]["name"].asString();
-             std::cout << "Control Center network node: " << cc_name << std::endl;
+             //std::cout << "Control Center network node: " << cc_name << std::endl;
 
              int ID = i+1;
              Dnp3ApplicationHelperNew dnp3Master ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, master_port));  //star.GetHubIpv4Address(i), master_port));
@@ -967,7 +967,7 @@ main (int argc, char *argv[])
       Simulator::Schedule(MilliSeconds(2005+period_routing), changeRoute, nodes, gateway, 2, configObject["Controller"][0]["actionFile"].asString());
   }
   fedName = helics_federate->getName();
-  std::cout << "Federate name: " << helics_federate->getName().c_str() << std::endl;
+  //std::cout << "Federate name: " << helics_federate->getName().c_str() << std::endl;
   int ep_count = helics_federate->getEndpointCount();
   for(int i=0; i < ep_count; i++){
 	  helics::Endpoint ep = helics_federate->getEndpoint(i);
@@ -977,7 +977,7 @@ main (int argc, char *argv[])
 	  if(pos != std::string::npos) {
 		  epName.erase(pos, fedName.length()+1);
 	  }
-	  std::cout << "Endpoint name: " << epName << std::endl;
+	  //std::cout << "Endpoint name: " << epName << std::endl;
   }
 
     if (includeMIM == 1){
@@ -990,7 +990,7 @@ main (int argc, char *argv[])
                   if (std::string(ep_name2).find(ID2) != std::string::npos){
                       ep_name2 = "SS_"+std::to_string(MIM_ID);
                   }
-		  std::cout << "adding node " << ep_name2 << std::endl;
+		  //std::cout << "adding node " << ep_name2 << std::endl;
                   Ptr<Node> tempnode = MIM.Get(MIM_ID-1); //star.GetSpokeNode (MIM_ID-1);
                   Names::Add(ep_name, tempnode);
                   std::string enamestring = ep_name;
@@ -1012,7 +1012,7 @@ main (int argc, char *argv[])
                    dnp3MIM1.SetAttribute("JitterMaxNs", DoubleValue (1000));
                    dnp3MIM1.SetAttribute("isMaster", BooleanValue (false));
                    dnp3MIM1.SetAttribute ("Name", StringValue (enamestring));
-		           dnp3MIM1.SetAttribute ("ID", UintegerValue(MIM_ID));
+		   dnp3MIM1.SetAttribute ("ID", UintegerValue(MIM_ID));
                    dnp3MIM1.SetAttribute ("AttackConf", StringValue(configFileName));
                    dnp3MIM1.SetAttribute("MasterDeviceAddress", UintegerValue(1));
                    dnp3MIM1.SetAttribute("StationDeviceAddress", UintegerValue(2));
@@ -1056,7 +1056,7 @@ main (int argc, char *argv[])
     dnpOutstationApp.Start (Seconds (start));
     dnpOutstationApp.Stop (simTime);
 
-    std::cout << "Setting up Bots" << std::endl;
+    //std::cout << "Setting up Bots" << std::endl;
     int BOT_START = std::stof(configObject["DDoS"][0]["Start"].asString());;
     int BOT_STOP = std::stof(configObject["DDoS"][0]["End"].asString());;
     std::string str_on_time = configObject["DDoS"][0]["TimeOn"].asString();
@@ -1139,7 +1139,7 @@ main (int argc, char *argv[])
             ApplicationContainer onOffApp[botNodes.GetN()];
             for (int k = 0; k < botNodes.GetN(); ++k)
             {
-                Ptr<Node> tempnode = ueNodes.Get((k%numThreads)+6);
+                Ptr<Node> tempnode = ueNodes.Get((k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString()));
                 int intID = (k%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString())+1;
                 if (configObject["DDoS"][0]["NodeType"][0].asString().find("CC") != std::string::npos){
                     tempnode = remoteHostContainer.Get(0);
@@ -1212,7 +1212,7 @@ main (int argc, char *argv[])
             UDP_SINK_PORT += 1;
     }
     
-    std::cout << "Done Setting up the bots " << std::endl;
+    //std::cout << "Done Setting up the bots " << std::endl;
 
     NodeContainer endpointNodes;
     endpointNodes.Add (remoteHostContainer.Get(0));
@@ -1241,7 +1241,7 @@ main (int argc, char *argv[])
         }
     }
 
-  lteHelper->EnableTraces ();
+  //lteHelper->EnableTraces ();
   //enablePcapAllBaseTime("radics-exercise2-utility1-1day", remoteHostContainer, ncP2P_nodes);
 
   Simulator::Stop (simTime);
