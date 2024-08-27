@@ -109,6 +109,12 @@ The following data is the same amount of simulated seconds but with no print lin
 | 4G LTE | 123 | 17 | 16 | no attack | 4868.21 |
 | 4G LTE | 123 | 17 | 16 | DDoS with 1 attacker | 19900.36 |
 | 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 2794.67 |
+| (3G) Star | 9500 | 23 | 121 | no attack | 18629.31 |
+| (3G) Star | 9500 | 23 | 121 | DDoS with 2 attackers | 15350.38 | 
+| (3G) Star | 9500 | 23 | 121 | MIM with 2 attackers | 14262.83 | 
+| (3G) Star | 123 | 9 | 16 | no attack | 3534.34 |
+| (3G) Star | 123 | 9 | 16 | DDoS with 1 attacker | 5194.93 |
+| (3G) Star | 123 | 9 | 16 | MIM with 3 attackers | 3629.42 | 
 
 The following data is the same amount of simulated seconds but with no print statement or data collection
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
@@ -118,7 +124,13 @@ The following data is the same amount of simulated seconds but with no print sta
 | 4G LTE | 9500 | 45 | 121 | MIM with 2 attackers | 24107.69 | 
 | 4G LTE | 123 | 17 | 16 | no attack | 4098.09 |
 | 4G LTE | 123 | 17 | 16 | DDoS with 1 attacker | 8354.13 | 
-| 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 2683.45 |   
+| 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 2683.45 |
+| (3G) Star | 9500 | 23 | 121 | no attack | HERE | 
+| (3G) Star | 9500 | 23 | 121 | DDoS with 2 attackers | 26023.97 |
+| (3G) Star | 9500 | 23 | 121 | MIM with 2 attacker | 22749.53 | 
+| (3G) Star | 123 | 9 | 16 | no attack | 3338.92 |
+| (3G) Star | 123 | 9 | 16 | DDoS with 1 attacker | 5982.22 |
+| (3G) Star | 123 | 9 | 16 | MIM with 3 attacker | 3198.54 |  
 
 ## Out of the box examples
 
