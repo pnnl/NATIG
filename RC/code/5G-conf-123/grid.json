@@ -267,7 +267,7 @@
 	{
             "name": "MIM2",
 	    "attack_val": "TRIP",
-	    "real_val": "NA",
+	    "real_val": "CLOSE",
 	    "node_id": "microgrid_switch4",
 	    "point_id": "status",
 	    "scenario_id": "b",
@@ -280,7 +280,7 @@
 	{
             "name": "MIM3",
 	    "attack_val": "TRIP,TRIP",
-	    "real_val": "NA",
+	    "real_val": "CLOSE,CLOSE",
 	    "node_id": "microgrid_switch2,microgrid_switch3",
 	    "point_id": "status,status",
 	    "scenario_id": "b",
