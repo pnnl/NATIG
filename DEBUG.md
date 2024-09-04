@@ -1,5 +1,7 @@
 ## How to know if there is an issue with the run
 
+Debug commands:
+
 1. the command ` ps aux ` can give you details on how the run is doing when running an example of NATIG
 2. the command ` tail output/ns3-helics-grid-dnp3<Example tag>.log ` allows you to see if the run is progressing or not. If after 10 minutes there are no changes to the output then there is an issue with the run. 
     1. Example tag options: ` -4G ` when running the 4G LTE example
@@ -8,7 +10,20 @@
 3. the command ` tail output/gridlabd.log ` allows to see if there is any issues on the gridlabd side of the system
 4. the command ` tail output/helics_broker.log ` allows you to see if there is any errors on the helics side. This file should remain empty unless there is an issue with the run
 
-## Output examples when running previous commands
+## Steps when starting a new run
+
+1. Make sure to always run ` sudo bash killall.sh `. If there is any threads that are still running when you start a new run then you will get an error complaining of duplicat federates. 
+2. To make sure that you can start a new run, run ` ps aux ` before starting the new run. you should get the following output. This means that all the threads have successfully ended and it is safe to start the new run.
+
+```
+root@97323560c94f:/rd2c/integration/control# ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.0   6052  3568 pts/0    Ss+  Aug26   0:00 bash
+root         9  0.0  0.0   6676  4364 pts/1    Ss   Aug26   0:01 bash
+root     99995  0.0  0.0   8648  3316 pts/1    R+   03:56   0:00 ps aux
+```
+
+## Output examples when running debug commands commands
 
 ` ps aux `, when the run is working properly:
 
