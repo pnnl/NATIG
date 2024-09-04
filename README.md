@@ -155,7 +155,7 @@ The following data is the same amount of simulated seconds but with no print sta
 The following 5G run was run with 2X higher bandwidth. We went from sending a packet every 15 ms to every 7ms
 
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Data collection? | Attack? | Time (s) |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | 5G | 123 | 17 | 16 | no attack | yes | 8460.03 |
 | 5G | 123 | 17 | 16 | DDoS with 1 attacker | yes | 19895.78 |
 | 5G | 123 | 17 | 16 | MIM with 3 attacker | yes | 5715.21 | 
