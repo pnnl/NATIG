@@ -143,6 +143,87 @@ __3G mesh__: this is a directly connected network that has middles connected in 
                 }
         ],
 ```
+3. Example __Node__ section when simulating an all to all mesh using the IEEE 123 bus model:
+
+```
+"Node": [
+          {
+		  "name":0,
+		  "connections": [
+			1,
+			2,
+			3,
+			4
+		  ],
+		  "UseCSMA": 1,
+                  "MTU": 1500,
+                  "UseWifi": 0,
+                  "x": 2,
+                  "y": 50,
+                  "error": "0.001"
+            
+	  },
+	  {
+                  "name":1,
+		  "connections":[
+			0,
+		        2,
+			3,
+			4
+			
+		  ],
+		  "UseCSMA":1,
+		  "UseWifi":0,
+		  "x":100,
+		  "y":200,
+		  "error":"0.001"
+	  },
+	  {
+                  "name":2,
+		  "connections":[
+			0,
+			1,
+			3,
+			4
+		  ],
+		  "UseCSMA":1,
+		  "UseWifi":0,
+		  "x":200,
+		  "y":50,
+		  "error":"0.001"
+	  },
+	  {
+                  "name":3,
+		  "connections":[
+			0,
+			1,
+			2,
+			4
+		  ],
+		  "UseCSMA":1,
+		  "MTU":1500,
+		  "UseWifi":0,
+		  "x":300,
+		  "y":400,
+		  "error":"0.001"
+	  },
+	  {
+                  "name":4,
+	          "connections":[
+			0,
+			1,
+			2,
+			3
+		  ],
+	          "UseCSMA":1,
+	          "MTU":1600,
+	          "UseWifi":0,
+		  "x":50,
+		  "y":350,
+		  "error":"0.001"
+	  }
+    ]
+```
 
 ## Commands to run the examples
 
