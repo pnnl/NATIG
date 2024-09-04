@@ -103,6 +103,10 @@ The following time data was collected for a simulation of 60 simulated seconds a
 The following data is the same amount of simulated seconds but with no print lines but data collection is still active
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
 |---|---|---|---|---|---|
+| 5G | 9500 | 45 | 121 | no attack | 28885.06 | 
+| 5G | 123 | 17 | 16 | no attack | 5824.01 |
+| 5G | 123 | 17 | 16 | DDoS with 1 attacker | 17698.04 | 
+| 5G | 123 | 17 | 16 | MIM with 3 attackers | 5351.68 |
 | 4G LTE | 9500 | 45 | 121 | no attacker | 30048.81 | 
 | 4G LTE | 9500 | 45 | 121 | DDoS with 2 attackers | 24697.42 |
 | 4G LTE | 9500 | 45 | 121 | MIM with 2 attackers | 36660.07 |
@@ -125,6 +129,10 @@ The following data is the same amount of simulated seconds but with no print lin
 The following data is the same amount of simulated seconds but with no print statement or data collection
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
 |---|---|---|---|---|---|
+| 5G | 9500 | 45 | 121 | no attack |  | 
+| 5G | 123 | 17 | 16 | no attack | 5795.19 |
+| 5G | 123 | 17 | 16 | DDoS with 1 attacker | 10591.63 |
+| 5G | 123 | 17 | 16 | MIM with 3 attackers | 7997.78 |
 | 4G LTE | 9500 | 45 | 121 | no attack | 26244.69 |
 | 4G LTE | 9500 | 45 | 121 | DDoS with 2 attackers | 36607.44 |
 | 4G LTE | 9500 | 45 | 121 | MIM with 2 attackers | 24107.69 | 
@@ -144,17 +152,27 @@ The following data is the same amount of simulated seconds but with no print sta
 | (3G) Star | 123 | 9 | 4 | DDoS with 1 attacker | 5982.22 |
 | (3G) Star | 123 | 9 | 4 | MIM with 3 attacker | 3198.54 |  
 
+The following 5G run was run with 2X higher bandwidth. We went from sending a packet every 15 ms to every 7ms
+| topology tested | IEEE model | Number of Nodes | Number of Paths | Data collection? | Attack? | Time (s) |
+|---|---|---|---|---|---|
+| 5G | 123 | 17 | 16 | no attack | yes | 8460.03 |
+| 5G | 123 | 17 | 16 | DDoS with 1 attacker | yes | 19895.78 |
+| 5G | 123 | 17 | 16 | MIM with 3 attacker | yes | 5715.21 | 
+| 5G | 123 | 17 | 16 | no attack | no |4321.34 |
+| 5G | 123 | 17 | 16 | DDoS with 1 attacker | no | 8121.72 |
+| 5G | 123 | 17 | 16 | MIM with 3 attackers | no | 7420.40 |
+
 ## Out of the box examples
 
 The following table is for both the 9500 and 123 bus models:
 
 | Toplogy Type | Development Stage |
 |---|---|
-| 3G Star | Works
-| 3G Mesh | Not tested for MIM or DDoS
-| 3G Ring | Not tested for MIM or DDoS
-| 4G Mesh and Star hybrid | Works for DDoS, routing issue for MIM
-| 5G Mesh and Star hybrid | Works for DDoS, routing issue for MIM
+| 3G Star | Works for DDos and MIM
+| 3G Mesh | Works for MIM and DDoS
+| 3G Ring | Works for MIM and DDoS
+| 4G Mesh and Star hybrid | Works for DDoS and MIM
+| 5G Mesh and Star hybrid | Works for DDoS and MIM
 
 NOTE: Mesh and Start hybrid means that there is a Mesh topology connecting the micrigrids to the 4G/5G network in a all to all connection and a Star topology connecting the control center to the 4G/5G network. 
 
@@ -164,10 +182,10 @@ Table containing the status for the MIM examples:
 |---|---|---|
 | 3G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using directly connected network | Works
 | 3G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using directly connected network | Works
-| 4G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 4G network | Routing Issue
-| 4G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 4G network | Routing Issue
-| 5G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 5G network | Routing Issue
-| 5G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 5G network | Routing Issue
+| 4G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 4G network | Works
+| 4G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 4G network | Works
+| 5G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 5G network | Works
+| 5G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 5G network | Works
 
 
 Table containing the status for the DDoS examples:
