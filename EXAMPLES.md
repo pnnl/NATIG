@@ -79,41 +79,41 @@ __3G ring__: This is directly connected network that has middle nodes that are c
                     "error":"0.001"
 	  },
 	  {
-          "name":2,
-		  "connections":[
-			3
-		  ],
-		  "UseCSMA":1,
-		  "UseWifi":0,
-		  "x":200,
-		  "y":50,
-		  "error":"0.001"
-	  },
-	  {
-          "name":3,
-		  "connections":[
-			4
-		  ],
-		  "UseCSMA":1,
-		  "MTU":1500,
-		  "UseWifi":0,
-		  "x":300,
-		  "y":400,
-		  "error":"0.001"
-	  },
-	  {
-          "name":4,
-          "connections":[
-			0
-		  ],
-          "UseCSMA":1,
-          "MTU":1600,
-          "UseWifi":0,
-		  "x":50,
-		  "y":350,
-		  "error":"0.001"
-	  }
-    ]
+                    "name":2,
+                    "connections":[
+                            3
+                    ],
+                    "UseCSMA":1,
+                    "UseWifi":0,
+                    "x":200,
+                    "y":50,
+                    "error":"0.001"
+      },
+      {
+                    "name":3,
+                    "connections":[
+                            4
+                    ],
+                    "UseCSMA":1,
+                    "MTU":1500,
+                    "UseWifi":0,
+                    "x":300,
+                    "y":400,
+                    "error":"0.001"
+      },
+      {
+                    "name":4,
+                    "connections":[
+                            0
+                    ],
+                    "UseCSMA":1,
+                    "MTU":1600,
+                    "UseWifi":0,
+                    "x":50,
+                    "y":350,
+                    "error":"0.001"
+      }
+]
 
 ```
 4. the connection section controls which nodes the node defined in name is connected to. Both the name input and the connections input are indexes of the middle nodes that are connected together following a topology.  
