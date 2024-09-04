@@ -2,9 +2,9 @@
 
 1. the command ` ps aux ` can give you details on how the run is doing when running an example of NATIG
 2. the command ` tail output/ns3-helics-grid-dnp3<Example tag>.log ` allows you to see if the run is progressing or not. If after 10 minutes there are no changes to the output then there is an issue with the run. 
-  1. Example tag options: ` -4G ` when running the 4G LTE example
-  2. Example tag options: ` -5G ` when running the 5G example
-  3. Example tag options: empty when running the 3G examples
+    1. Example tag options: ` -4G ` when running the 4G LTE example
+    2. Example tag options: ` -5G ` when running the 5G example
+    3. Example tag options: empty when running the 3G examples
 3. the command ` tail output/gridlabd.log ` allows to see if there is any issues on the gridlabd side of the system
 4. the command ` tail output/helics_broker.log ` allows you to see if there is any errors on the helics side. This file should remain empty unless there is an issue with the run
 
