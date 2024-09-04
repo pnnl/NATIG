@@ -72,11 +72,11 @@ __3G ring__: This is directly connected network that has middle nodes that are c
 		  "connections":[
             2	
 		  ],
-		  "UseCSMA":1,
-		  "UseWifi":0,
-		  "x":100,
-		  "y":200,
-		  "error":"0.001"
+          "UseCSMA":1,
+          "UseWifi":0,
+          "x":100,
+          "y":200,
+          "error":"0.001"
 	  },
 	  {
           "name":2,
