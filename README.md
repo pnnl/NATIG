@@ -153,6 +153,7 @@ The following data is the same amount of simulated seconds but with no print sta
 | (3G) Star | 123 | 9 | 4 | MIM with 3 attacker | 3198.54 |  
 
 The following 5G run was run with 2X higher bandwidth. We went from sending a packet every 15 ms to every 7ms
+
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Data collection? | Attack? | Time (s) |
 |---|---|---|---|---|---|
 | 5G | 123 | 17 | 16 | no attack | yes | 8460.03 |
