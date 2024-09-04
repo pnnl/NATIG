@@ -13,7 +13,7 @@ The following table describes the available example in NATIG and the models that
 
 ## Available configurations and how to change them
 
-3G star: this is a directly connected network that has the control center at the center of the topology and the rest of the nodes are connected in a star pattern
+__3G star__: this is a directly connected network that has the control center at the center of the topology and the rest of the nodes are connected in a star pattern
 
 1. To enable this topology, open the grid.json either in /rd2c/PUSH/NATIG/RC/code/<exampleTag>-conf-<modelID> when using the conf input or in the /rd2c/integration/control/config folder when using the noconf input (see section __Commands to run the examples__ for more details about conf vs noconf).
 2. In section "Simulation" change UseDynTop to 0. When running the 3G example it will default the setup to a star topology
@@ -32,6 +32,91 @@ The following table describes the available example in NATIG and the models that
                 }
         ],
 ```
+
+__3G ring__: This is directly connected network that has middle nodes that are connected in a ring. Then the microgrid ns3 nodes and the control center ns3 node are connected to the individual middle node. 
+
+1. To enable this topology, open the grid.json either in /rd2c/PUSH/NATIG/RC/code/<exampleTag>-conf-<modelID> when using the conf input or in the /rd2c/integration/control/config folder when using the noconf input (see section __Commands to run the examples__ for more details about conf vs noconf).
+2. In section "Simulation" change UseDynTop to 1 as seen in the following output:
+```
+     "Simulation": [
+                {
+                        "SimTime": 60,
+                        "StartTime": 0.0,
+                        "PollReqFreq": 15,
+                        "includeMIM": 0,
+                        "UseDynTop": 1,
+                        "MonitorPerf": 0,
+                        "StaticSeed": 0,
+                        "RandomSeed": 777
+                }
+        ],
+```
+3. By setting UseDynTop to 1 it will enable the use of the __Node__ in the topology.json file located in the same folder as the grid.json file. Here is an example setup for oa ring topology using the IEEE 123 bus model:
+```
+"Node": [
+          {
+		  "name":0,
+		  "connections": [
+			1
+		  ],
+		  "UseCSMA": 1,
+                  "MTU": 1500,
+                  "UseWifi": 0,
+                  "x": 2,
+                  "y": 50,
+                  "error": "0.001"
+            
+	  },
+	  {
+          "name":1,
+		  "connections":[
+            2	
+		  ],
+		  "UseCSMA":1,
+		  "UseWifi":0,
+		  "x":100,
+		  "y":200,
+		  "error":"0.001"
+	  },
+	  {
+          "name":2,
+		  "connections":[
+			3
+		  ],
+		  "UseCSMA":1,
+		  "UseWifi":0,
+		  "x":200,
+		  "y":50,
+		  "error":"0.001"
+	  },
+	  {
+          "name":3,
+		  "connections":[
+			4
+		  ],
+		  "UseCSMA":1,
+		  "MTU":1500,
+		  "UseWifi":0,
+		  "x":300,
+		  "y":400,
+		  "error":"0.001"
+	  },
+	  {
+          "name":4,
+          "connections":[
+			0
+		  ],
+          "UseCSMA":1,
+          "MTU":1600,
+          "UseWifi":0,
+		  "x":50,
+		  "y":350,
+		  "error":"0.001"
+	  }
+    ]
+
+```
+4. the connection section controls which nodes the node defined in name is connected to. Both the name input and the connections input are indexes of the middle nodes that are connected together following a topology.  
 
 ## Commands to run the examples
 
