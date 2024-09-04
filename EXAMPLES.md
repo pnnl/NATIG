@@ -33,7 +33,7 @@ __3G star__: this is a directly connected network that has the control center at
         ],
 ```
 
-__3G ring__: This is directly connected network that has middle nodes that are connected in a ring. Then the microgrid ns3 nodes and the control center ns3 node are connected to the individual middle node. 
+__3G ring__: This is directly connected network that has middle nodes connected using a ring pattern. Then the microgrid ns3 nodes and the control center ns3 node are connected to the individual middle node. 
 
 1. To enable this topology, open the grid.json either in /rd2c/PUSH/NATIG/RC/code/<exampleTag>-conf-<modelID> when using the conf input or in the /rd2c/integration/control/config folder when using the noconf input (see section __Commands to run the examples__ for more details about conf vs noconf).
 2. In section "Simulation" change UseDynTop to 1 as seen in the following output:
@@ -120,10 +120,29 @@ __3G ring__: This is directly connected network that has middle nodes that are c
 5. Other inputs in the __Node__ section:
     1. UseCSMA: Can be set to either 1 or 0 (true/false). This input controls whether or not CSMA is used to connect the node defined in the name sections to the nodes in the connection list. CSMA (Carrier Sense Multiple Access) connections use a network protocol that listens for carrier signals before transmitting data to avoid collisions. Commonly utilized in Ethernet and Wi-Fi networks, it enhances communication efficiency by ensuring that only one device transmits at a time, reducing the likelihood of data packet collisions.
     2. UseWifi: Can be set to either 1 or 0 (true/false). This input controls whether or not Wifi is used to connect the node defined in the name sections to the nodes in the connection list. 
-    3. If both 1 and 2 are set to 0, the connections default to point to point connection types. Point-to-point connections refer to a direct data link between two network nodes, bypassing intermediaries. Common in telecommunications and computer networks, they ensure dedicated and high-speed communication channels. These connections are often used for secure data transfer, high-performance computing, and reliable inter-device communication in various applications.
-    4. If either 1 or 2 are not defined in the __node__ section then they are default to not used.
-    5. the x and y values are coordinates to the middle nodes over a 2D grid
-    6. The error input is used to add some noise to the network.
+        1. If both 1 and 2 are set to 0, the connections default to point to point connection types. Point-to-point connections refer to a direct data link between two network nodes, bypassing intermediaries. Common in telecommunications and computer networks, they ensure dedicated and high-speed communication channels. These connections are often used for secure data transfer, high-performance computing, and reliable inter-device communication in various applications.
+        2. If either 1 or 2 are not defined in the __Node__ section then they are default to not used.
+    3. the x and y values are coordinates to the middle nodes over a 2D grid
+    4. The error input is used to add some noise to the network.
+
+__3G mesh__: this is a directly connected network that has middles connected in a mesh pattern. Then the microgrid ns3 nodes and the control center ns3 node are connected to the individual middle node. 
+
+1. To enable this topology, open the grid.json either in /rd2c/PUSH/NATIG/RC/code/<exampleTag>-conf-<modelID> when using the conf input or in the /rd2c/integration/control/config folder when using the noconf input (see section __Commands to run the examples__ for more details about conf vs noconf).
+2. In section "Simulation" change UseDynTop to 1 as seen in the following output:
+```
+     "Simulation": [
+                {
+                        "SimTime": 60,
+                        "StartTime": 0.0,
+                        "PollReqFreq": 15,
+                        "includeMIM": 0,
+                        "UseDynTop": 1,
+                        "MonitorPerf": 0,
+                        "StaticSeed": 0,
+                        "RandomSeed": 777
+                }
+        ],
+```
 
 ## Commands to run the examples
 
