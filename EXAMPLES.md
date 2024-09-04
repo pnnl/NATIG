@@ -27,8 +27,8 @@ The following table describes the available example in NATIG and the models that
                         "includeMIM": 0,
                         "UseDynTop": 0,
                         "MonitorPerf": 0,
-			            "StaticSeed": 0,
-			            "RandomSeed": 777
+                        "StaticSeed": 0,
+                        "RandomSeed": 777
                 }
         ],
 ```
