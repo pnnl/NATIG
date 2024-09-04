@@ -117,6 +117,13 @@ __3G ring__: This is directly connected network that has middle nodes that are c
 
 ```
 4. the connection section controls which nodes the node defined in name is connected to. Both the name input and the connections input are indexes of the middle nodes that are connected together following a topology.  
+5. Other inputs in the __Node__ section:
+    1. UseCSMA: Can be set to either 1 or 0 (true/false). This input controls whether or not CSMA is used to connect the node defined in the name sections to the nodes in the connection list. CSMA (Carrier Sense Multiple Access) connections use a network protocol that listens for carrier signals before transmitting data to avoid collisions. Commonly utilized in Ethernet and Wi-Fi networks, it enhances communication efficiency by ensuring that only one device transmits at a time, reducing the likelihood of data packet collisions.
+    2. UseWifi: Can be set to either 1 or 0 (true/false). This input controls whether or not Wifi is used to connect the node defined in the name sections to the nodes in the connection list. 
+    3. If both 1 and 2 are set to 0, the connections default to point to point connection types. Point-to-point connections refer to a direct data link between two network nodes, bypassing intermediaries. Common in telecommunications and computer networks, they ensure dedicated and high-speed communication channels. These connections are often used for secure data transfer, high-performance computing, and reliable inter-device communication in various applications.
+    4. If either 1 or 2 are not defined in the __node__ section then they are default to not used.
+    5. the x and y values are coordinates to the middle nodes over a 2D grid
+    6. The error input is used to add some noise to the network.
 
 ## Commands to run the examples
 
