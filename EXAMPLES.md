@@ -11,6 +11,28 @@ The following table describes the available example in NATIG and the models that
 | 5G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 5G network | Works
 | 5G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 5G network | Works
 
+## Available configurations and how to change them
+
+3G star: this is a directly connected network that has the control center at the center of the topology and the rest of the nodes are connected in a star pattern
+
+1. To enable this topology, open the grid.json either in /rd2c/PUSH/NATIG/RC/code/<exampleTag>-conf-<modelID> when using the conf input or in the /rd2c/integration/control/config folder when using the noconf input (see section __Commands to run the examples__ for more details about conf vs noconf).
+2. In section "Simulation" change UseDynTop to 0. When running the 3G example it will default the setup to a star topology
+
+```
+     "Simulation": [
+                {
+                        "SimTime": 60,
+                        "StartTime": 0.0,
+                        "PollReqFreq": 15,
+                        "includeMIM": 0,
+                        "UseDynTop": 0,
+                        "MonitorPerf": 0,
+			            "StaticSeed": 0,
+			            "RandomSeed": 777
+                }
+        ],
+```
+
 ## Commands to run the examples
 
 The following steps are assuming that the examples are run on docker:
