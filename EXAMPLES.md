@@ -284,7 +284,16 @@ __4G and 5G topology__: currently the topology type of these two communication n
     ],
 ```
 
-4. The 5GSetup section. These values are used accross the 3G, 4G and 5G examples. 
+4. The 5GSetup section. These values are used accross the 3G, 4G and 5G examples. This is the mainly used for the configuration of the cellular antennas in 4G and 5G.
+    1. __S1uLinkDelay__ is the delay to be used for the next S1-U link to be created
+    2. __N1Delay__ is the minimum processing delay (UE side) from the end of DL Data reception to the earliest possible start of the corresponding ACK/NACK transmission
+    3. __N2Delay__ is the minimum processing delay needed to decode UL DCI and prepare UL data
+    4. __SRS__  is a reference signal sent in the UL (from UE to GnB/EnB)
+    5. __UeRow__ and __UECol__ control the size of the antenna on the UE side of the network
+    6. __GnBRow__ and __GnBCol__ control the size of the antenna on the GnB/EnB side of the network
+        1. Keep in mind that the larger the UE and GnB/EnB antenna size get the slower the simulation will get
+    7. __numUE__ and __numEnb__ control the number of UE and the number of GnB/EnB nodes in the network. Currently we only have tested with these values being equal to the number of Microgrids in the network. 
+
 
 ```
 "5GSetup": [
