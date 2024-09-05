@@ -42,3 +42,72 @@
          }
     ],
 ```
+
+2. MIM configuration. The following section controls the number of MIM attackers on the network.
+    1. In the first section, the __Numberattackers__ and the __listMIM__ controls the number of attackers and lists their indexes. 
+    2. The following sections, there are one section per MIM attacker. Currently there is the same number of attacker nodes as the number of Microgrids but not all of them need to be active to work correctly
+    3. Description of the MIM configuration parameters:
+        1. __name__ is the name parameter that is given to each of the attacker nodes
+        2. __attack_val__ is the value that the point value will be set too
+        3. __real_val__ is the value that the point is set off the attack. When it is set to __NA__ the value of the point will not be set off the attack. When it is set an actual value, the point value will set back to that value after the attack is over.
+
+```
+"MIM": [
+	{
+            "NumberAttackers": 3,
+	    "listMIM": "0,1,2"
+	},
+        {
+            "name": "MIM1",
+	    "attack_val": "-50000",
+	    "real_val": "0",
+	    "node_id": "trip_shad_inv1",
+	    "point_id": "Qref",
+	    "scenario_id": "a",
+	    "attack_type": 4,
+	    "Start": 30,
+	    "End": 60,
+	    "PointStart": "30",
+	    "PointStop": "60"
+        },
+	{
+            "name": "MIM2",
+	    "attack_val": "TRIP",
+	    "real_val": "CLOSE",
+	    "node_id": "microgrid_switch4",
+	    "point_id": "status",
+	    "scenario_id": "b",
+	    "attack_type": 3,
+	    "Start": 30,
+	    "End": 60,
+	    "PointStart": "30",
+	    "PointStop": "60"
+	},
+	{
+            "name": "MIM3",
+	    "attack_val": "TRIP,TRIP",
+	    "real_val": "CLOSE,CLOSE",
+	    "node_id": "microgrid_switch2,microgrid_switch3",
+	    "point_id": "status,status",
+	    "scenario_id": "b",
+	    "attack_type": 3,
+	    "Start": 30,
+	    "End": 60,
+	    "PointStart": "30,30",
+	    "PointStop": "60,60"
+	},
+	{
+            "name": "MIM4",
+	    "attack_val": "TRIP",
+	    "real_val": "NA",
+	    "node_id": "microgrid_switch1",
+	    "point_id": "status",
+	    "scenario_id": "b",
+	    "attack_type": 3,
+	    "Start": 30,
+	    "End": 60,
+	    "PointStart": "30",
+	    "PointStop": "60"
+	}
+    ],
+```
