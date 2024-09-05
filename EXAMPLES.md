@@ -258,7 +258,58 @@ __4G and 5G topology__: currently the topology type of these two communication n
         }
       ],
 ```
+3. The Gridlayout section. These values are used accross the 3G, 4G and 5G examples. They are mainly used to setup the 2D grid where the nodes are going to be placed.
+    1. __MinX__ and __MinY__ are used to set the minimum x and y coordinates for the nodes over the 2D.
+    2. __DeltaX__ and __DeltaY__ are the x and y spaces between buildings. For 5G that space needs to be closest to reduce inteference.
+    3. __GridWidth__ is the number of objects layed out on a line
+    4. __distance__ called in the code but no longer being used
+    5. __GnBH__ and __UEH__ are the height of the nodes in the cellular network like the GnB/EnB and UE nodes
+    6. __LayoutType__ determines whether positions are allocated row first or column first.
+    7. __SetPos__ determines whether or not the specific coordinates defined in the __Node__ section of the same file is used. (Only available in 3G)
 
+```
+ "Gridlayout": [
+         {
+            "MinX": 0,
+            "MinY": 0,
+            "DeltaX": 20,
+            "DeltaY": 20,
+            "GridWidth": 10,
+	    "distance": 15,
+	    "GnBH": 10.0,
+	    "UEH": 1.5,
+            "LayoutType": "RowFirst",
+            "SetPos": 1
+        }
+    ],
+```
+
+4. The 5GSetup section. These values are used accross the 3G, 4G and 5G examples. 
+
+```
+"5GSetup": [
+            {
+                "S1uLinkDelay": 0,
+                "N1Delay": 0.01,
+                "N2Delay": 0.01,
+                "Srs": 10,
+                "UeRow": 4,
+                "UeCol": 8,
+                "GnBRow": 8,
+                "GnBCol": 4,
+                "numUE": 4,
+                "numEnb": 4,
+		"CentFreq1": 28e9,
+		"CentFreq2": 28.2e9,
+		"Band1": 150e6,
+		"Band2": 150e6,
+	        "num1": 2,
+        	"num2": 0,
+                "scenario": "UMi-StreetCayon",
+                "txPower": 40
+          }
+    ],
+```
 
 ## Commands to run the examples
 
@@ -286,7 +337,7 @@ The following steps are assuming that the examples are run on docker:
 2. 4G: this tag is used to describe the 4G LTE example that we have develloped using the existing 4G module in NS3
 3. 3G: this tag is used to describe non-cellular network examples, like directly connected network using csma links.
 4. Middle Nodes: These are nodes located in the middle of the networks. Some of examples of these are node located between the Microgrid NS3 nodes and the Control Center for the 3G example, or the nodes located between the Microgrid NS3 nodes and the cellular network in the case of the 4G and 5G examples. This is also the nodes used by NATIG to simulate the Man-In-The-Middle attacks on the network. 
-5. User Equipments: These are the equivalent of cellular router. They are used to connect the nodes between the Microgrid and the User Equipments to the Control Center connected on the other side of the cellular network. 
+5. User Equipments (UE): These are the equivalent of cellular router. They are used to connect the nodes between the Microgrid and the User Equipments to the Control Center connected on the other side of the cellular network. 
 
 ## IEEE bus models
 
