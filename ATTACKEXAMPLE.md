@@ -50,6 +50,7 @@
         1. __name__ is the name parameter that is given to each of the attacker nodes
         2. __attack_val__ is the value that the point value will be set too
         3. __real_val__ is the value that the point is set off the attack. When it is set to __NA__ the value of the point will not be set off the attack. When it is set an actual value, the point value will set back to that value after the attack is over.
+        4. __node_id__ is the id of the nodes in gridlabd that is under attack. In the example bellow we are attacking the inverter that is labeled __trip_shad_inv1__. 
 
 ```
 "MIM": [
