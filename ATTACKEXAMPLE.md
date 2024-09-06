@@ -49,9 +49,13 @@
     3. Description of the MIM configuration parameters:
         1. __name__ is the name parameter that is given to each of the attacker nodes
         2. __attack_val__ is the value that the point value will be set too
-        3. __real_val__ is the value that the point is set off the attack. When it is set to __NA__ the value of the point will not be set off the attack. When it is set an actual value, the point value will set back to that value after the attack is over.
-        4. __node_id__ is the id of the nodes in gridlabd that is under attack. In the example bellow we are attacking the inverter that is labeled __trip_shad_inv1__. 
-
+        3. __Start__ and __End__ values control when the attack starts and ends in seconds. 
+        4. __real_val__ is the value that the point is set off the attack. When it is set to __NA__ the value of the point will not be set off the attack. When it is set an actual value, the point value will set back to that value after the attack is over.
+        5. __node_id__ is the id of the nodes in gridlabd that is under attack. In the example bellow, the __MIM1__ is attacking the inverter that is labeled __trip_shad_inv1__. 
+        6. __point_id__ is the aspect of the node that is under attack. In the case of the __MIM1__ attacker in the example below, the attacker is attacking the __Qref__ value of the __trip_shad_inv1__ inverter. 
+        7. __scenario_id__ and __attack_type__ are the input that controls the type of attacks that can be run by the MIM attacker. 
+            1. Scenario 4.a: Firstly, the microgrids get islanded. Then, a Man-In-The-Middle (MITM) attack changes the setpoint of node to introduce issues. The attack happened at approx. __Start__ seconds into data collection. __node_id__ has its __point_id__ setpoint changed from __real_val__ (default) to __attack_val__ (attack value).
+            2. Scenario 4.b: Firstly, the microgrids get islanded. Then, selected nodes are attacked consistently to cause stability issues. __node_id__ has its __point_id__ value randomly toggled between __real_val__ (default) and __attack_val__ (attack value). The attack starts at approx. 2 minutes into data capture.
 ```
 "MIM": [
 	{
