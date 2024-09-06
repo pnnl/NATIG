@@ -54,8 +54,9 @@
         5. __node_id__ is the id of the nodes in gridlabd that is under attack. In the example bellow, the __MIM1__ is attacking the inverter that is labeled __trip_shad_inv1__. 
         6. __point_id__ is the aspect of the node that is under attack. In the case of the __MIM1__ attacker in the example below, the attacker is attacking the __Qref__ value of the __trip_shad_inv1__ inverter. 
         7. __scenario_id__ and __attack_type__ are the input that controls the type of attacks that can be run by the MIM attacker. 
-            1. Scenario 4.a: Firstly, the microgrids get islanded. Then, a Man-In-The-Middle (MITM) attack changes the setpoint of node to introduce issues. The attack happened at approx. __Start__ seconds into data collection. __node_id__ has its __point_id__ setpoint changed from __real_val__ (default) to __attack_val__ (attack value).
-            2. Scenario 4.b: Firstly, the microgrids get islanded. Then, selected nodes are attacked consistently to cause stability issues. __node_id__ has its __point_id__ value randomly toggled between __real_val__ (default) and __attack_val__ (attack value). The attack starts at approx. 2 minutes into data capture.
+            1. Scenario 4.a: A Man-In-The-Middle (MITM) attack changes the setpoint of node to introduce issues. The attack happened at approx. __Start__ seconds into data collection. __node_id__ has its __point_id__ setpoint changed from __real_val__ (default) to __attack_val__ (attack value).
+            2. Scenario 4.b: Selected nodes are attacked consistently to cause stability issues. __node_id__ has its __point_id__ value randomly toggled between __real_val__ (default) and __attack_val__ (attack value). The attack starts at approx. 2 minutes into data capture.
+            3. Scenario 3: A command injection attack causes islanding of microgrids. Under-Frequency-Load-Shedding (UFLS) occurs due to lack of sufficient generation on the microgrids. It will flip the switches that are passed in as __node_id__ to the __attack_value__.
 ```
 "MIM": [
 	{
