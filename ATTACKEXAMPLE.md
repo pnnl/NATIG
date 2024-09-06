@@ -57,6 +57,8 @@
             1. Scenario 4.a: A Man-In-The-Middle (MITM) attack changes the setpoint of node to introduce issues. The attack happened at approx. __Start__ seconds into data collection. __node_id__ has its __point_id__ setpoint changed from __real_val__ (default) to __attack_val__ (attack value).
             2. Scenario 4.b: Selected nodes are attacked consistently to cause stability issues. __node_id__ has its __point_id__ value randomly toggled between __real_val__ (default) and __attack_val__ (attack value). The attack starts at approx. 2 minutes into data capture.
             3. Scenario 3: A command injection attack causes islanding of microgrids. Under-Frequency-Load-Shedding (UFLS) occurs due to lack of sufficient generation on the microgrids. It will flip the switches that are passed in as __node_id__ to the __attack_value__.
+            4. Scenario 2: changes the point values when the poll response is sent back to the control center
+            5. Scenario 1: MIM acts as an end point of the traffic and does not allow traffic to pass through to the control center. 
 ```
 "MIM": [
 	{
