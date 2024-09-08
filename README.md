@@ -105,7 +105,7 @@ The following data is the same amount of simulated seconds but with no print lin
 |---|---|---|---|---|---|
 | 5G | 9500 | 45 | 121 | no attack | 28885.06 | 
 | 5G | 9500 | 45 | 121 | DDoS with 2 attacker | 85648.90 |
-| 5G | 9500 | 45 | 121 | MIM with 2 attackers | | 
+| 5G | 9500 | 45 | 121 | MIM with 2 attackers | 30580.91 | 
 | 5G | 123 | 17 | 16 | no attack | 5824.01 |
 | 5G | 123 | 17 | 16 | DDoS with 1 attacker | 17698.04 | 
 | 5G | 123 | 17 | 16 | MIM with 3 attackers | 5351.68 |
