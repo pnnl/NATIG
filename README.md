@@ -170,7 +170,8 @@ Running the 5G example with the 9500 and debug statements activated on a shared 
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
 |---|---|---|---|---|---|
 | 5G | 9500 | 45 | 121 | no attack | 6736.61 |
-| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | |
+| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | 8269.92 |
+| 5G | 9500 | 45 | 121 | MIM with 2 attackers | |
 
 ## Out of the box examples
 
