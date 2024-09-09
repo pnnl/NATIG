@@ -115,7 +115,7 @@ The following data is the same amount of simulated seconds but with no print lin
 | 4G LTE | 123 | 17 | 16 | no attack | 4868.21 |
 | 4G LTE | 123 | 17 | 16 | DDoS with 1 attacker | 19900.36 |
 | 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 2794.67 |
-| (3G) Mesh | 9500 | 23 | 121 | no attack | 21423.28 |
+| (3G) Mesh | 9500 | 23 | 121 | no attack | 17616.97 |
 | (3G) Mesh | 9500 | 23 | 121 | DDoS with 2 attacker | 15199.12 |
 | (3G) Mesh | 9500 | 23 | 121 | MIM 2 attackers | 19013.93 |
 | (3G) Mesh | 123 | 9 | 16 | no attack | 4399.30 |
@@ -142,8 +142,8 @@ The following data is the same amount of simulated seconds but with no print sta
 | 4G LTE | 123 | 17 | 16 | no attack | 4098.09 |
 | 4G LTE | 123 | 17 | 16 | DDoS with 1 attacker | 8354.13 | 
 | 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 2683.45 |
-| (3G) Mesh | 9500 | 23 | 121 | no attack | 20765.89 |
-| (3G) Mesh | 9500 | 23 | 121 | DDoS with 2 attackers | 16061.02 |
+| (3G) Mesh | 9500 | 23 | 121 | no attack | 17391.63 |
+| (3G) Mesh | 9500 | 23 | 121 | DDoS with 2 attackers | HERE |
 | (3G) Mesh | 9500 | 23 | 121 | MIM with 2 attackers | 22001.69 | 
 | (3G) Mesh | 123 | 9 | 16 | no attack | 3416.46 |
 | (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | 4091.37 |
@@ -177,7 +177,8 @@ Running the 5G example with the 9500 bus model and the debug statements turned o
 
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
 |---|---|---|---|---|---|
-| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | | 
+| 5G | 9500 | 45 | 121 | no attack | |
+| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | 8309.60 | 
 | 5G | 9500 | 45 | 121 | MIM with 2 attackers | 7381.56 |
 
 ## Out of the box examples
