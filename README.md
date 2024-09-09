@@ -175,6 +175,11 @@ Running the 5G example with the IEEE 9500 bus model and debug statements activat
 
 Running the 5G example with the 9500 bus model and the debug statements turned off and the data collection still running on a shared computing system using slurm
 
+| topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
+|---|---|---|---|---|---|
+| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | | 
+| 5G | 9500 | 45 | 121 | MIM with 2 attackers | 7381.56 |
+
 ## Out of the box examples
 
 The following table is for both the 9500 and 123 bus models:
