@@ -177,9 +177,15 @@ Running the 5G example with the 9500 bus model and the debug statements turned o
 
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
 |---|---|---|---|---|---|
-| 5G | 9500 | 45 | 121 | no attack | |
+| 5G | 9500 | 45 | 121 | no attack | 7077.42 |
 | 5G | 9500 | 45 | 121 | DDoS with 2 attackers | 8309.60 | 
 | 5G | 9500 | 45 | 121 | MIM with 2 attackers | 7381.56 |
+
+Running the 5G example with the 9500 bus model and the debug statements turned off and the data collection in turned off on a shared computing system using slurm
+
+| topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
+|---|---|---|---|---|---|
+| 5G | 9500 | 45 | 121 | no attack | |
 
 ## Out of the box examples
 
