@@ -116,8 +116,8 @@ The following data is the same amount of simulated seconds but with no print lin
 | 4G LTE | 123 | 17 | 16 | DDoS with 1 attacker | 19900.36 |
 | 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 2794.67 |
 | (3G) Mesh | 9500 | 23 | 121 | no attack | 17616.97 |
-| (3G) Mesh | 9500 | 23 | 121 | DDoS with 2 attacker | HERE |
-| (3G) Mesh | 9500 | 23 | 121 | MIM 2 attackers | 19013.93 |
+| (3G) Mesh | 9500 | 23 | 121 | DDoS with 1 attacker | 17339.23 |
+| (3G) Mesh | 9500 | 23 | 121 | MIM 2 attackers | HERE |
 | (3G) Mesh | 123 | 9 | 16 | no attack | 4399.30 |
 | (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | 3064.72 |
 | (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | 3056.50 |
@@ -133,6 +133,7 @@ The following data is the same amount of simulated seconds but with no print sta
 |---|---|---|---|---|---|
 | 5G | 9500 | 45 | 121 | no attack | 45732.18 |
 | 5G | 9500 | 45 | 121 | DDoS with 2 attackers | 74192.72| 
+| 5G | 9500 | 45 | 121 | MIM with 2 attackers | |
 | 5G | 123 | 17 | 16 | no attack | 5795.19 |
 | 5G | 123 | 17 | 16 | DDoS with 1 attacker | 10591.63 |
 | 5G | 123 | 17 | 16 | MIM with 3 attackers | 7997.78 |
@@ -143,8 +144,8 @@ The following data is the same amount of simulated seconds but with no print sta
 | 4G LTE | 123 | 17 | 16 | DDoS with 1 attacker | 8354.13 | 
 | 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 2683.45 |
 | (3G) Mesh | 9500 | 23 | 121 | no attack | 17391.63 |
-| (3G) Mesh | 9500 | 23 | 121 | DDoS with 2 attackers | 19135.84 |
-| (3G) Mesh | 9500 | 23 | 121 | MIM with 2 attackers | 22001.69 | 
+| (3G) Mesh | 9500 | 23 | 121 | DDoS with 1 attackers | 19135.84 |
+| (3G) Mesh | 9500 | 23 | 121 | MIM with 2 attackers | | 
 | (3G) Mesh | 123 | 9 | 16 | no attack | 3416.46 |
 | (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | 4091.37 |
 | (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | 3579.23 |  
@@ -185,7 +186,8 @@ Running the 5G example with the 9500 bus model and the debug statements turned o
 
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
 |---|---|---|---|---|---|
-| 5G | 9500 | 45 | 121 | no attack | |
+| 5G | 9500 | 45 | 121 | no attack | 7026.49 |
+| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | |
 
 ## Out of the box examples
 
