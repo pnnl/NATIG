@@ -118,9 +118,9 @@ The following data is the same amount of simulated seconds but with no print lin
 | (3G) Mesh | 9500 | 23 | 121 | no attack | 17616.97 |
 | (3G) Mesh | 9500 | 23 | 121 | DDoS with 1 attacker | 17339.23 |
 | (3G) Mesh | 9500 | 23 | 121 | MIM 2 attackers | 15537.93 |
-| (3G) Mesh | 123 | 9 | 16 | no attack | 4399.30 |
-| (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | 3064.72 |
-| (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | 3056.50 |
+| (3G) Mesh | 123 | 9 | 16 | no attack | |
+| (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | |
+| (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | |
 | (3G) Star | 9500 | 23 | 11 | no attack | 18629.31 |
 | (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | 15350.38 | 
 | (3G) Star | 9500 | 23 | 11 | MIM with 2 attackers | 14262.83 | 
@@ -145,10 +145,10 @@ The following data is the same amount of simulated seconds but with no print sta
 | 4G LTE | 123 | 17 | 16 | MIM with 3 attackers | 2683.45 |
 | (3G) Mesh | 9500 | 23 | 121 | no attack | 17391.63 |
 | (3G) Mesh | 9500 | 23 | 121 | DDoS with 1 attackers | 19135.84 |
-| (3G) Mesh | 9500 | 23 | 121 | MIM with 2 attackers | HERE | 
-| (3G) Mesh | 123 | 9 | 16 | no attack | 3416.46 |
-| (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | 4091.37 |
-| (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | 3579.23 |  
+| (3G) Mesh | 9500 | 23 | 121 | MIM with 2 attackers | 15076.19 | 
+| (3G) Mesh | 123 | 9 | 16 | no attack | HERE |
+| (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | |
+| (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | |  
 | (3G) Star | 9500 | 23 | 11 | no attack | 26689.90 | 
 | (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | 26023.97 |
 | (3G) Star | 9500 | 23 | 11 | MIM with 2 attacker | 22749.53 | 
@@ -188,7 +188,14 @@ Running the 5G example with the 9500 bus model and the debug statements turned o
 |---|---|---|---|---|---|
 | 5G | 9500 | 45 | 121 | no attack | 7026.49 |
 | 5G | 9500 | 45 | 121 | DDoS with 2 attackers | 8320.26 |
-| 5G | 9500 | 45 | 121 | MIM with 2 attackers | | 
+| 5G | 9500 | 45 | 121 | MIM with 2 attackers | 8143.94 | 
+
+Running the 5G example with the 9500 bus model and the debug statements turned off and the data collection in turned off on a shared computing system using slurm with the poll request rate increased from every 15ms to every 7ms
+
+| topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
+|---|---|---|---|---|---|
+| 5G | 9500 | 45 | 121 | no attack | 11679.67 |
+| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | |
 
 ## Out of the box examples
 
