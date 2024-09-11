@@ -59,8 +59,8 @@ The following data is the same amount of simulated seconds but with no print sta
 | (3G) Mesh | 9500 | 23 | 121 | DDoS with 1 attackers | 19135.84 |
 | (3G) Mesh | 9500 | 23 | 121 | MIM with 2 attackers | 15076.19 |
 | (3G) Mesh | 123 | 9 | 16 | no attack | 2385.79 |
-| (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | HERE |
-| (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | |
+| (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | 4152.84 |
+| (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | HERE |
 | (3G) Star | 9500 | 23 | 11 | no attack | |
 | (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | |
 | (3G) Star | 9500 | 23 | 11 | MIM with 2 attacker | |
@@ -107,4 +107,5 @@ Running the 5G example with the 9500 bus model and the debug statements turned o
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
 |---|---|---|---|---|---|
 | 5G | 9500 | 45 | 121 | no attack | 11679.67 |
-| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | |
+| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | 13187.88 |
+| 5G | 9500 | 45 | 121 | MIM with 2 attackers | |
