@@ -33,12 +33,12 @@ The following data is the same amount of simulated seconds but with no print lin
 | (3G) Mesh | 123 | 9 | 16 | no attack | 2106.03 |
 | (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | HERE |
 | (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | |
-| (3G) Star | 9500 | 23 | 11 | no attack | 18629.31 |
-| (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | 15350.38 |
-| (3G) Star | 9500 | 23 | 11 | MIM with 2 attackers | 14262.83 |
-| (3G) Star | 123 | 9 | 4 | no attack | 3534.34 |
-| (3G) Star | 123 | 9 | 4 | DDoS with 1 attacker | 5194.93 |
-| (3G) Star | 123 | 9 | 4 | MIM with 3 attackers | 3629.42 |
+| (3G) Star | 9500 | 23 | 11 | no attack | |
+| (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | |
+| (3G) Star | 9500 | 23 | 11 | MIM with 2 attackers | |
+| (3G) Star | 123 | 9 | 4 | no attack | |
+| (3G) Star | 123 | 9 | 4 | DDoS with 1 attacker | |
+| (3G) Star | 123 | 9 | 4 | MIM with 3 attackers | |
 
 The following data is the same amount of simulated seconds but with no print statement or data collection
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
@@ -61,16 +61,16 @@ The following data is the same amount of simulated seconds but with no print sta
 | (3G) Mesh | 123 | 9 | 16 | no attack | 2385.79 |
 | (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | |
 | (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | |
-| (3G) Star | 9500 | 23 | 11 | no attack | 26689.90 |
-| (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | 26023.97 |
-| (3G) Star | 9500 | 23 | 11 | MIM with 2 attacker | 22749.53 |
-| (3G) Star | 123 | 9 | 4 | no attack | 3338.92 |
-| (3G) Star | 123 | 9 | 4 | DDoS with 1 attacker | 5982.22 |
-| (3G) Star | 123 | 9 | 4 | MIM with 3 attacker | 3198.54 |
+| (3G) Star | 9500 | 23 | 11 | no attack | |
+| (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | |
+| (3G) Star | 9500 | 23 | 11 | MIM with 2 attacker | |
+| (3G) Star | 123 | 9 | 4 | no attack | |
+| (3G) Star | 123 | 9 | 4 | DDoS with 1 attacker | |
+| (3G) Star | 123 | 9 | 4 | MIM with 3 attacker | |
 
 The following 5G run was run with 2X higher bandwidth. We went from sending a packet every 15 ms to every 7ms
 
-| topology tested | IEEE model | Number of Nodes | Number of Paths | Data collection? | Attack? | Time (s) |
+| topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Data collection? | Time (s) |
 |---|---|---|---|---|---|---|
 | 5G | 123 | 17 | 16 | no attack | yes | 8460.03 |
 | 5G | 123 | 17 | 16 | DDoS with 1 attacker | yes | 19895.78 |
