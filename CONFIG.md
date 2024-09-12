@@ -179,4 +179,4 @@ If a user wants to add a node to interact with in the examples they need to acce
         },
 ```
 
-3. __The point files__: These files include points_mg1.csv, points_mg2.csv, points_mg3.csv, and points_substation.csv located in the RC/code/points-123/ folder in the NATIG for the IEEE 123 bus model. 
+3. __The point files__: These files include points_mg1.csv, points_mg2.csv, points_mg3.csv, and points_substation.csv located in the RC/code/points-123/ folder in the NATIG repository for the IEEE 123 bus model. 
