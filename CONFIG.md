@@ -1,10 +1,11 @@
 ## How to add a node to the configuration and interact with it.
 
-Step 1: If a user wants to add a node to interact with in the examples they need to access three types of files:
+If a user wants to add a node to interact with in the examples they need to access three types of files:
 
 1. grid.json: This file is used to asssociate the specific node ID to a Microgrid
     1. The Microgrid section as shown in the example has the mapping between node IDs and the Microgrid
     2. Ex: in the example below we can see that microgrid\_switch4 is located in mg1 (Microgrid 1) and in mg2 (Microgrid 2). On the other hand we can see that load\_35 is only located in mg1.  
+    3. The reason some of the node\_ids are shared between microgrids is because they are nodes that connect microgrids together. In most cases, those nodes are switches and they are used as ways to island the Microgrids from each other and the grids during some attacks. 
 
 ```
 "microgrid": [
@@ -71,3 +72,5 @@ Step 1: If a user wants to add a node to interact with in the examples they need
             ]
         },
 ```
+
+2. gridlabd_config.json: This file is used to define the points that can be interacted with during attacks or workflows. 
