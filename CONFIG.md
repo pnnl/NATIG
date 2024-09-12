@@ -74,6 +74,8 @@ If a user wants to add a node to interact with in the examples they need to acce
 ```
 
 2. gridlabd\_config.json: This file is used to define the points that can be interacted with during attacks or workflows. 
+    1. In the example below, we can see that some of the points ids that could be targeted by an attacker attacking microgrid\_switch4 inlcude status, phase A, B and C, and current in A, B and C.
+    2. This file is also used to coordinate information between gridlabd and ns3. 
 
 ```
 "endpoints": [
@@ -102,6 +104,36 @@ If a user wants to add a node to interact with in the examples they need to acce
             "info": "{\"node_40\": \"voltage_A\"}"
         },
 ...
+        {
+            "name": "mg1_microgrid_switch4$status",
+            "type": "string",
+            "global": false,
+            "info": "{\"microgrid_switch4\": \"status\"}"
+        },
+        {
+            "name": "mg1_microgrid_switch4$phase_A_state",
+            "type": "string",
+            "global": false,
+            "info": "{\"microgrid_switch4\": \"phase_A_state\"}"
+        },
+        {
+            "name": "mg1_microgrid_switch4$phase_B_state",
+            "type": "string",
+            "global": false,
+            "info": "{\"microgrid_switch4\": \"phase_B_state\"}"
+        },
+        {
+            "name": "mg1_microgrid_switch4$phase_C_state",
+            "type": "string",
+            "global": false,
+            "info": "{\"microgrid_switch4\": \"phase_C_state\"}"
+        },
+        {
+            "name": "mg1_microgrid_switch4$current_in_A",
+            "type": "string",
+            "global": false,
+            "info": "{\"microgrid_switch4\": \"current_in_A\"}"
+        },
         {
             "name": "mg1_microgrid_switch4$current_in_B",
             "type": "string",
