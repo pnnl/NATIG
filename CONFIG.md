@@ -73,4 +73,76 @@ If a user wants to add a node to interact with in the examples they need to acce
         },
 ```
 
-2. gridlabd_config.json: This file is used to define the points that can be interacted with during attacks or workflows. 
+2. gridlabd\_config.json: This file is used to define the points that can be interacted with during attacks or workflows. 
+
+```
+"endpoints": [
+        {
+            "name": "mg1_node_36$voltage_A",
+            "type": "string",
+            "global": false,
+            "info": "{\"node_36\": \"voltage_A\"}"
+        },
+        {
+            "name": "mg1_node_36$voltage_B",
+            "type": "string",
+            "global": false,
+            "info": "{\"node_36\": \"voltage_B\"}"
+        },
+        {
+            "name": "mg1_node_36$voltage_C",
+            "type": "string",
+            "global": false,
+            "info": "{\"node_36\": \"voltage_C\"}"
+        },
+        {
+            "name": "mg1_node_40$voltage_A",
+            "type": "string",
+            "global": false,
+            "info": "{\"node_40\": \"voltage_A\"}"
+        },
+...
+        {
+            "name": "mg1_microgrid_switch4$current_in_B",
+            "type": "string",
+            "global": false,
+            "info": "{\"microgrid_switch4\": \"current_in_B\"}"
+        },
+        {
+            "name": "mg1_microgrid_switch4$current_in_C",
+            "type": "string",
+            "global": false,
+            "info": "{\"microgrid_switch4\": \"current_in_C\"}"
+        },
+	{
+            "name": "mg1_trip_shad_inv1$Qref",
+	    "type": "string",
+	    "global": false,
+	    "info": "{\"trip_shad_inv1\": \"Qref\"}"
+	},
+	{
+            "name": "mg1_trip_shad_inv1$Pref",
+	    "type": "string",
+	    "global": false,
+	    "info": "{\"trip_shad_inv1\": \"Pref\"}"
+	},
+	{
+            "name": "mg1_trip_shad_inv4$Qref",
+	    "type": "string",
+	    "global": false,
+	    "info": "{\"trip_shad_inv4\": \"Qref\"}"
+	},
+	{
+            "name": "mg1_trip_shad_inv4$Pref",
+	    "type": "string",
+	    "global": false,
+	    "info": "{\"trip_shad_inv4\": \"Pref\"}"
+	},
+        {
+            "name": "mg1",
+            "type": "string",
+            "global": false,
+            "destination": "ns3/mg1",
+            "info": "{\"node_36\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"node_40\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"node_44\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"node_135\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"node_151\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_35\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_37\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_38\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_39\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_41\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_42\": [\"voltage_A\", \"voltage_B\", \"voltage_C\", \"Qref\"], \"load_43\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_45\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_46\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_47\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_48\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_49\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_50\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"load_51\": [\"voltage_A\", \"voltage_B\", \"voltage_C\"], \"microgrid_switch4\": [\"status\", \"phase_A_state\", \"phase_B_state\", \"phase_C_state\", \"current_in_A\", \"current_in_B\", \"current_in_C\"], \"trip_shad_inv1\":[\"Qref\", \"Pref\"], \"trip_shad_inv4\":[\"Qref\", \"Pref\"]}"
+        },
+```
