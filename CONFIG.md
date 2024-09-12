@@ -179,4 +179,50 @@ If a user wants to add a node to interact with in the examples they need to acce
         },
 ```
 
-3. __The point files__: These files include points_mg1.csv, points_mg2.csv, points_mg3.csv, and points_substation.csv located in the RC/code/points-123/ folder in the NATIG repository for the IEEE 123 bus model. 
+3. __The point files__: These files include points_mg1.csv, points_mg2.csv, points_mg3.csv, and points_substation.csv located in the RC/code/points-123/ folder in the NATIG repository for the IEEE 123 bus model.
+    1. The example below is shows the content of points_mg1.csv file. All the points files have similar structures. 
+    2. ANALOG is used for values that have a numerical value like voltage or current
+    3. BINARY is used values that either have a string input like "OPEN" or "CLOSE". Overall they are limited to a finite number of states. 
+    4. Once you set whether the target point is a binary or analog point, you need to set the node_id$point_id value. This used by the grid during poll response to identify the value that needs to be sent back to the control center.
+    5. Most ANALOG points will have a real and imaginary value. Make sure to add an input for both cases.
+    6. Finally the last input is not directly used by the examples in NATIG. If not used, set to 0. 
+
+```
+ANALOG,node_36$voltage_A.real,0
+ANALOG,node_36$voltage_A.imag,0
+ANALOG,node_36$voltage_B.real,0
+ANALOG,node_36$voltage_B.imag,0
+ANALOG,node_36$voltage_C.real,0
+ANALOG,node_36$voltage_C.imag,0
+ANALOG,node_40$voltage_A.real,0
+ANALOG,node_40$voltage_A.imag,0
+ANALOG,node_40$voltage_B.real,0
+ANALOG,node_40$voltage_B.imag,0
+ANALOG,node_40$voltage_C.real,0
+ANALOG,node_40$voltage_C.imag,0
+ANALOG,node_44$voltage_A.real,0
+ANALOG,node_44$voltage_A.imag,0
+ANALOG,node_44$voltage_B.real,0
+ANALOG,node_44$voltage_B.imag,0
+ANALOG,node_44$voltage_C.real,0
+...
+ANALOG,load_51$voltage_A.real,0
+ANALOG,load_51$voltage_A.imag,0
+ANALOG,load_51$voltage_B.real,0
+ANALOG,load_51$voltage_B.imag,0
+ANALOG,load_51$voltage_C.real,0
+ANALOG,load_51$voltage_C.imag,0
+ANALOG,microgrid_switch4$current_in_A.real,0
+ANALOG,microgrid_switch4$current_in_A.imag,0
+ANALOG,microgrid_switch4$current_in_B.real,0
+ANALOG,microgrid_switch4$current_in_B.imag,0
+ANALOG,microgrid_switch4$current_in_C.real,0
+ANALOG,microgrid_switch4$current_in_C.imag,0
+ANALOG,trip_shad_inv1$Pref,0
+ANALOG,trip_shad_inv1$Qref,0
+ANALOG,trip_shad_inv4$Pref,0
+BINARY,microgrid_switch4$phase_A_state,0
+BINARY,microgrid_switch4$phase_B_state,0
+BINARY,microgrid_switch4$phase_C_state,0
+BINARY,microgrid_switch4$status,0
+``` 
