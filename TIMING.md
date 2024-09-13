@@ -34,8 +34,8 @@ The following data is the same amount of simulated seconds but with no print lin
 | (3G) Mesh | 123 | 9 | 16 | DDoS with 1 attacker | 4196.78 |
 | (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | 2121.83 |
 | (3G) Star | 9500 | 23 | 11 | no attack | 6018.12 |
-| (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | HERE |
-| (3G) Star | 9500 | 23 | 11 | MIM with 2 attackers | |
+| (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | 8914.86 |
+| (3G) Star | 9500 | 23 | 11 | MIM with 2 attackers | HERE |
 | (3G) Star | 123 | 9 | 4 | no attack | |
 | (3G) Star | 123 | 9 | 4 | DDoS with 1 attacker | |
 | (3G) Star | 123 | 9 | 4 | MIM with 3 attackers | |
