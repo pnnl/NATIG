@@ -35,7 +35,7 @@ The following data is the same amount of simulated seconds but with no print lin
 | (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | 2121.83 |
 | (3G) Star | 9500 | 23 | 11 | no attack | 6018.12 |
 | (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | 8914.86 |
-| (3G) Star | 9500 | 23 | 11 | MIM with 2 attackers | HERE |
+| (3G) Star | 9500 | 23 | 11 | MIM with 2 attackers | 6815.02 |
 | (3G) Star | 123 | 9 | 4 | no attack | |
 | (3G) Star | 123 | 9 | 4 | DDoS with 1 attacker | |
 | (3G) Star | 123 | 9 | 4 | MIM with 3 attackers | |
@@ -63,7 +63,7 @@ The following data is the same amount of simulated seconds but with no print sta
 | (3G) Mesh | 123 | 9 | 16 | MIM with 3 attackers | 1986.06 |
 | (3G) Star | 9500 | 23 | 11 | no attack | 6435.05 |
 | (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | 7879.37 |
-| (3G) Star | 9500 | 23 | 11 | MIM with 2 attacker | |
+| (3G) Star | 9500 | 23 | 11 | MIM with 2 attacker | HERE |
 | (3G) Star | 123 | 9 | 4 | no attack | |
 | (3G) Star | 123 | 9 | 4 | DDoS with 1 attacker | |
 | (3G) Star | 123 | 9 | 4 | MIM with 3 attacker | |
