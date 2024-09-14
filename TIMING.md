@@ -65,8 +65,8 @@ The following data is the same amount of simulated seconds but with no print sta
 | (3G) Star | 9500 | 23 | 11 | DDoS with 2 attackers | 7879.37 |
 | (3G) Star | 9500 | 23 | 11 | MIM with 2 attacker | 6879.18 |
 | (3G) Star | 123 | 9 | 4 | no attack | 1844.98 |
-| (3G) Star | 123 | 9 | 4 | DDoS with 1 attacker | HERE |
-| (3G) Star | 123 | 9 | 4 | MIM with 3 attacker | |
+| (3G) Star | 123 | 9 | 4 | DDoS with 1 attacker | 3861.15 |
+| (3G) Star | 123 | 9 | 4 | MIM with 3 attacker | HERE |
 
 The following 5G run was run with 2X higher bandwidth. We went from sending a packet every 15 ms to every 7ms
 
