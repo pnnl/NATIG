@@ -38,7 +38,7 @@ The following data is the same amount of simulated seconds but with no print lin
 | (3G) Star | 9500 | 23 | 11 | MIM with 2 attackers | 6815.02 |
 | (3G) Star | 123 | 9 | 4 | no attack | 1428.09 |
 | (3G) Star | 123 | 9 | 4 | DDoS with 1 attacker | 3879.00 |
-| (3G) Star | 123 | 9 | 4 | MIM with 3 attackers | |
+| (3G) Star | 123 | 9 | 4 | MIM with 3 attackers | 1415.56 |
 
 The following data is the same amount of simulated seconds but with no print statement or data collection
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
