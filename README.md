@@ -21,6 +21,8 @@ We demonstrate few attack scenarios in the default framework and provide ways to
 
 [Example output data](https://github.com/pnnl/NATIG/tree/master/README.md#example-output-data)
 
+[How to run it on a unix cluster](https://github.com/pnnl/NATIG/tree/master/README.md#how-to-run-it-on-a-unix-cluster)
+
 [Citation](https://github.com/pnnl/NATIG/tree/master/README.md#Reference)
 
 ## How to get started
