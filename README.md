@@ -242,60 +242,6 @@ If your system does not have slurm nodes:
 
 Command to run the simulation: ` ./run.sh _location of RC folder_  _[3G|4G|5G]_ _[RC|emptyString]_ _[9500|123]_ _[conf|noconf]_ `
 
-## Available configurations
-Using the configuration files, a user can create a ring topology that uses wifi as a connection type, for example. Currently with the exception of 5G and 4G a user can mix and match any connection types with any topologies.
-
-Existing error: When using a mesh topology with wifi, we do run into the ressource issue with the docker container. If a user want to run such a topology please limit the number of connections per nodes at 2 to 3 connections per nodes. *currently under investigation*
-
-### Topologies (Only with 3G example)
-1. Ring
-2. Mesh (partial when using wifi)
-3. Star
-
-### Connection types:
-1. point to point connections (p2p)
-2. CSMA 
-3. Wifi (only on 3G example)
-5. 4G
-6. 5G
-
-### IEEE models (working)
-1. 123-node bus model
-2. 9500-node bus model (Current it is called using ieee8500.glm, but it is the ieee9500 model)
-
-### Additional tools
-To automatically generate the input json files use the get\_config.py from the graph folder. If you want to change the glm file that is used either replace the content of ieee8500.glm with the content of your glm file or replace in the python from the name of the glm file that is passed in by the name of the glm file that you want to use
-
-#### How to generate config json file
-1. go to graph folder
-2. run ``` python get_config.py <Number of Microgrids> ```
-3. the number of Microgrids is the number of Microgrids you want your model to have. Currently only tested even number of Microgrids. 
-
-## Configuration files
-
-1. Location: integration/control/config
-2. Available config files:
-   - **topology.json**: Used to control the topology of the ns3 network
-   - **grid.json**: Used to relate nodes of glm files to ns3 nodes. This file is also used to control the attack parameters.
-   - **ns_config.json**: Used as configuration file for Helics
-
-### topology.json
-1. Channel parameter: settings for the communication parameter for point to point, csma and wifi networks
-2. Gridlayout parameter: settings for 2D layout for wifi networks. This will be enabled in the future for other types of networks. 
-3. 5GSetup parameter: settings used in both 5G and 4G networks.
-4. Node parameter: settings for each node of the network. The configuration file contains default values for each of the nodes. 
-
-### grid.json
-1. Microgrids: connects the gridlabd components from glm with the NS3 nodes. Ex: mg1 is 1 NS3 node.
-2. MIM: parameter settings for the man-in-the-middle attacks (injection and parameter changes) 
-3. DDoS: parameters for the DDoS attacker (ex: number of bots)
-4. Simulation: general parameters for the simulation (ex: the start and end time of the simulation)
-
-### gridlabd\_config.json
-1. Helics parameters: Helics broker setup parameters (ex: IP address and port number for helics setup)
-2. Endpoint: Gridlabd endpoint
-
-NOTE: to change the helics broker's port the gridlabd\_config.json needs to be updated. All 3 of the files have a reference to the port used by the helics broker. 
 
 ## Simulated attacks
 
@@ -303,10 +249,10 @@ NOTE: to change the helics broker's port the gridlabd\_config.json needs to be u
 1. Injection attacks (Man-in-the-middle): The attacker trips relays connecting the microgrids to one another and to the grid causing islanding of the microgrid 
 2. Parameter changes (Man-in-the-middle): The attacker modifies the Pref and Qref values of two inverters in Microgrid 1 while the microgrids are islanded
 3. DDoS: The attacker generates a number of bots that will flood 1 to n nodes in the network to slow down the network performance
+4. Man-In-The-Middle: The attacker can cause grid islanding and injection attackes on the network. 
 
 ### In progress
 1. MPI capabilities for the code
-2. Examples for Man-In-The-Middle attacks
 
 
 ### Reference
