@@ -11,6 +11,16 @@ The following table describes the available example in NATIG and the models that
 | 5G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 5G network | Works
 | 5G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 5G network | Works
 
+
+## Table of contents
+[Available configurations and how to change them](https://github.com/pnnl/NATIG/tree/master/EXAMPLES.md#available-configurations-and-how-to-change-them)
+
+[Commands to run the examples](https://github.com/pnnl/NATIG/tree/master/EXAMPLES.md#commands-to-run-the-examples)
+
+[Tag descriptions and definitions](https://github.com/pnnl/NATIG/tree/master/EXAMPLES.md#tag-descriptions-and-definitions)
+
+[IEEE bus models](https://github.com/pnnl/NATIG/tree/master/EXAMPLES.md#IEEE-bus-models)
+
 ## Available configurations and how to change them
 
 __3G star__: this is a directly connected network that has the control center at the center of the topology and the rest of the nodes are connected in a star pattern
