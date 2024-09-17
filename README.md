@@ -11,9 +11,7 @@ We demonstrate few attack scenarios in the default framework and provide ways to
 
 [Detailed description of out of the box examples and how to run them](https://github.com/pnnl/NATIG/blob/master/EXAMPLES.md)
 
-[5G configuration](https://github.com/pnnl/NATIG/tree/master/README.md#5G-configuration)
-
-[Out of the box examples (5G)](https://github.com/pnnl/NATIG/tree/master/README.md#5G-out-of-the-box-example)
+[How to update the setup to run 5G](https://github.com/pnnl/NATIG/tree/master/README.md#How-to-update-the-setup-to-run-5G)
 
 [How to check if the code is running](https://github.com/pnnl/NATIG/tree/master/README.md#Is-the-code-running)
 
@@ -165,67 +163,12 @@ cd /rd2c/PUSH/NATIG/
 ./update_workstation.sh 5G
 ```
 
-## 5G configuration
+## How to update the setup to run 5G
 
 To enable 5G capabilities:
 1. request access to https://gitlab.com/cttc-lena/nr
 2. run ``` ./build_ns3.sh 5G /<root folder that the simulation is run on>/ ``` from the NATIG folder in the PUSH folder
   - in the case of Docker run ``` ./build_ns3.sh 5G /rd2c/ ```
-
-## 5G out of the box example
-
-5G example using a star topology.
-
-When using the IEEE 9500 bus model, the topology contains 10 substation, 10 middle nodes, 10 user equipments (UE) connected to 10 5G relay antennas (GnB nodes), and one control center.
-When using the IEEE 123 bus model, the topology contains 4 substation, 4 middle nodes, 4 user equipments (UE) connected to 4 5G relay antennas (GnB nodes), and one control center.
-
-DDoS enabled and running between 10 and 35 simulated seconds (simulated seconds refers to the time that ns3 tracks and not the wall time). This attack is trying to flood the link between the UE and the Middle node with several junk packets with the goal to slow down and increase packet loss. 
-
-DDoS default parameters in grid.json inside /rd2c/integration/control/config/:
-```
-NumberOfBots: 4,
-
-threadsPerAttacker: 4,
-
-Active: 1 ( 1 means that the DDoS is active and 0 means that the DDoS is inactive)
-
-Start: 10,
-
-End: 35,
-
-PacketSize: 1500,
-
-Rate: "40480kb/s",
-
-usePing: 1,
-
-legitNodeUsedByBots: UE, (This is the node that the bots conducting the DDoS attack connect to)
-
-endPoint: MIM (Refers to the end point of the attack. Usefull if you want to attack multiple links)
-```
-MIM --> Middle node between the UE and the substation
-
-To run this example in docker and overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 5G "" 9500 conf `
-
-To run this example in docker and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 5G "" 9500 noconf `
-
-To run this example in docker with the IEEE 123 model and overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 5G "" 123 conf `
-
-To run this example in docker with the IEEE 123 model and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sudo bash run.sh /rd2c/ 5G "" 123 noconf `
-
-To run this example in a unix cluster using slurm and overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 5G RC 9500 conf `
-
-To run this example in a unix cluster using slurm and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 5G RC 9500 noconf `
-
-To run this example in a unix cluster using slurm with the IEEE 123 model and overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 5G RC 123 conf `
-
-To run this example in a unix cluster using slurm with the IEEE 123 model and __NOT__ overwrite the config files using the ones in the NATIG repo: ` sbatch run.sh /rd2c/ 5G RC 123 noconf `
-
-Interesting outputted data:
-
-1. TP.txt this file contains the performance of each path full path between the control center and the substation. To read this file only take the 20 last inputs per timesteps. if the number of substation changes, only read the last 2 X the number of substations rows per timesteps.
-
-  - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Total received bytes since the start of the simulation , Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
 
 ## Example output data
 
