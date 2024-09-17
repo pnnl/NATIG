@@ -23,6 +23,10 @@ We demonstrate few attack scenarios in the default framework and provide ways to
 
 [How to run it on a unix cluster](https://github.com/pnnl/NATIG/tree/master/README.md#how-to-run-it-on-a-unix-cluster)
 
+[Detailed description of the available attacks that can simulated in NATIG](https://github.com/pnnl/NATIG/blob/master/ATTACKEXAMPLE.md)
+
+[Overview of simulated attack](https://github.com/pnnl/NATIG/tree/master/README.md#simulated-attacks)
+
 [Citation](https://github.com/pnnl/NATIG/tree/master/README.md#Reference)
 
 ## How to get started
@@ -249,7 +253,7 @@ Command to run the simulation: ` ./run.sh _location of RC folder_  _[3G|4G|5G]_ 
 1. Injection attacks (Man-in-the-middle): The attacker trips relays connecting the microgrids to one another and to the grid causing islanding of the microgrid 
 2. Parameter changes (Man-in-the-middle): The attacker modifies the Pref and Qref values of two inverters in Microgrid 1 while the microgrids are islanded
 3. DDoS: The attacker generates a number of bots that will flood 1 to n nodes in the network to slow down the network performance
-4. Man-In-The-Middle: The attacker can cause grid islanding and injection attackes on the network. 
+4. Grid islanding (Man-In-The-Middle): The attacker can trip the switches that connects the microgrids to other microgrids and the grid. This causes the microgrids to rely on the internal generation.  
 
 ### In progress
 1. MPI capabilities for the code
