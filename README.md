@@ -7,6 +7,8 @@ We demonstrate few attack scenarios in the default framework and provide ways to
 ## Table of contents
 [How to get started](https://github.com/pnnl/NATIG/tree/master/README.md#how-to-get-started)
 
+[Detailed description of out of the box examples and how to run them](https://github.com/pnnl/NATIG/blob/master/EXAMPLES.md)
+
 [Out of the box examples (4G)](https://github.com/pnnl/NATIG/tree/master/README.md#out-of-the-box-examples)
 
 [5G configuration](https://github.com/pnnl/NATIG/tree/master/README.md#5G-configuration)
