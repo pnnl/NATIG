@@ -31,7 +31,7 @@ The following table describes the available example in NATIG and the models that
 2. Available config files:
    - **topology.json**: Used to control the topology of the ns3 network
    - **grid.json**: Used to relate nodes of glm files to ns3 nodes. This file is also used to control the attack parameters.
-   - **ns_config.json**: Used as configuration file for Helics
+   - **gridlabd_config.json**: Used as configuration file for Helics
 
 ### topology.json
 1. Channel parameter: settings for the communication parameter for point to point, csma and wifi networks
