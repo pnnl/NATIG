@@ -119,3 +119,10 @@
 	}
     ],
 ```
+
+## Under development
+
+Ping attack: When setting usePing to 1, the attacker is sending numerous ping packets to the victim node using the ipv4 protocol. When using that option the attacker does not rely on a specific port being opened. In this case the attacker is conducting what is called a ping attack (https://www.researchgate.net/publication/222619629_PING_attack_-_How_bad_is_it)
+
+When setting usePing to 0, the attacker is sending numerous packets filled with random data to the target node. The attacker in this case is more visible since the target victim has a port that is used by the attacker to receive the data.
+

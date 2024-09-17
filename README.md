@@ -133,13 +133,6 @@ Interesting outputted data:
 
   - column IDs in the file: Timesteps,  path ID , ( sourceAddress / sourcePort --> destinationAddress / destinationPort ) , Throughput of path, lostPackets, Total received bytes since the start of the simulation , Total transmitted bytes since the start of the simulation, loss packet rate, delay per received packets, total transmitted packets since the start of the simulation ,total received packets since the start of the simulation, jitter per received packet
 
-## DDoS applications that the attacker can use:
-
-When setting usePing to 1, the attacker is sending numerous ping packets to the victim node using the ipv4 protocol. When using that option the attacker does not rely on a specific port being opened. In this case the attacker is conducting what is called a ping attack (https://www.researchgate.net/publication/222619629_PING_attack_-_How_bad_is_it)
-
-When setting usePing to 0, the attacker is sending numerous packets filled with random data to the target node. The attacker in this case is more visible since the target victim has a port that is used by the attacker to receive the data. 
-
-The threadsPerAttacker parameter in the DDoS section controls how many concurrent application the attacker starts to flood the target node. Ex: if the attack does a ping attack with 4 threadsPerAttacker, this means it will instantiate 4 concurrent ping applications pinging the same node. This parameter enables us to simulate different intensities of attacks. 
 
 ## How to stop the run?
 
