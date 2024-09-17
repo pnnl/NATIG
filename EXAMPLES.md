@@ -25,6 +25,8 @@ The following table describes the available example in NATIG and the models that
 
 [IEEE bus models](https://github.com/pnnl/NATIG/tree/master/EXAMPLES.md#IEEE-bus-models)
 
+[Under development](https://github.com/pnnl/NATIG/tree/master/EXAMPLES.md#under-development)
+
 ## Configuration files
 
 1. Location: integration/control/config
@@ -422,3 +424,7 @@ To automatically generate the input json files use the get\_config.py from the g
 1. IEEE 9500 bus model: The IEEE 9500 bus model is a comprehensive test system used for research and development in the field of electric distribution systems. Comprising 9500 nodes, this model emulates a real-world distribution network with detailed configurations, including various load types, distributed generation, and complex switching operations. It offers a benchmark for evaluating the performance of new technologies, algorithms, and methodologies in areas such as power flow analysis, fault management, and smart grid innovations. The IEEE 9500 bus model aims to enhance the reliability, efficiency, and resilience of modern electric distribution networks through robust simulations and analyses. (https://github.com/GRIDAPPSD/CIMHub/tree/master/ieee9500)
 
 2. IEEE 123 bus model: The IEEE 123 bus model is a standard test system extensively used for research and development in the electric power distribution sector. It represents a moderately-sized distribution network with 123 buses, featuring diverse load profiles, various distribution lines, and multiple voltage levels. This model includes detailed characteristics such as distributed generation sources, capacitor banks, voltage regulators, and switches. The IEEE 123 bus model serves as a crucial tool for evaluating and validating new technologies, simulation tools, and optimization algorithms, thereby supporting advancements in grid reliability, efficiency, and resilience. It provides a realistic framework for studying modern distribution network challenges and solutions. (https://github.com/gridlab-d/tools/blob/master/IEEE%20Test%20Models/123node/IEEE-123.glm)
+
+## Under development
+
+1. IEEE 3000 bus model: We are current starting work on adding the ability to run simulations using the recently developped IEEE 3000 bus model. 
