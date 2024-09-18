@@ -11,6 +11,10 @@ We demonstrate few attack scenarios in the default framework and provide ways to
 
 [Overview of out of the box examples](https://github.com/pnnl/NATIG/tree/master/README.md#out-of-the-box-examples)
 
+[Overview of resource impact on the run time of 5G example](https://github.com/pnnl/NATIG/blob/master/README.md#timing-overview-of-examples)
+
+[Detailed timing analysis of out of the box example](https://github.com/pnnl/NATIG/blob/master/TIMING.md)
+
 [Detailed description of out of the box examples and how to run them](https://github.com/pnnl/NATIG/blob/master/EXAMPLES.md)
 
 [How to stop the code](https://github.com/pnnl/NATIG/tree/master/README.md#How-to-stop-the-run)
