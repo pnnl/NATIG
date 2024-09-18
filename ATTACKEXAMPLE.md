@@ -3,6 +3,8 @@
 
 [Configuring attacks on out of the box examples](https://github.com/pnnl/NATIG/tree/master/ATTACKEXAMPLE.md#Configuring-attacks-on-out-of-the-box-examples)
 
+[Important notes](https://github.com/pnnl/NATIG/tree/master/ATTACKEXAMPLE.md#Important-notes)
+
 [Under development](https://github.com/pnnl/NATIG/tree/master/ATTACKEXAMPLE.md#Under-development)
 
 ## Available attacks 
@@ -126,6 +128,50 @@
 	    "PointStart": "30",
 	    "PointStop": "60"
 	}
+    ],
+```
+
+## Important notes
+
+1. MIM get enabled by setting __includeMIM__ to 1 in the __Simulation__ section of grid.json
+
+```
+"Simulation":[{
+            "SimTime": 200,
+            "StartTime": 0.0,
+            "PollReqFreq": 10,
+            "includeMIM": 1,
+            "UseDynTop": 1,
+            "MonitorPerf": 0,
+            "StaticSeed": 1,
+            "RandomSeed": 777
+        }
+    ],
+```
+
+2. DDoS get enabled by setting __Active__ to 1 in the DDoS section of the grid.json
+
+```
+"DDoS": [
+                {
+                        "NumberOfBots": 50,
+                        "threadsPerAttacker": 1,
+                        "Active": 0,
+                        "usePing": 0,
+                        "Start": 120,
+                        "End": 240,
+                        "TimeOn": 15.0,
+                        "TimeOff": 0.0,
+                        "PacketSize": 1500,
+                        "Rate": "80Mb/s",
+                        "NodeType": [
+                                "subNode"
+                        ],
+                        "NodeID": [
+                               2
+                        ],
+                        "endPoint": "MIM"
+                }
     ],
 ```
 
