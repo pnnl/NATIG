@@ -66,6 +66,8 @@
             3. Scenario 3: A command injection attack causes islanding of microgrids. Under-Frequency-Load-Shedding (UFLS) occurs due to lack of sufficient generation on the microgrids. It will flip the switches that are passed in as __node_id__ to the __attack_value__.
             4. Scenario 2: changes the point values when the poll response is sent back to the control center
             5. Scenario 1: MIM acts as an end point of the traffic and does not allow traffic to pass through to the control center. 
+        8. __PointStart__ and __PointStop__ control the start and end time for the individual point_id node_id combination. The smallest value needs to match the value for the __PointStart__ should be bigger or equal to the __Start__ input value and the largest value for the __PointStop__ needs to be smaller or equal to the __End__ value. The benefit of using those values is that a user can simulate staggered attacks within a single microgrid. If a user does not want to use them, they need to be set to the same values as the __Start__ and __End__ values for the same number of inputs as the __point_id__/__node_id__ number of inputs, as seen in the example below.
+ 
 ```
 "MIM": [
 	{
