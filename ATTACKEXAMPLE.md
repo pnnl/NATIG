@@ -181,3 +181,14 @@ Ping attack: When setting usePing to 1, the attacker is sending numerous ping pa
 
 When setting usePing to 0, the attacker is sending numerous packets filled with random data to the target node. The attacker in this case is more visible since the target victim has a port that is used by the attacker to receive the data.
 
+Route controller: updating route setups to reconfigure a topology in response to different events on the network.
+
+```
+"Controller": [
+        {
+                        "use": 0,
+                        "actionFile": "AgentDecisions.txt",
+                        "NodesControlled":[1,2,3,4]
+        }
+    ],
+```
