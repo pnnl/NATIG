@@ -1,3 +1,10 @@
+## Table of contents
+[Available attacks](https://github.com/pnnl/NATIG/tree/master/ATTACKEXAMPLE.md#Available-attacks)
+
+[Configuring attacks on out of the box examples](https://github.com/pnnl/NATIG/tree/master/ATTACKEXAMPLE.md#Configuring-attacks-on-out-of-the-box-examples)
+
+[Under development](https://github.com/pnnl/NATIG/tree/master/ATTACKEXAMPLE.md#Under-development)
+
 ## Available attacks 
 
 1. Man-In-The-Middle (MIM) Attacks: A Man-In-The-Middle (MITM) attack occurs when a malicious actor intercepts and potentially alters communication between two parties without their knowledge. This breach compromises data integrity and confidentiality, allowing the attacker to steal sensitive information, inject malicious content, or manipulate communication for fraudulent purposes.
