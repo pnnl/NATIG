@@ -134,8 +134,17 @@ Table containing the status for the DDoS examples:
 | 5G 123 IEEE bus | connects the microgrids of the IEEE 123 bus model using 5G network | Works
 | 5G 9500 IEEE bus | connects the microgrids of the IEEE 9500 bus model using 5G network | Works
 
+### Timing overview of examples:
 
-Interesting outputted data:
+Running the 5G example with the 9500 bus model and the debug statements turned off and the data collection in turned off
+
+| topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) on slurm | Time (s) on docker | 
+|---|---|---|---|---|---|---|
+| 5G | 9500 | 45 | 121 | no attack | 7026.49 | 45732.18 |
+| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | 8320.26 | 74192.72 |
+| 5G | 9500 | 45 | 121 | MIM with 2 attackers | 8143.94 | 31666.34 |
+
+### Interesting outputted data:
 
 1. TP.txt this file contains the performance of each path full path between the control center and the substation. To read this file only take the 20 last inputs per timesteps. if the number of substation changes, only read the last 2 X the number of substations rows per timesteps.
 
