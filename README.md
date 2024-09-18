@@ -21,6 +21,8 @@ We demonstrate few attack scenarios in the default framework and provide ways to
 
 [How to check if the code is running](https://github.com/pnnl/NATIG/tree/master/README.md#Is-the-code-running)
 
+[Detailed description on how to know if the code is running](https://github.com/pnnl/NATIG/blob/master/DEBUG.md)
+
 [How to update code](https://github.com/pnnl/NATIG/tree/master/README.md#Getting-an-updated-version-of-the-code)
 
 [How to update the setup to run 5G](https://github.com/pnnl/NATIG/tree/master/README.md#How-to-update-the-setup-to-run-5G)
