@@ -44,7 +44,7 @@ The following data is the same amount of simulated seconds but with no print sta
 | topology tested | IEEE model | Number of Nodes | Number of Paths | Attack? | Time (s) |
 |---|---|---|---|---|---|
 | 5G | 9500 | 45 | 121 | no attack | 45732.18 |
-| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | 74192.72|
+| 5G | 9500 | 45 | 121 | DDoS with 2 attackers | 74192.72 |
 | 5G | 9500 | 45 | 121 | MIM with 2 attackers | 31666.34 |
 | 5G | 123 | 17 | 16 | no attack | 5795.19 |
 | 5G | 123 | 17 | 16 | DDoS with 1 attacker | 10591.63 |
