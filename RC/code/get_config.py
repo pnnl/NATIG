@@ -4,8 +4,17 @@ import glm
 import json
 import os
 import sys
+from argparse import ArgumentParser
 
-list_files = glob.glob("../ieee8500.glm")
+parser = ArgumentParser()
+parser.add_argument("-f", "--file", dest="filename", default="ieee8500.glm", help="write report to FILE", metavar="FILE")
+parser.add_argument("-nm", "--NumMicro", dest="micro", default=11, help="write report to NUMMICRO", metavar="NUMMICRO")
+parser.add_argument("-na", "--NumAtt", dest="numAtt", default=3, help="write report to NUMATT", metavar="NUMATT")
+parser.add_argument("-aID", "--AttID", dest="AttID", default="0,1,2", help="write report to ATTID", metavar="ATTID")
+
+args = parser.parse_args()
+
+list_files = glob.glob(args.filename) #sys.argv[2]) #"../ieee8500.glm")
 
 l1 = glm.load(list_files[0])
 
@@ -47,7 +56,7 @@ for i in l1["objects"]:
                 microgrids["SS_"+str(len(microgrids.keys()))] = [i["attributes"]["from"], i["attributes"]["to"]]
 
 
-num_group = int(sys.argv[1]) #len(list(microgrids.keys()))
+num_group = int(args.micro) #sys.argv[1]) #len(list(microgrids.keys()))
 tt = {}
 kk = sorted(list(microgrids.keys()))
 print("Size of keys: "+str(len(kk)))
@@ -115,7 +124,7 @@ for i in l1["objects"]:
 
 
 for i in sorted(list(points.keys())):
-    f = open("../test_conf/points_"+i+".csv", "w")
+    f = open("test_conf/points_"+i+".csv", "w")
     f.write(points[i])
     f.close()
 
@@ -150,21 +159,55 @@ grid["DDoS"][0]["NodeID"] = [2]
 
 grid["MIM"] = []
 overview_MIM = {}
-overview_MIM["NumberAttackers"] = 3
-overview_MIM["listMIM"] = "0,1,2"
+overview_MIM["NumberAttackers"] = int(args.numAtt)
+overview_MIM["listMIM"] = args.AttID
 grid["MIM"].append(overview_MIM)
 count = 0
+attackerID = args.AttID.split(",")
 for c in sorted(list(types_.keys())):
     t = {}
-    t["name"] = "MIM"+str(count)
-    t["attack_val"] = "TRIP"
-    t["real_val"] = "NA"
-    t["node_id"] = "microgrid_switch1"
-    t["point_id"] = "status"
-    t["scenario_id"] = "b"
-    t["attack_type"] = "3"
-    t["Start"] = 120
-    t["End"] = 180
+    f = False
+    for x in attackerID:
+        if count == int(x):
+            f = True
+    if f: #count == int(attackerID[count]):
+        default = input("Do you want to use the default value?(n/y)")
+        if "N" in default or "n" in default:
+            t["name"] = "MIM"+str(count)
+            t["attack_val"] = input("What is the attack value? format: \"Val1,Val2,...,ValN\" with N being the number of attacked point: ")
+            t["real_val"] = input("What is the real value? format: \"Val1,Val2,...,ValN\" with N being the number of attacked point: ")
+            t["node_id"] = input("What nodes are under attack? format: \"ID1,ID2,...,IDN\" with N being the number of attacked point. Ex ID: node101: ")
+            t["point_id"] = input("What points are under attacked? format: \"Point1,Point2,...,PointN\" with N being the number of attacked point. Ex Point: status. ")
+            t["scenario_id"] = input("What scenario id are you choosing? format: \"(a|b)\". For attack type 4, if you choose a then the attack value is set once and does not fluctuate. If you select b, the attack value is random fluctuated between the selected attack value and the real value. If you are choosing attack type 3, which is an attack done on switches, this input is not use. Please default to b: ")
+            t["attack_type"] = input("What attack type are you choosing? format: \"(3|4)\". 3 is the attack type that allows you to modify points that use strings as inputs like the status of a switch. 4 is the attack type that allows you to modify points that use numbers as inputs like the Pref value of inverters. ")
+            t["Start"] = input("What time does the current round of attack starts? format: \"Start of current round of attacks in seconds\". Ex: \"10\". ")
+            t["End"] = input("What time does the current round of attack ends? format: \"End of current round of attacks in seconds\". Ex: \"35\". ")
+            t["PointStart"] = input("What time does the individual point get attacked? format: \"Start1, Start2, ..., StartN\" with N being the number of points under attack. It has to be greater then or equal to the overall start value. Ex: \"10,12\". ")
+            t["PointStop"] = input("What time does the individual point get back to normal? format: \"End1, End2, ..., EndN\" with N being the number of points under attack. It has to be less then or equal to the overall end value. Ex: \"44,50\". ")
+        else:
+            t["name"] = "MIM"+str(count)
+            t["attack_val"] = "TRIP"
+            t["real_val"] = "NA"
+            t["node_id"] = "microgrid_switch1"
+            t["point_id"] = "status"
+            t["scenario_id"] = "b"
+            t["attack_type"] = "3"
+            t["Start"] = 10
+            t["End"] = 35
+            t["PointStart"] = 10
+            t["PointStop"] = 35
+    else:
+        t["name"] = "MIM"+str(count)
+        t["attack_val"] = "TRIP"
+        t["real_val"] = "NA"
+        t["node_id"] = "microgrid_switch1"
+        t["point_id"] = "status"
+        t["scenario_id"] = "b"
+        t["attack_type"] = "3"
+        t["Start"] = 10
+        t["End"] = 35
+        t["PointStart"] = 10,
+        t["PointStop"] = 35
     grid["MIM"].append(t)
     count += 1
 
@@ -285,9 +328,9 @@ for i in range(len(list(types_.keys()))):
     topology["Node"].append(t)
 
 
-grid_name = "../test_conf/grid.json"
-name = "../test_conf/gridlabd_config.json"
-topology_name = "../test_conf/topology.json"
+grid_name = "test_conf/grid.json"
+name = "test_conf/gridlabd_config.json"
+topology_name = "test_conf/topology.json"
 
 with open(name, "w") as outfile:
     json.dump(l2, outfile, indent = 8)
