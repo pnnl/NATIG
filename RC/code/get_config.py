@@ -206,7 +206,7 @@ for c in sorted(list(types_.keys())):
         t["attack_type"] = "3"
         t["Start"] = 10
         t["End"] = 35
-        t["PointStart"] = 10,
+        t["PointStart"] = 10
         t["PointStop"] = 35
     grid["MIM"].append(t)
     count += 1
