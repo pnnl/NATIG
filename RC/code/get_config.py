@@ -54,6 +54,17 @@ for i in l1["objects"]:
                     found = True
             if not found:
                 microgrids["SS_"+str(len(microgrids.keys()))] = [i["attributes"]["from"], i["attributes"]["to"]]
+    if "parent" in i["attributes"].keys() and "ld" not in i['attributes']["name"]:
+        if len(microgrids.keys()) == 0:
+            microgrids["SS_0"] = [i["attributes"]["parent"]]
+        else:
+            found = False
+            for xx in microgrids.keys():
+                if i["attributes"]["parent"] in microgrids[xx]:
+                    microgrids[xx].append(i["attributes"]["parent"])
+                    found = True
+            if not found:
+                microgrids["SS_"+str(len(microgrids.keys()))] = [i["attributes"]["parent"]]
 
 
 num_group = int(args.micro) #sys.argv[1]) #len(list(microgrids.keys()))
@@ -86,7 +97,9 @@ for i in l1["objects"]:
 points = {}
 for i in l1["objects"]:
     if "name" in i["attributes"].keys():
-        if i["attributes"]["name"] in res_micro.keys() and ("switch" in i["name"] or "inverters" in i["name"] or "node" in i["name"]):
+        #print(i["attributes"]["name"])
+        if i["attributes"]["name"] in res_micro.keys() and "ld" not in i['attributes']["name"]: # and ("switch" in i["name"] or "inverters" in i["name"] or "node" in i["name"]):
+            #print(i["attributes"]["name"])
             att = []
             for xx in types.keys():
                 for ww in types[xx]:
@@ -133,9 +146,11 @@ grid["Simulation"] = [{}]
 grid["Simulation"][0]["SimTime"] = 35
 grid["Simulation"][0]["StartTime"] = 0.0
 grid["Simulation"][0]["PollReqFreq"] = 5
-grid["Simulation"][0]["includeMIM"] = 0
+grid["Simulation"][0]["includeMIM"] = input("Do you want to simulate MIM? (0|1)")
 grid["Simulation"][0]["UseDynTop"] = 0
 grid["Simulation"][0]["MonitorPerf"] = 1
+grid["Simulation"][0]["StaticSeed"] = 0
+grid["Simulation"][0]["RandomSeed"] = 777
 grid["microgrid"] = []
 for c in sorted(list(types_.keys())):
     t = {}
@@ -147,7 +162,7 @@ for c in sorted(list(types_.keys())):
 
 grid["DDoS"] = [{}]
 grid["DDoS"][0]["NumberOfBots"] = 50
-grid["DDoS"][0]["Active"] = 1
+grid["DDoS"][0]["Active"] = input("Do you want to simulate DDoS? (0|1)")
 grid["DDoS"][0]["Start"] = 1
 grid["DDoS"][0]["End"] = 11
 grid["DDoS"][0]["TimeOn"] = 10.0
@@ -171,7 +186,7 @@ for c in sorted(list(types_.keys())):
         if count == int(x):
             f = True
     if f: #count == int(attackerID[count]):
-        default = input("Do you want to use the default value?(n/y)")
+        default = input("Do you want to use the default value for MIM "+str(count)+"?(n/y)")
         if "N" in default or "n" in default:
             t["name"] = "MIM"+str(count)
             t["attack_val"] = input("What is the attack value? format: \"Val1,Val2,...,ValN\" with N being the number of attacked point: ")
