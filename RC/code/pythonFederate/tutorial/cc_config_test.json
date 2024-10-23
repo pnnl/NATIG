@@ -1,0 +1,39 @@
+{
+    "name": "CC",
+    "loglevel": 1,
+    "coreType": "zmq",
+    "broker": "127.0.0.1",
+    "brokerPort": 80,
+    "broker_rank": 0,
+    "period": "1s",
+    "endpoints": [
+        {
+            "name": "Monitor",
+            "type": "string",
+            "global": false
+        },
+
+
+        {
+            "global": false,
+            "name": "mg1_inv6$Pmin",
+            "destination": "GLD/mg1_inv6$Pmin",
+            "type": "double"
+        },
+
+         {
+            "global": false,
+            "name": "mg1_inv6$Pmax",
+            "destination": "GLD/mg1_inv6$Pmax",
+            "type": "double"
+        },
+
+        {
+            "global": false,
+            "name": "mg1_meter_ld_39$constant_power_B",
+            "destination": "GLD/mg1_meter_ld_39$constant_power_B",
+            "type": "string"
+        }
+
+    ]
+}
