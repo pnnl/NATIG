@@ -74,12 +74,12 @@ fi
 v2=$( grep 'brokerPort' ${PWD}/config/gridlabd_config.json | sed -r 's/^[^:]*:(.*)$/\1/' | sed 's/,//' | sed 's/ //' )
 
 cd ${ROOT_PATH} && \
-if [[ "$6" == "v2" ]]
-then
+#if [[ "$6" == "v2" ]]
+#then
 helics_broker --slowresponding --federates=2 --port=$v2 --loglevel=${helicsLOGlevel} >> ${helicsOutFile} 2>&1 & \
-else
-helics_broker --slowresponding --federates=2 --port=9000 --loglevel=${helicsLOGlevel} >> ${helicsOutFile} 2>&1 & \
-fi
+#else
+#helics_broker --slowresponding --federates=2 --port=9000 --loglevel=${helicsLOGlevel} >> ${helicsOutFile} 2>&1 & \
+#fi
  #helics_app tracer test.txt --config-file endpoints.txt --loglevel 7 --timedelta 1 >> tracer.txt 2>&1 & \
 cd -
 

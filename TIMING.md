@@ -101,6 +101,9 @@ Running the 5G example with the 9500 bus model and the debug statements turned o
 | 5G | 9500 | 45 | 121 | no attack | 7026.49 |
 | 5G | 9500 | 45 | 121 | DDoS with 2 attackers | 8320.26 |
 | 5G | 9500 | 45 | 121 | MIM with 2 attackers | 8143.94 | 
+| 5G | 123 | 17 | 16 | no attack | 2359.56 |
+| 5G | 123 | 17 | 16 | DDoS 1 attacker | |
+| 5G | 123 | 17 | 16 | MIM with 3 attackers | 2428.57 | 
 
 Running the 5G example with the 9500 bus model and the debug statements turned off and the data collection in turned off on a shared computing system using slurm with the poll request rate increased from every 15ms to every 7ms
 
