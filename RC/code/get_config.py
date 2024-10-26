@@ -22,7 +22,7 @@ l2 = {}
 l2["name"] = "GLD"
 l2["loglevel"] = 1
 l2["coreType"] = "zmq"
-l2["period"] = 10
+l2["period"] = 1
 l2["slow_responding"] = "True"
 l2["broker"] = "127.0.0.1:6000"
 l2["brokerPort"] = 6000
@@ -159,18 +159,32 @@ for c in sorted(list(types_.keys())):
     for i in sorted(list(types_[c].keys())):
         t[i] = types_[c][i]
     grid["microgrid"].append(t)
-
+"""
+"Controller": [
+                {
+                        "use": 0,
+                        "actionFile": "AgentDecisions11.txt",
+                        "NodesControlled":[1,2,3,4]
+                }
+        ],
+"""
+grid["Controller"] = [{}]
+grid["Controller"][0]["use"] = 0
+grid["Controller"][0]["actionFile"] = "AgentDecisions11.txt"
+grid["Controller"][0]["NodesControlled"] = [1,2,3,4]
 grid["DDoS"] = [{}]
-grid["DDoS"][0]["NumberOfBots"] = 50
+grid["DDoS"][0]["NumberOfBots"] = 4
+grid["DDoS"][0]["threadsPerAttacker"] = 2
 grid["DDoS"][0]["Active"] = input("Do you want to simulate DDoS? (0|1)")
 grid["DDoS"][0]["Start"] = 1
 grid["DDoS"][0]["End"] = 11
 grid["DDoS"][0]["TimeOn"] = 10.0
 grid["DDoS"][0]["TimeOff"] = 0.0
-grid["DDoS"][0]["PacketSize"] = 100000
-grid["DDoS"][0]["Rate"] = "600000kb/s"
-grid["DDoS"][0]["NodeType"] = ["MIM"]
+grid["DDoS"][0]["PacketSize"] = 1500
+grid["DDoS"][0]["Rate"] = "80Mb/s"
+grid["DDoS"][0]["NodeType"] = ["subNode"]
 grid["DDoS"][0]["NodeID"] = [2]
+grid["DDoS"][0]["endPoint"] = "CC"
 
 grid["MIM"] = []
 overview_MIM = {}
@@ -286,6 +300,8 @@ topology["Gridlayout"][0]["DeltaX"] = 50
 topology["Gridlayout"][0]["DeltaY"] = 50
 topology["Gridlayout"][0]["GridWidth"] = len(list(types_.keys()))
 topology["Gridlayout"][0]["distance"] = len(list(types_.keys()))
+topology["Gridlayout"][0]["GnBH"]= 10.0
+topology["Gridlayout"][0]["UEH"] = 1.5
 topology["Gridlayout"][0]["LayoutType"] = "RowFirst"
 topology["Gridlayout"][0]["SetPos"] = 0
 topology["5GSetup"] = [{}]
