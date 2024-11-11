@@ -103,7 +103,21 @@ Running the 5G example with the 9500 bus model and the debug statements turned o
 | 5G | 9500 | 45 | 121 | MIM with 2 attackers | 8143.94 | 
 | 5G | 123 | 17 | 16 | no attack | 2359.56 |
 | 5G | 123 | 17 | 16 | DDoS 1 attacker | 3224.56 |
-| 5G | 123 | 17 | 16 | MIM with 3 attackers | 2428.57 | 
+| 5G | 123 | 17 | 16 | MIM with 3 attackers | 2428.57 |
+| 4G | 9500 | 45 | 121 | no attack | 3989.23 |
+| 4G | 9500 | 45 | 121 | DDoS 2 attackers | 4205.97 |
+| 4G | 9500 | 45 | 121 | MIM with 3 attackers | 5670.66 |
+| 4G | 123 | 17 | 16 | no attack | 2234.71 |
+| 4G | 123 | 17 | 16 | DDoS 1 attacker | 5349.98 |
+| 4G | 123 | 17 | 16 | MIM with 3 attackers | 2293.31 |
+| (3G) Mesh | 9500 | 45 | 121 | no attack | 6272.34 |
+| (3G) Mesh | 9500 | 45 | 121 | DDoS 1 attacker | |
+
+Running the 4G example on slurm with the data collection set to on.
+| 4G | 9500 | 45 | 121 | no attack | 4789.57 |
+| 4G | 9500 | 45 | 121 | DDoS 2 attackers | 5398.60 | 
+| 4G | 9500 | 45 | 121 | MIM with 2 attackers | 9341.19 | 
+
 
 Running the 5G example with the 9500 bus model and the debug statements turned off and the data collection in turned off on a shared computing system using slurm with the poll request rate increased from every 15ms to every 7ms
 

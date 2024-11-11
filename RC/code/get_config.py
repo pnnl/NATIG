@@ -52,6 +52,7 @@ def save_graph(graph,file_name):
 
 """
 Example command to use this script: python3 get_config.py -f ieee8500.glm -nm 11 -na 2 -aID "6,9"
+Example2 command: python3 get_config.py -f IEEE-3000-glm/ieee3000.glm -nm 310 -na 1 -aID "6"
 """
 
 parser = ArgumentParser()
@@ -200,7 +201,7 @@ g2.add_edges_from(G)
 from networkx import *
 import itertools
 print("node degree clustering")
-k = int(len(list(G))/20)
+k = int(args.micro) #int(len(list(G))/20)
 def nx_chunk(graph, chunk_size):
     """
     Chunk a graph into subgraphs with the specified minimum chunk size.
@@ -412,6 +413,7 @@ for i in sources_loads.keys():
     print(total_P)
     print("")
 
+"""
 nx.draw_networkx(g2, pos=pos1, nodelist=Others,arrows=False, node_color=color_map1, node_size=size_map1, node_shape="o", linewidths=2.0, font_size=5, font_weight='bold', with_labels=False)
 nx.draw_networkx(g2, pos=pos1, nodelist=Switch,arrows=False, node_color=color_map2, node_size=size_map2, node_shape="v", linewidths=2.0, font_size=5, font_weight='bold', with_labels=False)
 nx.draw_networkx(g2, pos=pos1, nodelist=AttackedSwitch,arrows=False, node_color=color_map, node_size=size_map, node_shape="*", linewidths=2.0, font_size=5, font_weight='bold', with_labels=False)
@@ -423,7 +425,7 @@ plt.legend(prop={'size': 30})
 plt.savefig("g2.png", format="PNG")
 plt.clf()
 #save_graph(g2,"g2.png")
-
+"""
 
 num_group = len(list(microgrids.keys())) #int(sys.argv[1]) #len(list(microgrids.keys()))
 tt = {}
@@ -470,7 +472,7 @@ for i in l1["objects"]:
                 point_type = "ANALOG"
                 if not "voltage" in xx and not "current" in xx and not "Pref" in xx and not "Qref" in xx:
                     point_type = "BINARY"
-                if "flags" not in xx and "continuous" not in xx and "emergency" not in xx:
+                if "flags" not in xx and "continuous" not in xx and "emergency" not in xx and "frequency_measure_type" not in xx:
                     ss = {}
                     ss["name"] = res_micro[i["attributes"]["name"]]+"_"+i["attributes"]["name"]+"$"+xx
                     ss["type"] = "string"
@@ -586,7 +588,7 @@ for x in sorted(list(dd.keys())):
     for x in attackerID:
         print(c)
         print(int(x)+1)
-        if str(int(x)+1) in c:
+        if int(x)+1 == int(c.replace("SS_", "")):
             f = True
             attID = int(x)
     if f: #count == int(attackerID[count]):
