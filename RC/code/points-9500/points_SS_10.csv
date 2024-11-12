@@ -5,9 +5,11 @@ BINARY,swt_l5397_48332_sw$status,0
 BINARY,swt_ln0774470_sw$from,0
 BINARY,swt_ln0774470_sw$to,0
 BINARY,swt_ln0774470_sw$phases,0
+BINARY,swt_ln0774470_sw$status,0
 BINARY,swt_l9191_48332_sw$from,0
 BINARY,swt_l9191_48332_sw$to,0
 BINARY,swt_l9191_48332_sw$phases,0
+BINARY,swt_l9191_48332_sw$status,0
 BINARY,swt_tsw568613_sw$from,0
 BINARY,swt_tsw568613_sw$to,0
 BINARY,swt_tsw568613_sw$phases,0
@@ -590,7 +592,6 @@ BINARY,l3122827$phases,0
 ANALOG,l3122827$nominal_voltage.real,0
 ANALOG,l3122827$nominal_voltage.imag,0
 BINARY,m1047410$phases,0
-BINARY,swt_l9191_48332_sw$status,0
 ANALOG,m1047410$nominal_voltage.real,0
 ANALOG,m1047410$nominal_voltage.imag,0
 BINARY,m1047419$phases,0
@@ -612,7 +613,6 @@ BINARY,l2820556$phases,0
 ANALOG,l2820556$nominal_voltage.real,0
 ANALOG,l2820556$nominal_voltage.imag,0
 BINARY,n1138603$phases,0
-BINARY,swt_ln0774470_sw$status,0
 ANALOG,n1138603$nominal_voltage.real,0
 ANALOG,n1138603$nominal_voltage.imag,0
 BINARY,x2766741a$phases,0

@@ -244,7 +244,7 @@ cp -r ../PUSH/NATIG/RC/code/helics/dnp3-application-new* /rd2c/ns-3-dev/contrib/
 cp -r ../PUSH/NATIG/RC/code/helics/dnp3-application-new.cc /rd2c/ns-3-dev/contrib/helics/model/dnp3-application-new.cc
 cp -r ../PUSH/NATIG/RC/code/helics/dnp3-application-new.h /rd2c/ns-3-dev/contrib/helics/model/dnp3-application-new.h
 cp -r ../PUSH/NATIG/RC/code/helics/wscript /rd2c/ns-3-dev/contrib/helics/
-./make.sh 
+./make.sh ${RD2C} 
 if [ "$1" == "5G" ]; then
     echo "installing 5G"
     cd contrib
@@ -254,7 +254,7 @@ if [ "$1" == "5G" ]; then
     git checkout 5g-lena-v1.2.y
     cd ../../
     cp -r ${RD2C}/PUSH/NATIG/patch/nr/* contrib/nr/
-    ./make.sh
+    ./make.sh ${RD2C}
 fi
 
 #cd ../

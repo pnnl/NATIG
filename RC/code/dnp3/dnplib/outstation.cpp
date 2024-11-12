@@ -740,10 +740,10 @@ void Outstation::control(AppHeader::FunctionCode fn)
     string value_type;
     // NS_LOG_INFO("Oh range specifier: " << unsigned(oh.rangeSpecifier));
     EventInterface::PointType_t pt = obj_p->pointType;
-    NS_LOG_INFO("DNP val: " << v);
-    NS_LOG_INFO("DNP point type: " << pt);
-    NS_LOG_INFO("DNP flag: " << f);
-    NS_LOG_INFO("DNP index: " << unsigned(obj_p->index));
+    NS_LOG_UNCOND("DNP val: " << v);
+    NS_LOG_UNCOND("DNP point type: " << pt);
+    NS_LOG_UNCOND("DNP flag: " << f);
+    NS_LOG_UNCOND("DNP index: " << unsigned(obj_p->index));
     //NS_LOG_INFO("KYLE outstation name: " << Dnp3Application::GetName());
     string key;
     if(pt == EventInterface::AI){
@@ -772,8 +772,10 @@ void Outstation::control(AppHeader::FunctionCode fn)
 
       //format string to successfully publish
 
-
-      key = stationName + "/" + analog_pt_names[obj_p->index-2];
+      key = stationName + "/" + analog_pt_names[obj_p->index];
+      if (obj_p->index > 100){
+          key = stationName + "/" + analog_pt_names[obj_p->index-2];
+      }
       //key = analog_pt_names[obj_p->index];
 
 
@@ -798,9 +800,9 @@ void Outstation::control(AppHeader::FunctionCode fn)
       //cout << "I am in the Binary event "<< endl;
       if (ControlOutputRelayBlock* a = dynamic_cast<ControlOutputRelayBlock*>(obj_p)) {
          value_type = "string";
-	 //cout << "a->outputCode: " << a->outputCode << endl;
-	 //cout << "obj_p->index: " << obj_p->index << endl;
-	 //cout << "TRIP: " << ControlOutputRelayBlock::Code::TRIP << endl;
+	 cout << "a->outputCode: " << a->outputCode << endl;
+	 cout << "obj_p->index: " << obj_p->index << endl;
+	 cout << "TRIP: " << ControlOutputRelayBlock::Code::TRIP << endl;
          if(a->outputCode == ControlOutputRelayBlock::Code::TRIP){
              value = "OPEN";
          }
@@ -811,16 +813,24 @@ void Outstation::control(AppHeader::FunctionCode fn)
               /// TODO: Add ControlOutputRelayBlock::Code to handle different binary output
               throw(__LINE__);
           }
+	 cout << a->index << endl;
        }
        else {
                /// TODO: Add DNP objects to handle different binary output
                throw(__LINE__);
        }
 
+       for (int cur = 0; cur < binary_pt_names.size()-1; cur ++){
+            std::cout << "Point name: " << binary_pt_names[cur] << " : " << cur << std::endl;
+       }
+      //ControlOutputRelayBlock a = obj_p->value;
       key = stationName + "/" + binary_pt_names[obj_p->index];
+      if (obj_p->index > 100){
+          key = stationName + "/" + binary_pt_names[obj_p->index-2];
+      }
       //key = binary_pt_names[obj_p->index];
 
-      //cout<<"key: " << key <<endl;
+      cout<<"key: " << key << endl;
 
     }
     else if(pt == EventInterface::NONE){

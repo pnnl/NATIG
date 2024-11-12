@@ -1636,20 +1636,38 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
      std::vector<int> ID_point;
      for (int qq = 0; qq < nodesPoints.size(); qq++){
 	     std::cout << "Searching for point " << nodesPoints[qq]  << " qq = " << qq<< std::endl;
-	     
+	     bool ffound = false; 
 	     std::cout << "Number of points " << nodesPoints.size() << std::endl;
-	     for (int i = 0; i < unique_id_bin.size(); i++){
-		     std::cout << "ID: " << unique_id_bin[i] << " : " << i << std::endl;
-		     if(unique_id_bin[i].find(nodesPoints[qq]) != std::string::npos){
-			     std::cout << "Found Binary point " << nodesPoints[qq] << " : " << unique_id_bin[i] << " : " << i << std::endl;
+	     for (int i = 0; i < binary_point_names.size(); i++){
+		     std::cout << "ID: " << binary_point_names[i] << " : " << i << std::endl;
+		     bool flag = 0;
+		     /*for (auto i : ID_point){
+                          if ( binary_point_names[i].find(i) != std::string::npos ){
+                               flag = 1;
+			  }
+		     }*/
+		     if(binary_point_names[i].find(nodesPoints[qq]) != std::string::npos){ // and !flag){
+			     std::cout << "Found Binary point " << nodesPoints[qq] << " : " << binary_point_names[i] << " : " << i << std::endl;
 			     ID_point.push_back(i);
+			     ffound = true;
+			     break;
 		     }
 	     }
-	     for (int i = 0; i < unique_id_an.size(); i++){
-		     std::cout << "ID: " << unique_id_an[i] << " : " << i << std::endl;
-		     if (unique_id_an[i].find(nodesPoints[qq]) != std::string::npos){
-			     std::cout << "Found Analog point " << nodesPoints[qq] << " : " << unique_id_an[i] << " : " << i << std::endl;
+	     /*if (ffound){
+                  break;
+	     }*/
+	     for (int i = 0; i < analog_point_names.size(); i++){
+		     std::cout << "ID: " << analog_point_names[i] << " : " << i << std::endl;
+		     bool flag = 0;
+                     /*for (auto i : ID_point){
+                          if ( analog_point_names[i].find(i) != std::string::npos ){
+                               flag = 1;
+                          }
+                     }*/
+		     if (analog_point_names[i].find(nodesPoints[qq]) != std::string::npos){ // and !flag){
+			     std::cout << "Found Analog point " << nodesPoints[qq] << " : " << analog_point_names[i] << " : " << i << std::endl;
 			     ID_point.push_back(i);
+			     break;
 		     }
 	     }
      }
@@ -1745,13 +1763,14 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
     				  }
 			  }
                       } else if(m_attackType == 3) {
-		           NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
-		           NS_LOG_INFO ("MIMServer::HandleRead >>> MIM IP" << SourceAddr ); //<< " Forwarding packet to " << destAddr);
-		           NS_LOG_INFO("End of setup before if statement");
-	                   NS_LOG_INFO("========================\n");
-		           std::cout << unique_id_bin.size() << endl;
+		           NS_LOG_UNCOND ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
+		           NS_LOG_UNCOND ("MIMServer::HandleRead >>> MIM IP" << SourceAddr ); //<< " Forwarding packet to " << destAddr);
+		           NS_LOG_UNCOND ("End of setup before if statement");
+	                   NS_LOG_UNCOND ("========================\n");
+		           std::cout << binary_point_names.size() << endl;
 		           std::cout << "I will look through the available point during ATTACK 3" << std::endl;
 			   std::cout << "Searching for point " << ID_point[qq]  << " qq = " << qq<< std::endl;
+			   std::cout << "val[x] " << val[qq] << std::endl;
 			   if (val[qq].find("TRIP") != std::string::npos){
 				   ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::TRIP, ID_point[qq]);
 				   m_p->direct_operate(false,ao);
@@ -1854,6 +1873,7 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 		for (int qq = 0; qq < ID_point.size(); qq++){
 			std::cout << "I AM HERE" << std::endl;
 			std::cout << "Searching for point " << ID_point[qq]  << " qq = " << qq<< std::endl;
+			std::cout << "real_val[qq] " << real_val[qq] << std::endl;
 			if (!real_val[qq].empty() && std::find_if(real_val[qq].begin(),real_val[qq].end(), [](unsigned char c) { return !std::isdigit(c); }) == real_val[qq].end()){
 				std::cout << real_val[qq] << std::endl;
 				float f = std::stof(real_val[qq]); //get_val(val, val_min, val_max, qq);	
