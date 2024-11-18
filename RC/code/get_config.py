@@ -236,66 +236,69 @@ def nx_chunk(graph, chunk_size):
     # make the tree directed and compute the total descendants of each node
     tree = nx.dfs_tree(tree, args.root) #"swt_hvmv69s3b2_sw")
     total_descendants = get_total_descendants(tree)
-    for x in prop_div:
-        print(x + ": " + str(total_descendants[x]))
-        for node in tree.nodes():
-            if x in node:
-                print("found: "+ x)
-                #print(nx.ancestors(tree, node))
-                tt = []
-                start_End = ""
-                for x2 in prop_div:
-                    if x2 not in x:
-                        #print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
-                        for path in nx.all_simple_paths(tree, source=node, target=x2):
-                            found = False
-                            for x3 in prop_div:
-                                if x3 in path[1:-1]:
-                                    found = True
-                            if not found and len(path[1:-1]) > len(tt) and len(path[1:-1]) > 8:
-                                tt = path[1:-1]
-                                start_End = node + "," + x2
-                if len(tt) < 1:
-                    ancestor = list(nx.ancestors(tree, node))
-                    found = False
-                    for x3 in prop_div:
-                        if x3 in ancestor and x3 not in node:
-                            found = True
-                    if not found:
-                        print("Using ancestors")
-                        tt = ancestor
-                    else:
-                        descendants = list(nx.descendants(tree, node))
+    chunks = []
+    if "default_div" not in args.div:
+        for x in prop_div:
+            print(x + ": " + str(total_descendants[x]))
+            for node in tree.nodes():
+                if x in node:
+                    print("found: "+ x)
+                    #print(nx.ancestors(tree, node))
+                    tt = []
+                    start_End = ""
+                    for x2 in prop_div:
+                        if x2 not in x:
+                            #print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+                            for path in nx.all_simple_paths(tree, source=node, target=x2):
+                                found = False
+                                for x3 in prop_div:
+                                    if x3 in path[1:-1]:
+                                        found = True
+                                if not found and len(path[1:-1]) > len(tt) and len(path[1:-1]) > 8:
+                                    tt = path #[1:-1]
+                                    start_End = node + "," + x2
+                    if len(tt) < 1:
+                        ancestor = list(nx.ancestors(tree, node))
                         found = False
                         for x3 in prop_div:
-                            if x3 in descendants and x3 not in node:
+                            if x3 in ancestor and x3 not in node:
                                 found = True
                         if not found:
-                            print("Using descendants")
-                            tt = descendants
-                print(start_End)
-                print(tt)
-                print("----------------------------------------")
+                            print("Using ancestors")
+                            tt = ancestor
+                        else:
+                            descendants = list(nx.descendants(tree, node))
+                            found = False
+                            for x3 in prop_div:
+                                if x3 in descendants and x3 not in node:
+                                    found = True
+                            if not found:
+                                print("Using descendants")
+                                tt = descendants
+                    print(start_End)
+                    print(tt)
+                    if len(tt) > 0:
+                        chunks.append(tt)
+                    print("----------------------------------------")
+    else:
+        # prune chunks, starting from the leaves
+        max_descendants = np.max(list(total_descendants.values()))
+        while (max_descendants + 1 > chunk_size) & (tree.size() >= 2 * chunk_size):
+            for node in list(nx.topological_sort(tree))[::-1]: # i.e. from leaf to root
+                if (total_descendants[node] + 1) >= chunk_size:
+                    chunk = list(nx.descendants(tree, node))
+                    chunk.append(node)
+                    chunks.append(chunk)
 
-    # prune chunks, starting from the leaves
-    chunks = []
-    max_descendants = np.max(list(total_descendants.values()))
-    while (max_descendants + 1 > chunk_size) & (tree.size() >= 2 * chunk_size):
-        for node in list(nx.topological_sort(tree))[::-1]: # i.e. from leaf to root
-            if (total_descendants[node] + 1) >= chunk_size:
-                chunk = list(nx.descendants(tree, node))
-                chunk.append(node)
-                chunks.append(chunk)
+                    # update relevant data structures
+                    tree.remove_nodes_from(chunk)
+                    total_descendants = get_total_descendants(tree)
+                    max_descendants = np.max(list(total_descendants.values()))
 
-                # update relevant data structures
-                tree.remove_nodes_from(chunk)
-                total_descendants = get_total_descendants(tree)
-                max_descendants = np.max(list(total_descendants.values()))
+                    break
 
-                break
-
-    # handle remainder
-    chunks.append(list(tree.nodes()))
+        # handle remainder
+        chunks.append(list(tree.nodes()))
 
     return chunks
 

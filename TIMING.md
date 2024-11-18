@@ -113,9 +113,9 @@ Running the 5G example with the 9500 bus model and the debug statements turned o
 | (3G) Mesh | 9500 | 45 | 121 | no attack | 6272.34 |
 | (3G) Mesh | 9500 | 45 | 121 | DDoS 2 attacker | 5572.35 |
 | (3G) Mesh | 9500 | 45 | 121 | MIM 2 attackers | 8119.97 |
-| (3G) Mesh | 123 | 17 | 16 | no attack | 2478.79 | 
-| (3G) Mesh | 123 | 17 | 16 | DDoS 1 attackers | 2438.62 |
-| (3G) Mesh | 123 | 17 | 16 | MIM with 3 attackers | 2461.65 |
+| (3G) Mesh | 123 | 17 | 16 | no attack | | 
+| (3G) Mesh | 123 | 17 | 16 | DDoS 1 attackers | |
+| (3G) Mesh | 123 | 17 | 16 | MIM with 3 attackers | 2101.10 |
 | (3G) Star | 9500 | 45 | 121 | no attack | |
 | (3G) Star | 9500 | 45 | 121 | DDoS 2 attacker | |
 | (3G) Star | 9500 | 45 | 121 | MIM 2 attackers | |
