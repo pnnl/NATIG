@@ -53,6 +53,7 @@ def save_graph(graph,file_name):
 """
 Example command to use this script: python3 get_config.py -f ieee8500.glm -nm 11 -na 2 -aID "6,9"
 Example2 command: python3 get_config.py -f IEEE-3000-glm/ieee3000.glm -nm 310 -na 1 -aID "6"
+Example3 command with division: python3 get_config.py -f IEEE-3000-glm/ieee3000.glm -nm 310 -na 1 -aID "6" -div "swt_g9343_48332_sw,swt_ln4651075_sw,swt_ln4641075_sw,swt_ln0956471_sw,swt_ln4625713_sw,swt_ln0863704_sw,swt_ln0895780_sw,swt_ln0742811_sw,swt_ln0621886_sw,swt_tsw30473047_sw,swt_ln0108145_sw"
 """
 
 parser = ArgumentParser()
@@ -61,6 +62,7 @@ parser.add_argument("-nm", "--NumMicro", dest="micro", default=11, help="write r
 parser.add_argument("-na", "--NumAtt", dest="numAtt", default=3, help="write report to NUMATT", metavar="NUMATT")
 parser.add_argument("-aID", "--AttID", dest="AttID", default="0,1,2", help="write report to ATTID", metavar="ATTID")
 parser.add_argument("-p", "--port", dest="port", default=9000, help="write report to PORT", metavar="PORT")
+parser.add_argument("-div", "--division", dest="div", default="default_div", help="write report to DIV", metavar="DIV")
 
 args = parser.parse_args()
 
@@ -216,6 +218,9 @@ def nx_chunk(graph, chunk_size):
 
     # select a root that is maximally far away from all leaves
     leaves = [node for node, degree in tree.degree() if degree == 1]
+    prop_div = args.div.split(",")
+    print(prop_div)
+    print(leaves)
     minimum_distance_to_leaf = {node : tree.size() for node in tree.nodes()}
     for leaf in leaves:
         distances = nx.single_source_shortest_path_length(tree, leaf)
@@ -223,10 +228,49 @@ def nx_chunk(graph, chunk_size):
             if distance < minimum_distance_to_leaf[node]:
                 minimum_distance_to_leaf[node] = distance
     root = max(minimum_distance_to_leaf, key=minimum_distance_to_leaf.get)
+    print("-----------------------------------------------")
+    print(root)
 
     # make the tree directed and compute the total descendants of each node
     tree = nx.dfs_tree(tree, root)
     total_descendants = get_total_descendants(tree)
+    for x in prop_div:
+        print(x + ": " + str(total_descendants[x]))
+        for node in tree.nodes():
+            if x in node:
+                print("found: "+ x)
+                #print(nx.ancestors(tree, node))
+                tt = []
+                for x2 in prop_div:
+                    if x2 not in x:
+                        #print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+                        for path in nx.all_simple_paths(tree, source=node, target=x2):
+                            found = False
+                            for x3 in prop_div:
+                                if x3 in path[1:-1]:
+                                    found = True
+                            if not found and len(path[1:-1]) > len(tt):
+                                tt = path[1:-1]
+                if len(tt) < 1:
+                    ancestor = list(nx.ancestors(tree, node))
+                    found = False
+                    for x3 in prop_div:
+                        if x3 in ancestor and x3 not in node:
+                            found = True
+                    if not found:
+                        print("Using ancestors")
+                        tt = ancestor
+                    else:
+                        descendants = list(nx.descendants(tree, node))
+                        found = False
+                        for x3 in prop_div:
+                            if x3 in descendants and x3 not in node:
+                                found = True
+                        if not found:
+                            print("Using descendants")
+                            tt = descendants
+                print(tt)
+                print("----------------------------------------")
 
     # prune chunks, starting from the leaves
     chunks = []

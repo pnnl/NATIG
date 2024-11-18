@@ -111,7 +111,11 @@ Running the 5G example with the 9500 bus model and the debug statements turned o
 | 4G | 123 | 17 | 16 | DDoS 1 attacker | 5349.98 |
 | 4G | 123 | 17 | 16 | MIM with 3 attackers | 2293.31 |
 | (3G) Mesh | 9500 | 45 | 121 | no attack | 6272.34 |
-| (3G) Mesh | 9500 | 45 | 121 | DDoS 1 attacker | |
+| (3G) Mesh | 9500 | 45 | 121 | DDoS 2 attacker | 5572.35 |
+| (3G) Mesh | 9500 | 45 | 121 | MIM 2 attackers | 8119.97 |
+| (3G) Mesh | 123 | 17 | 16 | no attack | 2478.79 | 
+| (3G) Mesh | 123 | 17 | 16 | DDoS 1 attackers | 2438.62 |
+| (3G) Mesh | 123 | 17 | 16 | MIM with 3 attackers | |
 
 Running the 4G example on slurm with the data collection set to on.
 | 4G | 9500 | 45 | 121 | no attack | 4789.57 |
