@@ -53,7 +53,7 @@ def save_graph(graph,file_name):
 """
 Example command to use this script: python3 get_config.py -f ieee8500.glm -nm 11 -na 2 -aID "6,9"
 Example2 command: python3 get_config.py -f IEEE-3000-glm/ieee3000.glm -nm 310 -na 1 -aID "6"
-Example3 command with division: python3 get_config.py -f IEEE-3000-glm/ieee3000.glm -nm 310 -na 1 -aID "6" -div "swt_g9343_48332_sw,swt_ln4651075_sw,swt_ln4641075_sw,swt_ln0956471_sw,swt_ln4625713_sw,swt_ln0863704_sw,swt_ln0895780_sw,swt_ln0742811_sw,swt_ln0621886_sw,swt_tsw30473047_sw,swt_ln0108145_sw"
+Example3 command with division: python3 get_config.py -f IEEE-3000-glm/ieee3000.glm -nm 310 -na 1 -aID "6" -div "swt_g9343_48332_sw,swt_ln4651075_sw,swt_ln4641075_sw,swt_ln0956471_sw,swt_ln4625713_sw,swt_ln0863704_sw,swt_ln0895780_sw,swt_ln0742811_sw,swt_ln0621886_sw,swt_tsw30473047_sw,swt_ln0108145_sw" -r "swt_hvmv69s3b2_sw"
 """
 
 parser = ArgumentParser()
@@ -63,6 +63,8 @@ parser.add_argument("-na", "--NumAtt", dest="numAtt", default=3, help="write rep
 parser.add_argument("-aID", "--AttID", dest="AttID", default="0,1,2", help="write report to ATTID", metavar="ATTID")
 parser.add_argument("-p", "--port", dest="port", default=9000, help="write report to PORT", metavar="PORT")
 parser.add_argument("-div", "--division", dest="div", default="default_div", help="write report to DIV", metavar="DIV")
+parser.add_argument("-r", "--root", dest="root", default="root", help="write report to ROOT", metavar="ROOT")
+
 
 args = parser.parse_args()
 
@@ -232,7 +234,7 @@ def nx_chunk(graph, chunk_size):
     print(root)
 
     # make the tree directed and compute the total descendants of each node
-    tree = nx.dfs_tree(tree, root)
+    tree = nx.dfs_tree(tree, args.root) #"swt_hvmv69s3b2_sw")
     total_descendants = get_total_descendants(tree)
     for x in prop_div:
         print(x + ": " + str(total_descendants[x]))
@@ -241,6 +243,7 @@ def nx_chunk(graph, chunk_size):
                 print("found: "+ x)
                 #print(nx.ancestors(tree, node))
                 tt = []
+                start_End = ""
                 for x2 in prop_div:
                     if x2 not in x:
                         #print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
@@ -249,8 +252,9 @@ def nx_chunk(graph, chunk_size):
                             for x3 in prop_div:
                                 if x3 in path[1:-1]:
                                     found = True
-                            if not found and len(path[1:-1]) > len(tt):
+                            if not found and len(path[1:-1]) > len(tt) and len(path[1:-1]) > 8:
                                 tt = path[1:-1]
+                                start_End = node + "," + x2
                 if len(tt) < 1:
                     ancestor = list(nx.ancestors(tree, node))
                     found = False
@@ -269,6 +273,7 @@ def nx_chunk(graph, chunk_size):
                         if not found:
                             print("Using descendants")
                             tt = descendants
+                print(start_End)
                 print(tt)
                 print("----------------------------------------")
 
