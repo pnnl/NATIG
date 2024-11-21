@@ -110,15 +110,18 @@ Running the 5G example with the 9500 bus model and the debug statements turned o
 | 4G | 123 | 17 | 16 | no attack | 2234.71 |
 | 4G | 123 | 17 | 16 | DDoS 1 attacker | 5349.98 |
 | 4G | 123 | 17 | 16 | MIM with 3 attackers | 2293.31 |
-| (3G) Mesh | 9500 | 45 | 121 | no attack | 6272.34 |
-| (3G) Mesh | 9500 | 45 | 121 | DDoS 2 attacker | 5572.35 |
-| (3G) Mesh | 9500 | 45 | 121 | MIM 2 attackers | 8119.97 |
-| (3G) Mesh | 123 | 17 | 16 | no attack | | 
-| (3G) Mesh | 123 | 17 | 16 | DDoS 1 attackers | |
+| (3G) Mesh | 9500 | 45 | 121 | no attack | 4365.11 |
+| (3G) Mesh | 9500 | 45 | 121 | DDoS 2 attacker | 4810.54 |
+| (3G) Mesh | 9500 | 45 | 121 | MIM 2 attackers | 4329.21 |
+| (3G) Mesh | 123 | 17 | 16 | no attack | 1995.36 | 
+| (3G) Mesh | 123 | 17 | 16 | DDoS 1 attackers | 2312.78 |
 | (3G) Mesh | 123 | 17 | 16 | MIM with 3 attackers | 2101.10 |
-| (3G) Star | 9500 | 45 | 121 | no attack | |
-| (3G) Star | 9500 | 45 | 121 | DDoS 2 attacker | |
-| (3G) Star | 9500 | 45 | 121 | MIM 2 attackers | |
+| (3G) Star | 9500 | 45 | 121 | no attack | 3973.83 |
+| (3G) Star | 9500 | 45 | 121 | DDoS 2 attacker | 4849.28 |
+| (3G) Star | 9500 | 45 | 121 | MIM 2 attackers | 4386.04 |
+| (3G) Star | 123 | 17 | 16 | no attack | 1944.87 |
+| (3G) Star | 123 | 17 | 16 | DDoS 1 attacker | 2122.58 |
+| (3G) Star | 123 | 17 | 16 | MIM 3 attackers | 1973.11 |
 
 Running the 4G example on slurm with the data collection set to on.
 | 4G | 9500 | 45 | 121 | no attack | 4789.57 |

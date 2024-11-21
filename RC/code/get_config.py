@@ -221,8 +221,8 @@ def nx_chunk(graph, chunk_size):
     # select a root that is maximally far away from all leaves
     leaves = [node for node, degree in tree.degree() if degree == 1]
     prop_div = args.div.split(",")
-    print(prop_div)
-    print(leaves)
+    #print(prop_div)
+    #print(leaves)
     minimum_distance_to_leaf = {node : tree.size() for node in tree.nodes()}
     for leaf in leaves:
         distances = nx.single_source_shortest_path_length(tree, leaf)
@@ -230,8 +230,8 @@ def nx_chunk(graph, chunk_size):
             if distance < minimum_distance_to_leaf[node]:
                 minimum_distance_to_leaf[node] = distance
     root = max(minimum_distance_to_leaf, key=minimum_distance_to_leaf.get)
-    print("-----------------------------------------------")
-    print(root)
+    #print("-----------------------------------------------")
+    #print(root)
 
     # make the tree directed and compute the total descendants of each node
     tree = nx.dfs_tree(tree, args.root) #"swt_hvmv69s3b2_sw")
@@ -239,10 +239,10 @@ def nx_chunk(graph, chunk_size):
     chunks = []
     if "default_div" not in args.div:
         for x in prop_div:
-            print(x + ": " + str(total_descendants[x]))
+            #print(x + ": " + str(total_descendants[x]))
             for node in tree.nodes():
                 if x in node:
-                    print("found: "+ x)
+                    #print("found: "+ x)
                     #print(nx.ancestors(tree, node))
                     tt = []
                     start_End = ""
@@ -264,7 +264,7 @@ def nx_chunk(graph, chunk_size):
                             if x3 in ancestor and x3 not in node:
                                 found = True
                         if not found:
-                            print("Using ancestors")
+                            #print("Using ancestors")
                             tt = ancestor
                         else:
                             descendants = list(nx.descendants(tree, node))
@@ -273,13 +273,13 @@ def nx_chunk(graph, chunk_size):
                                 if x3 in descendants and x3 not in node:
                                     found = True
                             if not found:
-                                print("Using descendants")
+                                #print("Using descendants")
                                 tt = descendants
-                    print(start_End)
-                    print(tt)
+                    #print(start_End)
+                    #print(tt)
                     if len(tt) > 0:
                         chunks.append(tt)
-                    print("----------------------------------------")
+                    #print("----------------------------------------")
     else:
         # prune chunks, starting from the leaves
         max_descendants = np.max(list(total_descendants.values()))
@@ -509,7 +509,10 @@ for i in l1["objects"]:
 points = {}
 for i in l1["objects"]:
     if "name" in i["attributes"].keys():
-        if i["attributes"]["name"] in res_micro.keys() and ("switch" in i["name"] or "inverters" in i["name"] or "node" in i["name"] or "diesel" in i["name"]):
+        if "inverter" in i["name"]:
+            print(i["attributes"]["name"] in res_micro.keys())
+            print(i["attributes"]["name"])
+        if i["attributes"]["name"] in res_micro.keys() and ("switch" in i["name"] or "inverter" in i["name"] or "node" in i["name"] or "diesel" in i["name"]):
             att = []
             for xx in types.keys():
                 for ww in types[xx]:
