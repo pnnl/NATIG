@@ -954,7 +954,7 @@ main (int argc, char *argv[])
                   Names::Add(ep_name, tempnode);
                   std::string enamestring = ep_name;
                   Ptr<Ipv4> ip = Names::Find<Node>(enamestring)->GetObject<Ipv4>();
-                  int ID = MIM_ID-1;
+                  int ID = MIM_ID;
 
 
       ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal(); //star.GetHubIpv4Address(MIM_ID-1);
@@ -974,6 +974,8 @@ main (int argc, char *argv[])
       dnp3MIM1.SetAttribute("JitterMaxNs", DoubleValue (1000));
       dnp3MIM1.SetAttribute("isMaster", BooleanValue (false));
       dnp3MIM1.SetAttribute ("Name", StringValue (enamestring));
+      dnp3MIM1.SetAttribute ("ID", UintegerValue(MIM_ID));
+      dnp3MIM1.SetAttribute ("AttackConf", StringValue(configFileName));
       dnp3MIM1.SetAttribute("MasterDeviceAddress", UintegerValue(1));
       dnp3MIM1.SetAttribute("StationDeviceAddress", UintegerValue(2));
       dnp3MIM1.SetAttribute("IntegrityPollInterval", UintegerValue (10));
@@ -1048,7 +1050,7 @@ main (int argc, char *argv[])
     //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
     //Based on https://gist.github.com/Saket-Upadhyay/c4c702716233cab91eb31b6d547aaeab
     Time interPacketInterval{Seconds(1.0)};
-    bool usePing = std::stoi(configObject["DDoS"][0]["usePing"].asString());
+    bool usePing = 0; //std::stoi(configObject["DDoS"][0]["usePing"].asString());
     //int numThreads = std::stoi(configObject["DDoS"][0]["threadsPerAttacker"].asString());
     if (DDoS){
             ApplicationContainer onOffApp[botNodes.GetN()];
