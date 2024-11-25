@@ -954,7 +954,7 @@ main (int argc, char *argv[])
                   Names::Add(ep_name, tempnode);
                   std::string enamestring = ep_name;
                   Ptr<Ipv4> ip = Names::Find<Node>(enamestring)->GetObject<Ipv4>();
-                  int ID = MIM_ID;
+                  int ID = 1;
 
 
       ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal(); //star.GetHubIpv4Address(MIM_ID-1);
