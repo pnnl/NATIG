@@ -164,6 +164,41 @@ void PrintRoutingTable (Ptr<Node>& n)
     }
 }
 
+void trTocsv(){
+    std::ifstream trFile("edge_performance.tr");
+    std::ofstream csvFile("output.csv");
+
+    std::string line;
+    std::vector<std::string> row;
+
+    while (std::getline(trFile, line)) {
+        row.clear();
+
+        // Split the line by tab delimiter
+        size_t pos = 0;
+        std::string token;
+        while ((pos = line.find('\t')) != std::string::npos) {
+            token = line.substr(0, pos);
+            row.push_back(token);
+            line.erase(0, pos + 1);
+        }
+        row.push_back(line); // Add the last token
+
+        // Write the row to the CSV file
+        for (size_t i = 0; i < row.size(); ++i) {
+            csvFile << row[i];
+            if (i != row.size() - 1) {
+                csvFile << ",";
+            }
+        }
+        csvFile << "\n";
+    }
+
+    trFile.close();
+    csvFile.close();
+    Simulator::Schedule (Seconds (1), &trTocsv);
+}
+
 void Throughput (){
 	Ptr<Ipv4FlowClassifier> classifier=DynamicCast<Ipv4FlowClassifier>(flowHelper.GetClassifier());
 
@@ -696,6 +731,12 @@ main (int argc, char *argv[])
 	    UDPSinkApp.Start(Seconds(0.0));
 	    UDPSinkApp.Stop(Seconds(BOT_STOP));
     }
+
+    AsciiTraceHelper ascii;
+    p2ph.EnableAsciiAll (ascii.CreateFileStream ("edge_performance.tr"));
+    Simulator::Schedule (Seconds (0.2), &trTocsv);
+    //csma.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_csma.tr"));
+
 
     flowMonitor = flowHelper.InstallAll();
     flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.001));
