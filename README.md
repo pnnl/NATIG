@@ -60,6 +60,23 @@ When refering to the 3G example, we are talking about topologies that just use a
 
 Finally, when collecting data from recorders in gridlabd, with the IEEE 9500 bus model the files get fully populated at the end of the run. _currently under investigation_
 
+## Code structure
+
+The main folder where all the code is run is ```<Root>/integration/control/```. In docker this folder is located at ```/rd2c/integration/control/```.
+
+The examples code containing the different communication topologies are: 
+1. ns3-helics-grid-dnp3-5G.cc (5G with NR core)
+2. ns3-helics-grid-dnp3-4G.cc (4G LTE)
+3. ns3-helics-grid-dnp3.cc (Non cellular, which refer to as 3G)
+
+These .cc files are located in the integration/control folder
+
+The configuration files (The json files) that are used by NATIG to setup the run are read from the integration/control/config folder.
+
+When the "conf" parameter is passed into the bash run command, the json files are copied over from the ``` <Root>/PUSH/NATIG/RC/code/<topology ID>-conf-<GLM ID> folder.
+
+The GLM files are read directly from the integration/control folder. 
+
 ## Labels used to describe experiments
 
 ### Execution environmnent
