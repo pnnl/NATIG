@@ -73,9 +73,18 @@ These .cc files are located in the integration/control folder
 
 The configuration files (The json files) that are used by NATIG to setup the run are read from the integration/control/config folder.
 
-When the "conf" parameter is passed into the bash run command, the json files are copied over from the ``` <Root>/PUSH/NATIG/RC/code/<topology ID>-conf-<GLM ID> folder.
+When the "conf" parameter is passed into the bash run command, the json files are copied over to the integration/control/config folder from the ``` <Root>/PUSH/NATIG/RC/code/<topology ID>-conf-<GLM ID> ``` folder.
 
-The GLM files are read directly from the integration/control folder. 
+The GLM files are read directly from the integration/control folder. When ``` conf ``` is used then the GLM files are copied over to the integration/control folder from the ``` <Root>/PUSH/NATIG/RC/code/<topology ID>-conf-<GLM ID> ``` folder.
+
+The topology IDs can be selected from the following:
+1. 3G (This is the example that does not use cellular network)
+2. 4G (4G LTE)
+3. 5G (5G with NR core)
+
+The GLM IDs are as follows:
+1. 9500 (for the IEEE 9500 bus feeder model)
+2. 123 (for the IEEE 123 bus feeder model)
 
 ## Labels used to describe experiments
 
