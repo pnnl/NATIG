@@ -218,7 +218,7 @@ cp -r ../PUSH/NATIG/RC/code/internet/* ${RD2C}/ns-3-dev/src/internet/
 cp -r ../PUSH/NATIG/RC/code/lte/* ${RD2C}/ns-3-dev/src/lte/ 
 cp -r ../PUSH/NATIG/RC/code/dnp3/ src
 cp -r ../PUSH/NATIG/RC/code/dnp3/model/dnp3-application.cc src/dnp3/model/dnp3-application.cc
-cp -r ../PUSH/NATIG/RC/code/internet/ipv4-l3-protocol-MIM.* src/internet/model/
+cp -r ../PUSH/NATIG/RC/code/internet/ipv4-l3-protocol.* src/internet/model/
 cp -r ../PUSH/NATIG/RC/code/internet/internet-stack-helper-MIM.* src/internet/helper/
 cp -r ../PUSH/NATIG/RC/code/internet/wscript src/internet/
 cp -r ../PUSH/NATIG/RC/code/lte/* src/lte/
