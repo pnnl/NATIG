@@ -135,9 +135,10 @@ void updatePower(){
     Simulator::Schedule (Seconds (2), &updatePower); //Call the function every 2 seconds
 }
 
-void trTocsv(){
-    std::ifstream trFile("edge_performance.tr");
-    std::ofstream csvFile("output.csv");
+void trTocsv(std::string file_name, std::string tag){
+    std::ifstream trFile(file_name.c_str());
+    std::string csv_name = "output" + tag + ".csv";
+    std::ofstream csvFile(csv_name.c_str());
 
     std::string line;
     std::vector<std::string> row;
@@ -167,7 +168,11 @@ void trTocsv(){
 
     trFile.close();
     csvFile.close();
-    Simulator::Schedule (Seconds (1), &trTocsv);
+    Simulator::Schedule (Seconds (1), &trTocsv, file_name, tag);
+}
+
+void StartEndSignal (std::string status){
+   std::cout << "The attack has " << status << std::endl;
 }
 
 void Throughput (){
@@ -504,6 +509,27 @@ void changeRoute (std::vector<NodeContainer> nodes, int index, std::string fileI
 	   Simulator::Schedule(MilliSeconds(period_routing), changeRoute, nodes, nextNode_ind, fileID);
 }
 
+static void
+RxDrop (Ptr<PcapFileWrapper> file, Ptr<const Packet> p)
+{
+   Ptr<Packet> copy = p->Copy();
+   Ipv4Header ipHeader;
+   copy->RemoveHeader(ipHeader);
+
+   std::cout << "Source IP: ";
+   ipHeader.GetSource().Print(std::cout);
+   std::cout << std::endl;
+
+   std::cout << "Destination IP: ";
+   ipHeader.GetDestination().Print(std::cout);
+   std::cout << std::endl;
+   NS_LOG_UNCOND ("RxDrop at " << Simulator::Now ().GetSeconds ());
+   file->Write (Simulator::Now (), p);
+}
+
+
+
+
 int
 main (int argc, char *argv[])
 {
@@ -565,7 +591,7 @@ main (int argc, char *argv[])
 
   Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue (999999999));
   //Config::SetDefault ("ns3::Ipv4GlobalRouting::RespondToInterfaceEvents", BooleanValue (true));
-  
+
   std::cout << "Helics configuration file: " << helicsConfigFileName.c_str() << std::endl;
   std::cout << "MicroGrid configuration file: " << configFileName.c_str() << std::endl;
 
@@ -793,6 +819,13 @@ main (int argc, char *argv[])
 	  std::string address = "11."+std::to_string(i+2)+".0.0";
 	  ipv4Sub.SetBase(address.c_str(), "255.255.255.0", "0.0.0.1");
 	  Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign(NetDev);
+	  std::string loc = std::getenv("RD2C");
+	  PcapHelper pcapHelper;
+	  Ptr<PcapFileWrapper> file = pcapHelper.CreateFile (loc+"/integration/control/physicalDevOutput/"+std::to_string(i)+".pcap", std::ios::out, PcapHelper::DLT_PPP);
+	  NetDev.Get (0)->TraceConnectWithoutContext ("PhyRxDrop", MakeBoundCallback (&RxDrop, file));
+	  PcapHelper pcapHelper2;
+          Ptr<PcapFileWrapper> file2 = pcapHelper2.CreateFile (loc+"/integration/control/physicalDevOutput/"+std::to_string(i)+"_MIM.pcap", std::ios::out, PcapHelper::DLT_PPP);
+          NetDev.Get (1)->TraceConnectWithoutContext ("PhyRxDrop", MakeBoundCallback (&RxDrop, file2));
   }
   PointToPointHelper p2ph2;
   std::string rate = configObject["DDoS"][0]["Rate"].asString();
@@ -870,6 +903,10 @@ main (int argc, char *argv[])
   //changing the parameters of the nodes in the network
   Simulator::Schedule (Seconds (3.2), &updatePower); 
 
+  Ipv4GlobalRoutingHelper g;
+  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("mod-aodv.routes", std::ios::out);
+  g.PrintRoutingTableAllAt (Seconds (2), routingStream);
+
   for (i = 0;i < configObject["microgrid"].size();i++)
   {
     mimPort.push_back(master_port);
@@ -940,6 +977,8 @@ main (int argc, char *argv[])
       nodes.push_back(MIMNode);
       nodes.push_back(Microgrid);
       Simulator::Schedule(MilliSeconds(2005+period_routing), changeRoute, nodes, 2, configObject["Controller"][0]["actionFile"].asString());// was 6005
+      //StartEndSignal (std::string status)
+      //Simulator::Schedule(MilliSeconds(2005+BOT_START), StartEndSignal, "started");
   }
 
   fedName = helics_federate->getName();
@@ -1069,7 +1108,8 @@ main (int argc, char *argv[])
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
 
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
-
+    Simulator::Schedule(Seconds(BOT_START), StartEndSignal, "started");
+    Simulator::Schedule(Seconds(BOT_STOP), StartEndSignal, "ended");
     /*if (DDoS){
             for (int k = 0; k < botNodes.GetN(); ++k)
             {
@@ -1197,13 +1237,16 @@ main (int argc, char *argv[])
     }
 
 
+
     AsciiTraceHelper ascii;
-    p2ph.EnableAsciiAll (ascii.CreateFileStream ("edge_performance.tr"));
-    Simulator::Schedule (Seconds (0.2), &trTocsv);
-    //csma.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_csma.tr"));
+    csma2.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_csma.tr"));
+    p2p.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_p2p.tr"));
+    p2ph2.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_Bots.tr"));
+    Simulator::Schedule (Seconds (0.2), &trTocsv, "edge_performance_csma.tr", "csma");
+    Simulator::Schedule (Seconds (0.2), &trTocsv, "edge_performance_p2p.tr", "p2p");
+    Simulator::Schedule (Seconds (0.2), &trTocsv, "edge_performance_Bots.tr", "Bots");
 
-
-    flowMonitor = flowHelper.Install(endpointNodes);
+    flowMonitor = flowHelper.InstallAll(); //flowHelper.Install(endpointNodes);
     flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.5));
     flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.5));
     flowMonitor->SetAttribute("PacketSizeBinWidth", DoubleValue(50));

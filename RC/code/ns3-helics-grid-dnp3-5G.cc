@@ -195,9 +195,11 @@ void PrintRoutingTable (Ptr<Node>& n)
 double sigmoid(double x){
     return 1/(1+exp(-x));
 }
-void trTocsv(){
-    std::ifstream trFile("edge_performance.tr");
-    std::ofstream csvFile("output.csv");
+
+void trTocsv(std::string file_name, std::string tag){
+    std::ifstream trFile(file_name.c_str());
+    std::string csv_name = "output" + tag + ".csv";
+    std::ofstream csvFile(csv_name.c_str());
 
     std::string line;
     std::vector<std::string> row;
@@ -227,7 +229,11 @@ void trTocsv(){
 
     trFile.close();
     csvFile.close();
-    Simulator::Schedule (Seconds (1), &trTocsv);
+    Simulator::Schedule (Seconds (1), &trTocsv, file_name, tag);
+}
+
+void StartEndSignal (std::string status){
+   std::cout << "The attack has " << status << std::endl;
 }
 
 void Throughput (){
@@ -1222,7 +1228,10 @@ main (int argc, char *argv[])
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
 
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
-    
+
+    Simulator::Schedule(Seconds(BOT_START), StartEndSignal, "started");
+    Simulator::Schedule(Seconds(BOT_STOP), StartEndSignal, "ended");
+
     if (DDoS){
 	    ApplicationContainer onOffApp[botNodes.GetN()];
             for (int k = 0; k < botNodes.GetN(); ++k)
@@ -1334,16 +1343,18 @@ main (int argc, char *argv[])
     for (int i = 0; i < subNodes.GetN(); i++){
         endpointNodes.Add (subNodes.Get (i));
     }
-
     AsciiTraceHelper ascii;
-    p2ph.EnableAsciiAll (ascii.CreateFileStream ("edge_performance.tr"));
-    Simulator::Schedule (Seconds (0.2), &trTocsv);
+    csma.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_csma.tr"));
+    p2ph.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_p2p.tr"));
+    p2ph2.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_Bots.tr"));
+    Simulator::Schedule (Seconds (0.2), &trTocsv, "edge_performance_csma.tr", "csma");
+    Simulator::Schedule (Seconds (0.2), &trTocsv, "edge_performance_p2p.tr", "p2p");
+    Simulator::Schedule (Seconds (0.2), &trTocsv, "edge_performance_Bots.tr", "Bots");
     //csma.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_csma.tr"));
 
-
-    flowMonitor = flowHelper.Install(endpointNodes); //All();
-    flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.5));
-    flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.5));
+    flowMonitor = flowHelper.InstallAll(); //flowHelper.Install(endpointNodes); //All();
+    flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.001));
+    flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.001));
     flowMonitor->SetAttribute("PacketSizeBinWidth", DoubleValue(50));
     Simulator::Schedule (Seconds (0.2), &Throughput); //, ncP2P_nodes);
     if (mon) {  
@@ -1360,7 +1371,7 @@ main (int argc, char *argv[])
   Simulator::Stop (simTime);
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
   Simulator::Run ();
-
+  //flowMonitor->SerializeToXmlFile("flow-monitor.xml", true, true);
   /*GtkConfigStore config;
   config.ConfigureAttributes();*/
 
