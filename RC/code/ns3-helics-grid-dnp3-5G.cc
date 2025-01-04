@@ -1229,10 +1229,9 @@ main (int argc, char *argv[])
 
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
 
-    Simulator::Schedule(Seconds(BOT_START), StartEndSignal, "started");
-    Simulator::Schedule(Seconds(BOT_STOP), StartEndSignal, "ended");
-
     if (DDoS){
+	    Simulator::Schedule(Seconds(BOT_START), StartEndSignal, "started");
+            Simulator::Schedule(Seconds(BOT_STOP), StartEndSignal, "ended");
 	    ApplicationContainer onOffApp[botNodes.GetN()];
             for (int k = 0; k < botNodes.GetN(); ++k)
             {

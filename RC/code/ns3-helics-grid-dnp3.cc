@@ -1108,8 +1108,6 @@ main (int argc, char *argv[])
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
 
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
-    Simulator::Schedule(Seconds(BOT_START), StartEndSignal, "started");
-    Simulator::Schedule(Seconds(BOT_STOP), StartEndSignal, "ended");
     /*if (DDoS){
             for (int k = 0; k < botNodes.GetN(); ++k)
             {
@@ -1128,6 +1126,8 @@ main (int argc, char *argv[])
     bool usePing = 0; //std::stoi(configObject["DDoS"][0]["usePing"].asString());
     //int numThreads = std::stoi(configObject["DDoS"][0]["threadsPerAttacker"].asString());
     if (DDoS){
+	    Simulator::Schedule(Seconds(BOT_START), StartEndSignal, "started");
+            Simulator::Schedule(Seconds(BOT_STOP), StartEndSignal, "ended");
             ApplicationContainer onOffApp[botNodes.GetN()];
 	    //for (int i = 0; i < 8 ; i++){
 	    for (int t = 0; t < 1; t++){

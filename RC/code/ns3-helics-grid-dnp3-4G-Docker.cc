@@ -703,21 +703,21 @@ main (int argc, char *argv[])
     dnpOutstationApp.Start (Seconds (start));
     dnpOutstationApp.Stop (simTime);
 
+    std::cout << "Setting up Bots" << std::endl;
     int BOT_START = std::stof(configObject["DDoS"][0]["Start"].asString());;
     int BOT_STOP = std::stof(configObject["DDoS"][0]["End"].asString());;
     std::string str_on_time = configObject["DDoS"][0]["TimeOn"].asString();
     std::string str_off_time = configObject["DDoS"][0]["TimeOff"].asString();
     int TCP_SINK_PORT = 9000;
-    int UDP_SINK_PORT = 9001;
+    int UDP_SINK_PORT = mimPort[2]-10;
     int MAX_BULK_BYTES = std::stof(configObject["DDoS"][0]["PacketSize"].asString()); //20971520000;
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
 
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
 
-    Simulator::Schedule(Seconds(BOT_START), StartEndSignal, "started");
-    Simulator::Schedule(Seconds(BOT_STOP), StartEndSignal, "ended");
-
     if (DDoS){
+	    Simulator::Schedule(Seconds(BOT_START), StartEndSignal, "started");
+            Simulator::Schedule(Seconds(BOT_STOP), StartEndSignal, "ended");
             ApplicationContainer onOffApp[botNodes.GetN()];
             for (int k = 0; k < botNodes.GetN(); ++k)
             {
