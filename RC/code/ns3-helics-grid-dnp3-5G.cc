@@ -445,6 +445,8 @@ void updateUETable(NodeContainer subNodes, NodeContainer ueNodes){
 }
 
 void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, NodeContainer MIM, NodeContainer ueNodes, Ipv4Address gateway){
+
+    // This sets the paths from the MIM nodes and UE nodes to the CC
     Ipv4StaticRoutingHelper ipv4RoutingHelper;
     Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHostContainer.Get(0)->GetObject<Ipv4> ());
   for (int i = 0; i < ueNodes.GetN(); i++){
@@ -456,22 +458,19 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
       }
   }
 
+  // This sets the path from the UE nodes to the subNode passing by the MIM nodes
+  // Gets the MIM node that corresponds to the subNodes node interface
   for (int i = 0; i < ueNodes.GetN(); i++){
     Ptr<Ipv4StaticRouting> ueNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes.Get(i)->GetObject<Ipv4>());
     int cc = 0;
     for (int j = 0; j < subNodes.GetN(); j++){
       cc += 1;
       Ptr<Ipv4> ipv4 = ueNodes.Get(i)->GetObject<Ipv4>();
-      /*if (not ipv4->IsUp (cc)){
-            cc += 1;
-      }*/
       ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), cc+1, 0);
-      /*if (not ipv4->IsUp (cc-1)){
-            cc -= 1;
-      }*/
     }
   }
 
+  // MIM to the subNodes and MIM to the CC nodes that is not the default paths which is set above
   for (int i = 0; i < MIM.GetN(); i++){
     Ipv4Address addr2_ = ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress (2, 0).GetLocal ();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
@@ -485,6 +484,7 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
     }
   }
 
+  //SubNodes to CC
   for (int i = 0; i < subNodes.GetN(); i++){
     int cc = 0;
     Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
@@ -493,9 +493,6 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
         Ptr<Ipv4> ipv4_2 = MIM.Get(j)->GetObject<Ipv4>();
         Ptr<Ipv4> ipv4 = subNodes.Get(j)->GetObject<Ipv4>();
         int ind = i+1;
-        /*if (not ipv4->IsUp (ind)){
-            ind += 1;
-        }*/
         Ipv4Address addr5_ = ipv4_2->GetAddress(ind,0).GetLocal();
         subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, cc, 0);
     }
