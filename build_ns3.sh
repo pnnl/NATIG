@@ -66,4 +66,4 @@ if [ "$1" == "5G" ]; then
     cp -r $2/PUSH/NATIG/patch/nr/* contrib/nr/
     sudo ./make.sh $2
 fi
-#sudo ./make.sh
+mkdir $2/integration/control/physicalDevOutput
