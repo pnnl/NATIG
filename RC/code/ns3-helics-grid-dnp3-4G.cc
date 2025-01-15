@@ -712,7 +712,7 @@ main (int argc, char *argv[])
     int UDP_SINK_PORT = mimPort[2]-10;
     int MAX_BULK_BYTES = std::stof(configObject["DDoS"][0]["PacketSize"].asString()); //20971520000;
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
-
+    int numThreads = std::stoi(configObject["DDoS"][0]["threadsPerAttacker"].asString());
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
 
     if (DDoS){
