@@ -576,21 +576,21 @@ Ipv4L3Protocol::Receive ( Ptr<NetDevice> device, Ptr<const Packet> p, uint16_t p
                 m_node->GetId ());
 
 
-  std::cout << "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC" << std::endl;
+  //std::cout << "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC" << std::endl;
   Ptr<Packet> copy = p->Copy();
   Ipv4Header ipHeaderss;
   copy->RemoveHeader(ipHeaderss);
 
-  std::cout << "Source IP: ";
-  ipHeaderss.GetSource().Print(std::cout);
-  std::cout << std::endl;
+  //std::cout << "Source IP: ";
+  //ipHeaderss.GetSource().Print(std::cout);
+  //std::cout << std::endl;
 
-  std::cout << "Destination IP: ";
-  ipHeaderss.GetDestination().Print(std::cout);
-  std::cout << std::endl;
-  std::cout << "Node ID " << m_node->GetId () << std::endl;
-  std::cout << "Node Address " << m_node->GetObject<Ipv4> ()->GetAddress (1,0) << std::endl;
-  std::cout << "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC" << std::endl;
+  //std::cout << "Destination IP: ";
+  //ipHeaderss.GetDestination().Print(std::cout);
+  //std::cout << std::endl;
+  //std::cout << "Node ID " << m_node->GetId () << std::endl;
+  //std::cout << "Node Address " << m_node->GetObject<Ipv4> ()->GetAddress (1,0) << std::endl;
+  //std::cout << "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC" << std::endl;
 
 
   std::ofstream outfile;
@@ -1005,15 +1005,15 @@ Ipv4L3Protocol::SendRealOut (Ptr<Ipv4Route> route,
   Ipv4Header ipHeaderss;
   copy->RemoveHeader(ipHeaderss);
 
-  std::cout << "Source IP: ";
-  ipHeaderss.GetSource().Print(std::cout);
-  std::cout << std::endl;
+  //std::cout << "Source IP: ";
+  //ipHeaderss.GetSource().Print(std::cout);
+  //std::cout << std::endl;
 
-  std::cout << "Destination IP: ";
-  ipHeaderss.GetDestination().Print(std::cout);
-  std::cout << std::endl;
-  std::cout << "Node ID " << outDev->GetIfIndex () << std::endl;
-  std::cout << "Node Address " << this->GetObject<Node> ()->GetObject<Ipv4> ()->GetAddress (1,0) << std::endl;
+  //std::cout << "Destination IP: ";
+  //ipHeaderss.GetDestination().Print(std::cout);
+  //std::cout << std::endl;
+  //std::cout << "Node ID " << outDev->GetIfIndex () << std::endl;
+  //std::cout << "Node Address " << this->GetObject<Node> ()->GetObject<Ipv4> ()->GetAddress (1,0) << std::endl;
 
   std::ofstream outfile;
   outfile.open("PerNodePerf.csv", std::ios_base::app); // append instead of overwrite
