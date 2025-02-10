@@ -1624,28 +1624,24 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 	     nodesPoints.push_back(nodes[xx] + "$"+ points[xx]);
      }
      
-     std::vector<string> unique_id_an;
-     for(map<string, float>::iterator iter = analog_points.begin(); iter != analog_points.end(); iter++ ) {
-	     unique_id_an.push_back((*iter).first); //token);
-     }
-     std::vector<string> unique_id_bin;
-     std::cout << "nodesPoints.size() " << nodesPoints.size() << std::endl;
-     for(map<string, short unsigned int>::iterator iter = bin_points.begin(); iter != bin_points.end(); iter++ ) {
-	     unique_id_bin.push_back((*iter).first); //token);
-     }
      std::vector<int> ID_point;
      for (int qq = 0; qq < nodesPoints.size(); qq++){
 	     std::cout << "Searching for point " << nodesPoints[qq]  << " qq = " << qq<< std::endl;
 	     bool ffound = false; 
 	     std::cout << "Number of points " << nodesPoints.size() << std::endl;
+	     for (int i = 0; i < analog_point_names.size(); i++){
+                     std::cout << "ID: " << analog_point_names[i] << " : " << i << std::endl;
+                     bool flag = 0;
+                     if (analog_point_names[i].find(nodesPoints[qq]) != std::string::npos){ // and !flag){
+                             std::cout << "Found Analog point " << nodesPoints[qq] << " : " << analog_point_names[i] << " : " << i << std::endl;
+                             ID_point.push_back(i);
+                             break;
+                     }
+             }
+
 	     for (int i = 0; i < binary_point_names.size(); i++){
 		     std::cout << "ID: " << binary_point_names[i] << " : " << i << std::endl;
 		     bool flag = 0;
-		     /*for (auto i : ID_point){
-                          if ( binary_point_names[i].find(i) != std::string::npos ){
-                               flag = 1;
-			  }
-		     }*/
 		     if(binary_point_names[i].find(nodesPoints[qq]) != std::string::npos){ // and !flag){
 			     std::cout << "Found Binary point " << nodesPoints[qq] << " : " << binary_point_names[i] << " : " << i << std::endl;
 			     ID_point.push_back(i);
@@ -1656,20 +1652,6 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 	     /*if (ffound){
                   break;
 	     }*/
-	     for (int i = 0; i < analog_point_names.size(); i++){
-		     std::cout << "ID: " << analog_point_names[i] << " : " << i << std::endl;
-		     bool flag = 0;
-                     /*for (auto i : ID_point){
-                          if ( analog_point_names[i].find(i) != std::string::npos ){
-                               flag = 1;
-                          }
-                     }*/
-		     if (analog_point_names[i].find(nodesPoints[qq]) != std::string::npos){ // and !flag){
-			     std::cout << "Found Analog point " << nodesPoints[qq] << " : " << analog_point_names[i] << " : " << i << std::endl;
-			     ID_point.push_back(i);
-			     break;
-		     }
-	     }
      }
      if(mitm_flag == true) {
 	  Json::Value configObject;

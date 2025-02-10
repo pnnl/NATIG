@@ -758,7 +758,7 @@ void Outstation::control(AppHeader::FunctionCode fn)
     }
     else if(pt == EventInterface::AO){
       if (Bit32AnalogOutput* a = dynamic_cast<Bit32AnalogOutput*>(obj_p)) {
-          //cout << "Requested value:" << a->request/1000 << " , Status: " << a->status << endl;  // request << ", Status:" << a->status << endl;
+          cout << "Requested value:" << a->request/1000 << " , Status: " << a->status << endl;  // request << ", Status:" << a->status << endl;
           //set value and its type
           value = to_string(a->request/1000);
           value_type = "int";
@@ -768,11 +768,11 @@ void Outstation::control(AppHeader::FunctionCode fn)
        }
       //retrieve subclass
       /*Bit32AnalogOutput a = obj_p->value;*/
-       //std::cout << "obj_p index: " << obj_p->index << std::endl; //<< " a index: " << a.index);
+      std::cout << "obj_p index: " << obj_p->index << std::endl; //<< " a index: " << a.index);
 
       //format string to successfully publish
 
-      key = stationName + "/" + analog_pt_names[obj_p->index];
+      key = stationName + "/" + analog_pt_names[obj_p->index-2];
       if (obj_p->index > 100){
           key = stationName + "/" + analog_pt_names[obj_p->index-2];
       }
