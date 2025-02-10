@@ -824,7 +824,7 @@ void Outstation::control(AppHeader::FunctionCode fn)
             std::cout << "Point name: " << binary_pt_names[cur] << " : " << cur << std::endl;
        }
       //ControlOutputRelayBlock a = obj_p->value;
-      key = stationName + "/" + binary_pt_names[obj_p->index];
+      key = stationName + "/" + binary_pt_names[obj_p->index-2];
       if (obj_p->index > 100){
           key = stationName + "/" + binary_pt_names[obj_p->index-2];
       }
