@@ -12,6 +12,9 @@ from matplotlib import colors as mcolors
 import networkx as nx
 from argparse import ArgumentParser
 
+if not os.path.exists("test_conf"):
+    os.mkdir("test_conf")
+
 def get_overlap(s1, s2):
     s = difflib.SequenceMatcher(None, s1, s2)
     pos_a, pos_b, size = s.find_longest_match(0, len(s1), 0, len(s2))
