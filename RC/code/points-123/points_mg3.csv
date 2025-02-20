@@ -67,6 +67,8 @@ ANALOG,load_68$voltage_B.real,0
 ANALOG,load_68$voltage_B.imag,0
 ANALOG,load_68$voltage_C.real,0
 ANALOG,load_68$voltage_C.imag,0
+ANALOG,load_68$constant_power_A.real,0
+ANALOG,load_68$constant_power_A.imag,0
 ANALOG,load_69$voltage_A.real,0
 ANALOG,load_69$voltage_A.imag,0
 ANALOG,load_69$voltage_B.real,0
@@ -91,6 +93,8 @@ ANALOG,load_73$voltage_B.real,0
 ANALOG,load_73$voltage_B.imag,0
 ANALOG,load_73$voltage_C.real,0
 ANALOG,load_73$voltage_C.imag,0
+ANALOG,load_73$constant_power_C.real,0
+ANALOG,load_73$constant_power_C.imag,0
 ANALOG,load_74$voltage_A.real,0
 ANALOG,load_74$voltage_A.imag,0
 ANALOG,load_74$voltage_B.real,0

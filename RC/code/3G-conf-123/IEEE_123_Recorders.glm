@@ -168,8 +168,32 @@ object recorder {
         file "gen/MG_3_node_76_freq.csv";
 }
 
+object recorder {
+        name recorder_MG2_102_freq;
+        parent load_102;
+        property voltage_A, voltage_B, voltage_C,constant_power_C;
+        interval 1;
+        flags DELTAMODE;
+        file "load/MG_2_load102_freq.csv";
+}
 
+object recorder {
+	name recorder_load_73;
+	parent load_73;
+	property voltage_A, voltage_B, voltage_C,constant_power_C;
+	flags DELTAMODE;
+	interval 1;
+	file "load/load_73_constant_power.csv";
+};
 
+object recorder {
+	name recorder_load_41;
+	parent load_41;
+	property voltage_A, voltage_B, voltage_C, constant_power_C;
+	flags DELTAMODE;
+	interval 1;
+	file "load/Load_41_constant_power.csv";
+};
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // Switch Recorders

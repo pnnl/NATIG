@@ -40,6 +40,8 @@ ANALOG,load_102$voltage_B.real,0
 ANALOG,load_102$voltage_B.imag,0
 ANALOG,load_102$voltage_C.real,0
 ANALOG,load_102$voltage_C.imag,0
+ANALOG,load_102$constant_power_C.real,0
+ANALOG,load_102$constant_power_C.imag,0
 ANALOG,load_103$voltage_A.real,0
 ANALOG,load_103$voltage_A.imag,0
 ANALOG,load_103$voltage_B.real,0
@@ -94,6 +96,7 @@ ANALOG,load_114$voltage_B.real,0
 ANALOG,load_114$voltage_B.imag,0
 ANALOG,load_114$voltage_C.real,0
 ANALOG,load_114$voltage_C.imag,0
+ANALOG,trip_shad_inv3$Pref,0
 BINARY,switch_300-350$status,0
 BINARY,switch_300-350$phase_A_state,0
 BINARY,switch_300-350$phase_B_state,0

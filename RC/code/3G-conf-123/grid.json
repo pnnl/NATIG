@@ -1,6 +1,6 @@
 {
     "Simulation":[{
-	    "SimTime": 200,
+	    "SimTime": 20,
             "StartTime": 0.0,
             "PollReqFreq": 10,
             "includeMIM": 1,
@@ -71,7 +71,10 @@
             "switch": [
                 "switch_300-350",
 		"microgrid_switch4"
-            ]
+            ],
+            "inverter": [
+                "trip_shad_inv3"
+	    ]
         },
         {
             "name": "mg3",
@@ -231,8 +234,8 @@
                         "threadsPerAttacker": 1,
                         "Active": 0,
                         "usePing": 0,
-                        "Start": 120,
-                        "End": 240,
+                        "Start": 10,
+                        "End": 25,
                         "TimeOn": 15.0,
                         "TimeOff": 0.0,
                         "PacketSize": 1500,
@@ -248,47 +251,47 @@
     ],
     "MIM": [
 	{
-            "NumberAttackers": 3,
-	    "listMIM": "0,1,2"
+            "NumberAttackers": 1,
+	    "listMIM": "0"
 	},
         {
             "name": "MIM1",
-	    "attack_val": "-50000",
-	    "real_val": "0",
-	    "node_id": "trip_shad_inv1",
-	    "point_id": "Qref",
+	    "attack_val": "9000,50000,TRIP",
+	    "real_val": "450000,20000,CLOSE",
+	    "node_id": "trip_shad_inv1,load_41,microgrid_switch4",
+	    "point_id": "Pref,constant_power_C.real,status",
 	    "scenario_id": "a",
-	    "attack_type": 4,
-	    "Start": 50,
-	    "End": 100,
-	    "PointStart": "50",
-	    "PointStop": "100"
+	    "attack_type": "4,4,3",
+	    "Start": 1.0,
+	    "End": 20.0,
+	    "PointStart": "1.0,5.0,10.0",
+	    "PointStop": "9.0,20.0,15.0"
         },
 	{
             "name": "MIM2",
-	    "attack_val": "TRIP",
-	    "real_val": "CLOSE",
-	    "node_id": "microgrid_switch4",
-	    "point_id": "status",
-	    "scenario_id": "b",
-	    "attack_type": 3,
-	    "Start": 50,
-	    "End": 100,
-	    "PointStart": "50",
-	    "PointStop": "100"
+	    "attack_val": "40000",
+	    "real_val": "84000",
+	    "node_id": "trip_shad_inv3",
+	    "point_id": "Pref",
+	    "scenario_id": "a",
+	    "attack_type": "4",
+	    "Start": 1,
+	    "End": 20,
+	    "PointStart": "1",
+	    "PointStop": "20"
 	},
 	{
-            "name": "MIM3",
-	    "attack_val": "TRIP,TRIP",
-	    "real_val": "CLOSE,CLOSE",
-	    "node_id": "microgrid_switch2,microgrid_switch3",
-	    "point_id": "status,status",
-	    "scenario_id": "b",
-	    "attack_type": 3,
-	    "Start": 50,
-	    "End": 100,
-	    "PointStart": "50,50",
-	    "PointStop": "100,100"
+	    "name": "MIM3",
+            "attack_val": "50000",
+            "real_val": "20000",
+            "node_id": "load_73",
+            "point_id": "constant_power_C.real",
+            "scenario_id": "a",
+            "attack_type": "4",
+            "Start": 1,
+            "End": 20,
+            "PointStart": "1",
+            "PointStop": "20"
 	},
 	{
             "name": "MIM4",
@@ -297,7 +300,7 @@
 	    "node_id": "microgrid_switch1",
 	    "point_id": "status",
 	    "scenario_id": "b",
-	    "attack_type": 3,
+	    "attack_type": "3",
 	    "Start": 120,
 	    "End": 180,
 	    "PointStart": "120",

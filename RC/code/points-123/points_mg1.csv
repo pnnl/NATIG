@@ -58,6 +58,8 @@ ANALOG,load_41$voltage_B.real,0
 ANALOG,load_41$voltage_B.imag,0
 ANALOG,load_41$voltage_C.real,0
 ANALOG,load_41$voltage_C.imag,0
+ANALOG,load_41$constant_power_C.real,0
+ANALOG,load_41$constant_power_C.imag,0
 ANALOG,load_42$voltage_A.real,0
 ANALOG,load_42$voltage_A.imag,0
 ANALOG,load_42$voltage_B.real,0
@@ -112,15 +114,15 @@ ANALOG,load_51$voltage_B.real,0
 ANALOG,load_51$voltage_B.imag,0
 ANALOG,load_51$voltage_C.real,0
 ANALOG,load_51$voltage_C.imag,0
+ANALOG,trip_shad_inv1$Pref,0
+ANALOG,trip_shad_inv1$Qref,0
+ANALOG,trip_shad_inv4$Pref,0
 ANALOG,microgrid_switch4$current_in_A.real,0
 ANALOG,microgrid_switch4$current_in_A.imag,0
 ANALOG,microgrid_switch4$current_in_B.real,0
 ANALOG,microgrid_switch4$current_in_B.imag,0
 ANALOG,microgrid_switch4$current_in_C.real,0
 ANALOG,microgrid_switch4$current_in_C.imag,0
-ANALOG,trip_shad_inv1$Pref,0
-ANALOG,trip_shad_inv1$Qref,0
-ANALOG,trip_shad_inv4$Pref,0
 BINARY,microgrid_switch4$phase_A_state,0
 BINARY,microgrid_switch4$phase_B_state,0
 BINARY,microgrid_switch4$phase_C_state,0
