@@ -51,9 +51,7 @@ def save_graph(graph,file_name):
     del fig
 
 """
-Example command to use this script: python3 get_config.py -f ieee8500.glm -nm 11 -na 2 -aID "6,9"
-Example2 command: python3 get_config.py -f IEEE-3000-glm/ieee3000.glm -nm 310 -na 1 -aID "6"
-Example3 command with division: python3 get_config.py -f IEEE-3000-glm/ieee3000.glm -nm 310 -na 1 -aID "6" -div "swt_g9343_48332_sw,swt_ln4651075_sw,swt_ln4641075_sw,swt_ln0956471_sw,swt_ln4625713_sw,swt_ln0863704_sw,swt_ln0895780_sw,swt_ln0742811_sw,swt_ln0621886_sw,swt_tsw30473047_sw,swt_ln0108145_sw" -r "swt_hvmv69s3b2_sw"
+How to use with the 3000 model: python3 get_config.py -f 3000-model-glm/3000_model.glm -nm 310 -na 1 -aID "6" -div "swt_g9343_48332_sw,swt_ln4651075_sw,swt_ln4641075_sw,swt_ln0956471_sw,swt_ln4625713_sw,swt_ln0863704_sw,swt_ln0895780_sw,swt_ln0742811_sw,swt_ln0621886_sw,swt_tsw30473047_sw,swt_ln0108145_sw" -r "swt_hvmv69s3b2_sw"
 """
 
 parser = ArgumentParser()
