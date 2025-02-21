@@ -642,7 +642,7 @@ main (int argc, char *argv[])
    float start = std::stof(configObject["Simulation"][0]["StartTime"].asString());
    includeMIM = std::stoi(configObject["Simulation"][0]["includeMIM"].asString());
    numBots = std::stoi(configObject["DDoS"][0]["NumberOfBots"].asString());
-
+   int numThreads = std::stoi(configObject["DDoS"][0]["threadsPerAttacker"].asString());
  /* Dnp3SimulatorImpl *hb=new Dnp3SimulatorImpl();
   Ptr<Dnp3SimulatorImpl> hb2(hb);
   hb->Unref();
@@ -1154,7 +1154,6 @@ main (int argc, char *argv[])
     int UDP_SINK_PORT = mimPort[2]-10;
     int MAX_BULK_BYTES = std::stof(configObject["DDoS"][0]["PacketSize"].asString()); //20971520000;
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
-    int numThreads = std::stoi(configObject["DDoS"][0]["threadsPerAttacker"].asString());
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
 
     if (DDoS){
