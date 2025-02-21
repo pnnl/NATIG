@@ -662,6 +662,14 @@ main (int argc, char *argv[])
   InternetStackHelperMIM internetMIM;
   internet.Install (remoteHostContainer);
 
+
+  PointToPointHelper p2ph2;
+  std::string rate = configObject["DDoS"][0]["Rate"].asString();
+  p2ph2.SetDeviceAttribute ("DataRate", DataRateValue (DataRate (rate)));
+  //p2ph2.SetDeviceAttribute ("DataRate", DataRateValue (DataRate (topologyConfigObject["Channel"][0]["P2PRate"].asString())));
+  p2ph2.SetDeviceAttribute ("Mtu", UintegerValue (std::stoi(configObject["DDoS"][0]["PacketSize"].asString())));
+  p2ph2.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (std::stoi(topologyConfigObject["Channel"][0]["delay"].asString()))));
+
   // Create the Internet
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
