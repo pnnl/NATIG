@@ -847,13 +847,9 @@ main (int argc, char *argv[])
 
   if (mon) {
       if (DDoS){
-          p2p.EnablePcapAll (pcapFileDir+"p2p-DDoS", false);
-          csma2.EnablePcapAll (pcapFileDir+"csma-DDoS", false);
-          phy.EnablePcapAll (pcapFileDir+"wifi-DDoS", false);
+          p2ph.EnablePcapAll (pcapFileDir+"p2p-DDoS", false);
       }else{
-          p2p.EnablePcapAll (pcapFileDir+"p2p", false);
-          csma2.EnablePcapAll (pcapFileDir+"csma", false);
-          phy.EnablePcapAll (pcapFileDir+"wifi", false);
+          p2ph.EnablePcapAll (pcapFileDir+"p2p", false);
       }
   }
 
