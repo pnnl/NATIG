@@ -74,6 +74,19 @@ Time baseDate("1509418800s");
 
 Ptr<FlowMonitor> flowMonitor;
 FlowMonitorHelper flowHelper;
+std::map<FlowId, double> tp_transmitted;
+std::map<int, int> previous;
+std::map<int, std::map<int, std::vector<int>>> route_perf;
+//std::map<int, std::vector<int>> reward;
+std::map<int, map<int,std::vector<int>>> reward;
+std::map<int, std::string> monitor;
+std::map<int, int> interface;
+std::map<int, float> epsilon;
+float epsilon_min = 0.04; //0.01;
+float epsilon_decay = 0.99; //0.99;
+float alpha = 0.35; //0.35;
+float gamma_ = 0.8; //0.3; //0.04;
+int period_routing = 100; //1500;
 
 void readMicroGridConfig(std::string fpath, Json::Value& configobj)
 {
@@ -206,14 +219,19 @@ void StartEndSignal (std::string status){
 void Throughput (){
 	Ptr<Ipv4FlowClassifier> classifier=DynamicCast<Ipv4FlowClassifier>(flowHelper.GetClassifier());
 
-	std::stringstream netStatsOut;
-
-
+	//std::stringstream netStatsOut;
+        std::stringstream netStatsOut2;
+        std::string loc = std::getenv("RD2C");
+        std::string loc1 = loc + "/integration/control/TP-Prob.txt";
+        std::string loc2 = loc + "/integration/control/TP.txt";
 	string proto;
 	map< FlowId, FlowMonitor::FlowStats > stats = flowMonitor->GetFlowStats();
-	for (map< FlowId, FlowMonitor::FlowStats>::iterator
-			flow=stats.begin(); flow!=stats.end(); flow++)
-	{
+	std::vector <Ptr<FlowProbe>> xx = flowMonitor->GetAllProbes();
+	for (int i = 0; i < xx.size(); i ++){
+            map< FlowId, FlowProbe::FlowStats > probstats = xx[i]->GetStats();
+	    for (map< FlowId, FlowProbe::FlowStats>::iterator
+			flow=probstats.begin(); flow!=probstats.end(); flow++)
+	    {
 		Ipv4FlowClassifier::FiveTuple  t = classifier->FindFlow(flow->first);
 		switch(t.protocol)
 		{
@@ -227,20 +245,314 @@ void Throughput (){
 				exit(1);
 		}
 
-		netStatsOut << Simulator::Now ().GetSeconds () << " " <<  flow->first << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 << " " << flow->second.lostPackets << " " << flow->second.txBytes << " " << flow->second.rxBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
+		netStatsOut2 << Simulator::Now ().GetSeconds () << " " <<  flow->first << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << flow->second.bytes << " " << flow->second.packets << " " << flow->second.delayFromFirstProbeSum  << endl;
 
 
 		FILE * pFile;
-		pFile = fopen ("/rd2c/integration/control/TP.txt","a");
+		pFile = fopen (loc1.c_str(),"a");
 		if (pFile!=NULL)
 		{
-			fprintf(pFile, netStatsOut.str().c_str());
+			fprintf(pFile, netStatsOut2.str().c_str());
 			fclose (pFile);
 		}
 
+	    }
 	}
-	Simulator::Schedule (Seconds (.5), &Throughput); // Callback every 0.5s
+	int ID2 = 0;
+	for (map< FlowId, FlowMonitor::FlowStats>::iterator
+			flow=stats.begin(); flow!=stats.end(); flow++)
+	{
+		std::stringstream netStatsOut;
+		Ipv4FlowClassifier::FiveTuple  t = classifier->FindFlow(flow->first);
+		switch(t.protocol)
+		{
+			case(6):
+				proto = "TCP";
+				break;
+			case(17):
+				proto = "UDP";
+				break;
+			default:
+				exit(1);
+		}
+                if (tp_transmitted.find(flow->first) == tp_transmitted.end()) {
+                    tp_transmitted[flow->first] = 0;
+		}
+	        std::string delimiter = ".";
+                std::ostringstream ss;
+                ss << t.sourceAddress;//ipHeader.GetSource();
+                std::vector<std::string> ip;
+                std::string ip_ = ss.str();
+                size_t pos = 0;
+                while ((pos = ip_.find(delimiter)) != std::string::npos) {
+                   ip.push_back(ip_.substr(0, pos));
+                   ip_.erase(0, pos + delimiter.length());
+                }
 
+                std::stringstream ss1;
+                ss1 << ip[1];
+                int ID;
+                ss1 >> ID;
+                string temp = ss1.str(); //.substr(ss1.str().length() - 2);
+		/*if (ss1.str().length() > 2){
+                    temp = ss1.str().substr(ss1.str().length() - 2);
+                }*/
+		//std::string::size_type i2 = temp.find(".");
+                //std::string s = ".";
+                //if (i2 != std::string::npos){
+                //  temp.erase(i2, s.length());
+                //}
+                /*std::stringstream ss2;
+                ss2 << temp;
+                int ID2;
+                ss2 >> ID2;*/
+
+		//getting the equation for the reward that the user wants to use
+                std::vector<std::string> features;
+                //timestamp
+                std::stringstream timestamp;
+                timestamp << Simulator::Now ().GetSeconds ();
+                features.push_back(timestamp.str());
+		//Port
+		std::stringstream port;
+		port << t.sourcePort;
+		features.push_back(port.str());
+                //Path ID
+                std::stringstream pathID;
+                pathID << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") ";
+                features.push_back(pathID.str());
+                //Throughput
+                std::stringstream tp;
+                tp << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024;
+                features.push_back(tp.str());
+                //NS3 lost packet
+                std::stringstream lost;
+                lost << flow->second.lostPackets;
+                features.push_back(lost.str());
+                //received bytes
+                std::stringstream RXbytes;
+                RXbytes << (double)flow->second.rxBytes;
+                features.push_back(RXbytes.str());
+                //transmitted bytes
+                std::stringstream TXbytes;
+                TXbytes << (double)flow->second.txBytes;
+                features.push_back(TXbytes.str());
+                //lost packet ratio
+                std::stringstream lostRatio;
+                lostRatio << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets;
+                features.push_back(lostRatio.str());
+                //delay per packet
+                std::stringstream PacketDelay;
+                PacketDelay << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets);
+                features.push_back(PacketDelay.str());
+                //received packets
+                std::stringstream RXpackets;
+                RXpackets << (double)flow->second.rxPackets;
+                features.push_back(RXpackets.str());
+                //transmitted packets
+                std::stringstream TXPackets;
+                TXPackets << (double)flow->second.txPackets;
+                features.push_back(TXPackets.str());
+                //jitter per packets
+                std::stringstream PacketJitter;
+                PacketJitter << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets));
+                features.push_back(PacketJitter.str());
+
+                if (ID > 0){
+                    std::cout << "I am HERE -------------------------- " << ss1.str() << std::endl;
+                    std::cout << "Choosing interface " << std::to_string(interface[ID2]) << "for" << std::to_string(ID) << std::endl;
+                    if (route_perf.find(ID2) == route_perf.end()){
+                          std::map<int, std::vector<int>> xxx;
+                          route_perf[ID2] = xxx;
+                    }
+		    double lost = (double)flow->second.lostPackets;
+		    route_perf[ID2][interface[ID2]].push_back(std::pow(2,(flow->second.rxPackets-lost)/(flow->second.delaySum.GetSeconds()+flow->second.jitterSum.GetSeconds())));
+		    //route_perf[ID2][interface[ID2]].push_back(std::pow(2,(1-((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets)*(((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024))); //std::pow(10,(((flow->second.rxPackets-lost)/flow->second.delaySum.GetSeconds()))));
+
+		}
+
+
+		if (((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 > 0 )
+		{
+			double rx = (double)flow->second.rxBytes;
+			if (ID == 0){
+	 		    netStatsOut << Simulator::Now ().GetSeconds () << " " <<  t.sourcePort << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 << " " << flow->second.lostPackets << " " <<  (double)flow->second.rxBytes << " " << flow->second.txBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
+                            monitor[t.sourcePort] = netStatsOut.str();
+			}else{
+			    netStatsOut << Simulator::Now ().GetSeconds () << " " <<  t.destinationPort << " (" << proto << " " << t.sourceAddress << " / " << t.sourcePort << " --> " << t.destinationAddress << " / " << t.destinationPort << ") " << ((double)flow->second.rxBytes*8)/((double)flow->second.timeLastRxPacket.GetSeconds()-(double)flow->second.timeFirstTxPacket.GetSeconds())/1024 << " " << flow->second.lostPackets << " " <<  (double)flow->second.rxBytes << " " << flow->second.txBytes << " " << ((double)flow->second.txPackets-(double)flow->second.rxPackets)/(double)flow->second.txPackets << " " << (flow->second.delaySum.GetSeconds()/flow->second.rxPackets) << " " << flow->second.txPackets << " " << flow->second.rxPackets << " " << (flow->second.jitterSum.GetSeconds()/(flow->second.rxPackets))  << endl;
+                            monitor[t.destinationPort] = netStatsOut.str();
+			}
+                        tp_transmitted[flow->first] = (double)flow->second.rxBytes;
+		}
+		ID2 = ID2 + 1;
+	}
+	FILE * pFile;
+	pFile = fopen (loc2.c_str(),"a");
+        map<int, std::string>::iterator it;
+        for (it = monitor.begin(); it != monitor.end(); it++)
+        {
+              fprintf(pFile, it->second.c_str());
+        }
+	fclose (pFile);
+	Simulator::Schedule (Seconds (.05), &Throughput); // Callback every 0.5s
+
+}
+
+void updateUETable(NodeContainer subNodes, NodeContainer ueNodes){
+    std::stringstream addrTrans;
+    for (int i = 0; i < subNodes.GetN(); i++){
+      int cc = 0;
+      for (int j = 0; j < ueNodes.GetN(); j++){
+        cc += 1;
+        addrTrans << subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal() << ": " << ueNodes.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal() << endl;
+    }
+  }
+
+  std::cout << "The translation table" << std::endl;
+  std::cout << addrTrans.str().c_str() << std::endl;
+
+  FILE * addFile;
+  std::string loc = std::getenv("RD2C");
+  std::string loc1 = loc + "/integration/control/add.txt";
+  std::cout << loc1 << std::endl;
+  addFile = fopen (loc1.c_str(),"w");
+
+  if (addFile!=NULL)
+  {
+          fprintf(addFile, addrTrans.str().c_str());
+          fclose (addFile);
+  }
+}
+
+void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, NodeContainer MIM, NodeContainer ueNodes, Ipv4Address gateway){
+
+    // This sets the paths from the MIM nodes and UE nodes to the CC
+    Ipv4StaticRoutingHelper ipv4RoutingHelper;
+    Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHostContainer.Get(0)->GetObject<Ipv4> ());
+  for (int i = 0; i < ueNodes.GetN(); i++){
+      remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1);
+      int cc = 0;
+      for (int j = 0; j < MIM.GetN(); j++){
+        cc += 1;
+        remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1, 0);
+      }
+  }
+
+  // This sets the path from the UE nodes to the subNode passing by the MIM nodes
+  // Gets the MIM node that corresponds to the subNodes node interface
+  for (int i = 0; i < ueNodes.GetN(); i++){
+    Ptr<Ipv4StaticRouting> ueNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes.Get(i)->GetObject<Ipv4>());
+    int cc = 0;
+    for (int j = 0; j < subNodes.GetN(); j++){
+      cc += 1;
+      Ptr<Ipv4> ipv4 = ueNodes.Get(i)->GetObject<Ipv4>();
+      ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), cc+1, 0);
+    }
+  }
+
+  // MIM to the subNodes and MIM to the CC nodes that is not the default paths which is set above
+  for (int i = 0; i < MIM.GetN(); i++){
+    Ipv4Address addr2_ = ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress (2, 0).GetLocal ();
+    Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
+    subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), addr2_, 1);
+    int cc = 0;
+    for (int j = 0; j < subNodes.GetN(); j++){
+        cc += 1;
+        int ind = i;
+        subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(ind)->GetObject<Ipv4>());
+        subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask ("255.255.0.0"), cc, 0);
+    }
+  }
+
+  //SubNodes to CC
+  for (int i = 0; i < subNodes.GetN(); i++){
+    int cc = 0;
+    Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
+    for (int j = 0; j < MIM.GetN(); j++){
+        cc += 1;
+        Ptr<Ipv4> ipv4_2 = MIM.Get(j)->GetObject<Ipv4>();
+        Ptr<Ipv4> ipv4 = subNodes.Get(j)->GetObject<Ipv4>();
+        int ind = i+1;
+        Ipv4Address addr5_ = ipv4_2->GetAddress(ind,0).GetLocal();
+        subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, cc, 0);
+    }
+  }
+}
+
+void changeRoute (std::vector<NodeContainer> nodes, Ipv4Address gateway, int index, std::string fileID) {
+          std::cout << "Getting the available interfaces" << std::endl;
+          Ipv4StaticRoutingHelper ipv4RoutingHelper;
+          //for (int index = 1; index < ueNodes.GetN()+1; index ++){
+          Ptr<Ipv4> ipv4_2 = nodes[1].Get(0)->GetObject<Ipv4>();
+          std::string delimiter = ".";
+          std::ostringstream ss;
+          ss << ipv4_2->GetAddress(1,0);//ipHeader.GetSource();
+          std::vector<std::string> ip;
+          std::string ip_ = ss.str();
+          size_t pos = 0;
+          while ((pos = ip_.find(delimiter)) != std::string::npos) {
+               ip.push_back(ip_.substr(0, pos));
+               ip_.erase(0, pos + delimiter.length());
+          }
+
+          std::stringstream ss1;
+          ss1 << ip[1];
+          int ID2;
+          ss1 >> ID2;
+          //string temp(ss1.str().back());
+          std::cout << "I am " << ip[1] << std::endl;
+          string temp = ss1.str(); //.substr(ss1.str().length() - 2);
+          if (ss1.str().length() > 2){
+                temp = ss1.str().substr(ss1.str().length() - 2);
+          }
+          int ID = 0;
+
+          int NewIndex = 1 + (rand() % int(nodes[1].GetN()));//random - (rand() % int(ueNodes.GetN()/2));
+          if (NewIndex > nodes[1].GetN()){
+              NewIndex =  1;
+          }
+
+
+          map<int, std::vector<int>>::iterator it;
+          map<int, map<int, std::vector<int>>>::iterator itx;
+          map<int, int> min;
+          map<int, int> max;
+          int nextNode_ind = NewIndex; //(rand() % int(ueNodes.GetN())-2);
+          int nextNode_TP = 10000000;
+          int count = 0;
+          struct stat buffer;
+
+          std::string line;
+          std::ifstream infile("/people/belo700/RD2C/RC/integration/control/AgentDecisions11.txt"); //fileID.c_str());
+          //std::fstream infile;
+          //infile.open(fileID.c_str(), ios::in);
+          //if (infile.is_open()) {
+          NewIndex = interface[ID];
+          while (std::getline(infile, line))
+          {
+               std::cout << "Please print something!!" << std::endl;
+               std::cout << line << std::endl;
+               std::string delimiter = ":";
+               size_t pos = 0;
+               pos = line.find(delimiter);
+               std::string token;
+               token = line.substr(0, pos);
+               line.erase(0, pos + delimiter.length());
+               int ID = std::stoi(token)-1;
+               int NewIndex = std::stoi(line)+1;
+               for (int x = 0; x < nodes[1].GetN() ; x++){
+                   nodes[1].Get(ID)->GetObject<Ipv4>()->SetUp(x+1);
+               }
+               std::cout << "LOOOOOOOOKKKKKEEEE BELOW!!!" << std::endl;
+               std::cout << NewIndex << std::endl;
+               std::cout << interface[ID] << std::endl;
+               if (NewIndex != interface[ID]){
+		       previous[ID] = interface[ID];
+                    nodes[1].Get(ID)->GetObject<Ipv4>()->SetDown(interface[ID]);
+                    interface[ID] = NewIndex;
+                }
+           }
+	  Simulator::Schedule(MilliSeconds(period_routing), changeRoute, nodes, gateway, nextNode_ind, fileID);
 }
 
 int
@@ -440,6 +752,20 @@ main (int argc, char *argv[])
 
   Ipv4InterfaceContainer inter;
   Ipv4InterfaceContainer inter_MIM;
+  for (int i = 0; i < csmaSubNodes.size(); i++){
+    NetDeviceContainer internetDevicesSub = csma.Install (csmaSubNodes[i]);
+
+    Ipv4AddressHelper ipv4Sub;
+    std::string address = "172."+std::to_string(i+17)+".0.0";
+    ipv4Sub.SetBase (address.c_str(), "255.255.0.0", "0.0.0.1");
+    Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign (internetDevicesSub);
+
+    inter.Add(interfacesSub.Get(2));
+    inter_MIM.Add(interfacesSub.Get(1));
+  }
+
+  /*Ipv4InterfaceContainer inter;
+  Ipv4InterfaceContainer inter_MIM;
   std::stringstream addrTrans;
   for (int i = 0; i < csmaSubNodes.size(); i++){
     NetDeviceContainer internetDevicesSub = csma.Install (csmaSubNodes[i]);
@@ -463,7 +789,9 @@ main (int argc, char *argv[])
   {
 	  fprintf(addFile, addrTrans.str().c_str());
 	  fclose (addFile);
-  }
+  }*/
+
+  updateUETable(subNodes, ueNodes);
 
   Ipv4Address gateway = epcHelper->GetUeDefaultGatewayAddress ();
   NodeContainer ncP2P_nodes;
@@ -481,13 +809,13 @@ main (int argc, char *argv[])
   //Ptr<Ipv4> ipv4 = ueNodeZero->GetObject<Ipv4> (); 
 
 
-  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  //Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   /*for (int i = 0; i < ueNodes.GetN(); i++){
       for (int x = 0; x < subNodes.GetN()/ueNodes.GetN(); x++){
           remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(2+x,0).GetLocal(), Ipv4Mask ("255.0.0.0"),gateway, 1);
       }
   }*/
-  for (int i = 0; i < subNodes.GetN(); i ++){
+  /*for (int i = 0; i < subNodes.GetN(); i ++){
     remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), ueNodes.Get(i%ueNodes.GetN())->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(),1); //gateway, 1);
   }
 
@@ -510,7 +838,7 @@ main (int argc, char *argv[])
     for (int j = 0; j < remoteHostContainer.GetN(); j++){
         subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, 1);
     }
-  }
+  }*/
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
 
@@ -549,7 +877,7 @@ main (int argc, char *argv[])
 	  
   }
 
-   NetDeviceContainer botDeviceContainer[numBots];
+  /*NetDeviceContainer botDeviceContainer[numBots];
   for (int i = 0; i < numBots; ++i)
   {
 	  botDeviceContainer[i] = p2ph.Install(botNodes.Get(i), remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
@@ -563,8 +891,32 @@ main (int argc, char *argv[])
   {
 	  ipv4_n.Assign(botDeviceContainer[j]);
 	  ipv4_n.NewNetwork();
+  }*/
+  NetDeviceContainer botDeviceContainer[numBots];
+  for (int i = 0; i < numBots; ++i)
+  {
+	  if (configObject["DDoS"][0]["NodeType"][0].asString().find("CC") != std::string::npos){
+              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), remoteHostContainer.Get(0));
+	  }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("UE") != std::string::npos){
+              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), ueNodes.Get(int(((i%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString())))%ueNodes.GetN()));
+	  }else if (configObject["DDoS"][0]["NodeType"][0].asString().find("subNode") != std::string::npos){
+              botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), subNodes.Get(int(((i%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString())))%subNodes.GetN()));
+          }else{
+	      botDeviceContainer[i] = p2ph2.Install(botNodes.Get(i), MIM.Get(int(((i%numThreads)+std::stoi(configObject["DDoS"][0]["NodeID"][0].asString()))%MIM.GetN()))); //remoteHostContainer.Get(0));//We are currently attacking the remoteHost but I will need to change that in the future to be dynamic
+	  }
   }
 
+  internet.Install(botNodes);
+  Ipv4AddressHelper ipv4_n;
+  ipv4_n.SetBase("30.0.0.0", "255.255.255.252");
+
+  for (int j = 0; j < numBots; ++j)
+  {
+	  ipv4_n.Assign(botDeviceContainer[j]);
+	  ipv4_n.NewNetwork();
+  }
+
+  setRoutingTable(remoteHostContainer, subNodes, MIM, ueNodes, gateway);
   //Ptr<Ipv4> ip2 = MIM.Get(1)->GetObject<Ipv4>();
   //ip2->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = remoteHostAddr;
   //ip->GetObject<Ipv4L3ProtocolMIM> ()->sourceAddr = Ipv4Address("7.0.0.2");
@@ -572,7 +924,7 @@ main (int argc, char *argv[])
   uint16_t master_port = 40000;
   ApplicationContainer dnpOutstationApp, dnpMasterApp;
   std::vector<uint16_t> mimPort;
-
+  /*
   for (i = 0;i < configObject["microgrid"].size();i++)
       {
             mimPort.push_back(master_port);
@@ -620,7 +972,89 @@ main (int argc, char *argv[])
 	     master_port += 1;
 	     
       }
-  
+  */
+  for (i = 0;i < configObject["microgrid"].size();i++)
+      {
+	    //if (systemId == i){
+	    std::string delimiter = ".";
+            std::ostringstream ss;
+            ss << subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal();//ipHeader.GetSource();
+            std::vector<std::string> ip;
+            std::string ip_ = ss.str();
+            size_t pos = 0;
+            while ((pos = ip_.find(delimiter)) != std::string::npos) {
+               ip.push_back(ip_.substr(0, pos));
+               ip_.erase(0, pos + delimiter.length());
+            }
+
+            std::stringstream ss1;
+            ss1 << ip[1];
+            //int IDx;
+            //ss1 >> IDx;
+            std::cout << "I am " << ip[1] << std::endl;
+	    string temp = ss1.str();
+	    /*if (ss1.str().length() > 2){
+                temp = ss1.str().substr(ss1.str().length() - 2);
+	    }*/
+	    /*std::string::size_type i2 = temp.find(".");
+            std::string s = ".";
+            if (i2 != std::string::npos){
+              temp.erase(i2, s.length());
+            }*/
+            std::stringstream ss2;
+            ss2 << temp;
+            int ID2;
+            ss2 >> ID2;
+            interface[i] = i+1;
+
+            mimPort.push_back(master_port);
+            auto ep_name = configObject["microgrid"][i]["name"].asString();
+	    std::string IDx = "SS_";
+            if (std::string(ep_name).find(IDx) != std::string::npos){
+                ep_name = "SS_"+std::to_string(i+1);
+            }
+            std::cout << "Microgrid network node: " << ep_name << " " << subNodes.GetN() << " " << configObject["microgrid"][i].size() << " " << i << std::endl;
+             Ptr<Node> tempnode1 = subNodes.Get(i);
+	     auto cc_name = configObject["controlCenter"]["name"].asString();
+	     std::cout << "Control Center network node: " << cc_name << std::endl;
+
+	     int ID = i+1;
+	     Dnp3ApplicationHelperNew dnp3Master ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, master_port));  //star.GetHubIpv4Address(i), master_port));
+
+	     dnp3Master.SetAttribute("LocalPort", UintegerValue(master_port));
+	     dnp3Master.SetAttribute("RemoteAddress", AddressValue(tempnode1->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal()));//star.GetSpokeIpv4Address (i)));
+	     dnp3Master.SetAttribute("RemotePort", UintegerValue(port));
+	     dnp3Master.SetAttribute("JitterMinNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMin"].asString())));
+	     dnp3Master.SetAttribute("JitterMaxNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMax"].asString())));
+	     dnp3Master.SetAttribute("isMaster", BooleanValue (true));
+	     dnp3Master.SetAttribute("Name", StringValue (cc_name+ep_name));
+	     dnp3Master.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
+	     dnp3Master.SetAttribute("MasterDeviceAddress", UintegerValue(1));
+	     dnp3Master.SetAttribute("StationDeviceAddress", UintegerValue(i+2));
+	     dnp3Master.SetAttribute("IntegrityPollInterval", UintegerValue(10));
+	     dnp3Master.SetAttribute("EnableTCP", BooleanValue (false));
+
+	     Ptr<Dnp3ApplicationNew> master = dnp3Master.Install (remoteHost, std::string(cc_name+ep_name));
+	     dnpMasterApp.Add(master);
+	     Dnp3ApplicationHelperNew dnp3Outstation ("ns3::UdpSocketFactory", InetSocketAddress (tempnode1->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal(), port)); //star.GetSpokeIpv4Address (i), port));
+	     dnp3Outstation.SetAttribute("LocalPort", UintegerValue(port));
+	     dnp3Outstation.SetAttribute("RemoteAddress", AddressValue(remoteHostAddr)); //star.GetHubIpv4Address(i)));
+	     dnp3Outstation.SetAttribute("RemotePort", UintegerValue(master_port));
+	     dnp3Outstation.SetAttribute("isMaster", BooleanValue (false));
+	     dnp3Outstation.SetAttribute("Name", StringValue (ep_name));
+	     dnp3Outstation.SetAttribute("PointsFilename", StringValue (pointFileDir+"/points_"+ep_name+".csv"));
+	     dnp3Outstation.SetAttribute("MasterDeviceAddress", UintegerValue(1));
+	     dnp3Outstation.SetAttribute("StationDeviceAddress", UintegerValue(i+2));
+	     dnp3Outstation.SetAttribute("EnableTCP", BooleanValue (false));
+
+	     Ptr<Dnp3ApplicationNew> slave = dnp3Outstation.Install (tempnode1, std::string(ep_name));
+	     dnpOutstationApp.Add(slave);
+	     Simulator::Schedule(MilliSeconds(1005), &Dnp3ApplicationNew::periodic_poll, master, std::stoi(configObject["Simulation"][0]["PollReqFreq"].asString()));
+	     //Simulator::Schedule(MilliSeconds(3005), &Dnp3ApplicationNew::send_control_analog, master,
+             //			           Dnp3ApplicationNew::DIRECT, 0, -16);
+	     master_port += 1;
+	    //}
+      }
   fedName = helics_federate->getName();
   std::cout << "Federate name: " << helics_federate->getName().c_str() << std::endl;
   int ep_count = helics_federate->getEndpointCount();
