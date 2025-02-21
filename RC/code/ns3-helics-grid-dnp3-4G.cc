@@ -816,7 +816,7 @@ main (int argc, char *argv[])
     }
     std::cout << "Done Setting up the bots " << std::endl;
 
-    AsciiTraceHelper ascii;
+    /*AsciiTraceHelper ascii;
     p2ph.EnableAsciiAll (ascii.CreateFileStream ("edge_performance.tr"));
     Simulator::Schedule (Seconds (0.2), &trTocsv);
     //csma.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_csma.tr"));
@@ -837,7 +837,25 @@ main (int argc, char *argv[])
     }
 
   lteHelper->EnableTraces ();
-  enablePcapAllBaseTime("radics-exercise2-utility1-1day", remoteHostContainer, ncP2P_nodes);
+  enablePcapAllBaseTime("radics-exercise2-utility1-1day", remoteHostContainer, ncP2P_nodes);*/
+  flowMonitor = flowHelper.InstallAll(); //flowHelper.Install(endpointNodes);
+  flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.5));
+  flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.5));
+  flowMonitor->SetAttribute("PacketSizeBinWidth", DoubleValue(50));
+  int mon = std::stoi(configObject["Simulation"][0]["MonitorPerf"].asString());
+  Simulator::Schedule (Seconds (0.2), &Throughput);
+
+  if (mon) {
+      if (DDoS){
+          p2p.EnablePcapAll (pcapFileDir+"p2p-DDoS", false);
+          csma2.EnablePcapAll (pcapFileDir+"csma-DDoS", false);
+          phy.EnablePcapAll (pcapFileDir+"wifi-DDoS", false);
+      }else{
+          p2p.EnablePcapAll (pcapFileDir+"p2p", false);
+          csma2.EnablePcapAll (pcapFileDir+"csma", false);
+          phy.EnablePcapAll (pcapFileDir+"wifi", false);
+      }
+  }
 
   Simulator::Stop (simTime);
   Simulator::Run ();
