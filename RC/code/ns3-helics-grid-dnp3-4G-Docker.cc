@@ -750,8 +750,10 @@ main (int argc, char *argv[])
   std::vector<NodeContainer> csmaSubNodes;
   for (int i = 0; i < subNodes.GetN(); i++){
     std::cout << "Creating the csma nodes" << std::endl;
-    NodeContainer csmaSubNodes_temp (ueNodes.Get(i%ueNodes.GetN()), MIM.Get(i), subNodes.Get(i));
-    csmaSubNodes.push_back(csmaSubNodes_temp);
+    for (int j = 0; j < ueNodes.GetN(); j++){
+       NodeContainer csmaSubNodes_temp (ueNodes.Get(i%ueNodes.GetN()), MIM.Get(i), subNodes.Get(j));
+       csmaSubNodes.push_back(csmaSubNodes_temp);
+    }
   }
 
   CsmaHelper csma;
