@@ -458,6 +458,7 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
   for (int i = 0; i < MIM.GetN(); i++){
     Ipv4Address addr2_ = ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress (2, 0).GetLocal ();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
+    subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), addr2_, 1);
     for (int j = 1; j < MIM.Get(i)->GetNDevices(); j++){
          int cc = 1;
          Ptr< NetDevice > level1 = MIM.Get(i)->GetDevice(j);
@@ -469,7 +470,7 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
   }
 
   //SubNodes to CC
-  for (int i = 0; i < subNodes.GetN(); i++){
+  /*for (int i = 0; i < subNodes.GetN(); i++){
     int cc = 0;
     Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
     for (int j = 1; j < subNodes.Get(i)->GetNDevices(); j++){
@@ -479,6 +480,16 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
               Ptr< NetDevice > level2 = level1->GetNode()->GetDevice(j);
               subNodeStaticRouting3->AddNetworkRouteTo(level2->GetNode()->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask("255.255.0.0"), level1->GetNode()->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), 1, 0);
          }
+    }
+  }*/
+   for (int i = 0; i < subNodes.GetN(); i++){
+    int cc = 0;
+    Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
+    for (int j = 0; j < MIM.GetN(); j++){
+        cc += 1;
+        Ptr<Ipv4> ipv4_2 = MIM.Get(j)->GetObject<Ipv4>();
+        Ipv4Address addr5_ = ipv4_2->GetAddress(i+1,0).GetLocal();
+        subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, cc, 0);
     }
   }
 }
