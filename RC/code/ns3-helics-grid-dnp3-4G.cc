@@ -401,10 +401,8 @@ void Throughput (){
 void updateUETable(NodeContainer subNodes, NodeContainer ueNodes){
     std::stringstream addrTrans;
     for (int i = 0; i < subNodes.GetN(); i++){
-      int cc = 0;
-      for (int j = 0; j < ueNodes.GetN(); j++){
-        cc += 1;
-        addrTrans << subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal() << ": " << ueNodes.Get(j)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal() << endl;
+      for (int j = 1; j < subNodes.Get(i)->GetNDevices(); j++){
+        addrTrans << subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(j,0).GetLocal() << ": " << ueNodes.Get(j-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal() << endl;
     }
   }
 
@@ -430,13 +428,14 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
     Ipv4StaticRoutingHelper ipv4RoutingHelper;
     Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHostContainer.Get(0)->GetObject<Ipv4> ());
   for (int i = 0; i < ueNodes.GetN(); i++){
-      remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1);
-      int cc = 0;
-      for (int j = 0; j < subNodes.GetN(); j++){
-        cc += 1;
-        remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1, 0);
-      }
+      remoteHostStaticRouting->AddNetworkRouteTo (ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1);
   }
+  for (int j = 0; j < subNodes.GetN(); j++){
+    for (int x = 1; x < subNodes.Get(j)->GetNDevices(); x++){
+        remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(x,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1, 0);
+    }
+  }
+  
 
   // This sets the path from the UE nodes to the subNode passing by the MIM nodes
   // Gets the MIM node that corresponds to the subNodes node interface
