@@ -87,6 +87,8 @@ float epsilon_decay = 0.99; //0.99;
 float alpha = 0.35; //0.35;
 float gamma_ = 0.8; //0.3; //0.04;
 int period_routing = 100; //1500;
+std::vector<NodeContainer> csmaSubNodes;
+
 
 void readMicroGridConfig(std::string fpath, Json::Value& configobj)
 {
@@ -439,7 +441,7 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
 
   // This sets the path from the UE nodes to the subNode passing by the MIM nodes
   // Gets the MIM node that corresponds to the subNodes node interface
-  for (int i = 0; i < ueNodes.GetN(); i++){
+  /*for (int i = 0; i < ueNodes.GetN(); i++){
     Ptr<Ipv4StaticRouting> ueNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes.Get(i)->GetObject<Ipv4>());
     int cc = 0;
     Ptr<Ipv4> ipv4 = ueNodes.Get(i)->GetObject<Ipv4>();
@@ -449,23 +451,21 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
          Ptr< NetDevice > level1 = ueNodes.Get(i)->GetDevice(j);
 	 for (int x = 1; x < level1->GetNode()->GetNDevices(); x++){
               Ptr< NetDevice > level2 = level1->GetNode()->GetDevice(j);
-              ueNodeStaticRouting->AddNetworkRouteTo(level2->GetNode()->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask("255.255.0.0"), level1->GetNode()->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), 1, 0);
+              ueNodeStaticRouting->AddNetworkRouteTo(level2->GetNode()->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask("255.255.0.0"), level1->GetNode()->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), j, 0);
 	 }
     }
-  }
+  }*/
 
   // MIM to the subNodes and MIM to the CC nodes that is not the default paths which is set above
   for (int i = 0; i < MIM.GetN(); i++){
     Ipv4Address addr2_ = ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress (2, 0).GetLocal ();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
     subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), addr2_, 1);
-    for (int j = 1; j < MIM.Get(i)->GetNDevices(); j++){
-         int cc = 1;
-         Ptr< NetDevice > level1 = MIM.Get(i)->GetDevice(j);
-         for (int x = 1; x < level1->GetNode()->GetNDevices(); x++){
-              Ptr< NetDevice > level2 = level1->GetNode()->GetDevice(j);
-              subNodeStaticRouting->AddNetworkRouteTo(level2->GetNode()->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask("255.255.0.0"), level1->GetNode()->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), 1, 0);
-         }
+    int cc = 0;
+    for (int j = 0; j < subNodes.GetN()%(MIM.Get(i)->GetNDevices()-1); j++){
+        cc += 1;
+        subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
+        subNodeStaticRouting->AddNetworkRouteTo (subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask ("255.255.0.0"), 1, 0);
     }
   }
 
@@ -482,13 +482,32 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
          }
     }
   }*/
+
+  /*std::map<Ipv4Address, int> cc_map;
+  std::map<Ipv4Address, int> index_map;
+  for (int i = 0; i < csmaSubNodes.size(); i++){
+      Ipv4Address ffadd = csmaSubNodes[i].Get(2)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
+      if (index_map.find(ffadd) == index_map.end()) {
+              index_map[ffadd] = 1;
+      }else{
+              index_map[ffadd] += 1;
+      }
+      Ipv4Address addr5_ = csmaSubNodes[i].Get(1)->GetObject<Ipv4>()->GetAddress(index_map[ffadd],0).GetLocal();
+      if (cc_map.find(addr5_) == cc_map.end()) {
+	      cc_map[addr5_] = 1;
+      }else{
+	      cc_map[addr5_] += 1;
+      }
+      Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (csmaSubNodes[i].Get(2)->GetObject<Ipv4>());
+      subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, cc_map[addr5_], 0);
+  }*/
    for (int i = 0; i < subNodes.GetN(); i++){
     int cc = 0;
     Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
-    for (int j = 0; j < MIM.GetN(); j++){
+    for (int j = 0; j < MIM.GetN()%(subNodes.Get(i)->GetNDevices()); j++){
         cc += 1;
-        Ptr<Ipv4> ipv4_2 = MIM.Get(j)->GetObject<Ipv4>();
-        Ipv4Address addr5_ = ipv4_2->GetAddress(i+1,0).GetLocal();
+        //Ptr<Ipv4> ipv4_2 = MIM.Get(j)->GetObject<Ipv4>();
+        Ipv4Address addr5_ = MIM.Get(j)->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal();
         subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, cc, 0);
     }
   }
@@ -763,7 +782,6 @@ main (int argc, char *argv[])
     internet.Install (MIM);
   }
 
-  std::vector<NodeContainer> csmaSubNodes;
   for (int i = 0; i < subNodes.GetN(); i++){
     std::cout << "Creating the csma nodes" << std::endl;
     for (int j = 0; j < ueNodes.GetN(); j++){
@@ -773,8 +791,10 @@ main (int argc, char *argv[])
   }
 
   CsmaHelper csma;
-  csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  csma.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
+  csma.SetChannelAttribute ("DataRate", StringValue (topologyConfigObject["Channel"][0]["P2PRate"].asString()));
+	  //SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
+  csma.SetChannelAttribute("Delay", TimeValue (NanoSeconds (std::stoi(topologyConfigObject["Channel"][0]["CSMAdelay"].asString()))));
+  //csma.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
 
   Ipv4InterfaceContainer inter;
   Ipv4InterfaceContainer inter_MIM;
@@ -1004,7 +1024,8 @@ main (int argc, char *argv[])
 	    //if (systemId == i){
 	    std::string delimiter = ".";
             std::ostringstream ss;
-            ss << subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal();//ipHeader.GetSource();
+	    int ID = i+1;
+            ss << subNodes.Get(i)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal();//ipHeader.GetSource();
             std::vector<std::string> ip;
             std::string ip_ = ss.str();
             size_t pos = 0;
@@ -1031,7 +1052,7 @@ main (int argc, char *argv[])
             ss2 << temp;
             int ID2;
             ss2 >> ID2;
-            interface[i] = i+1;
+            interface[i] = ID;
 
             mimPort.push_back(master_port);
             auto ep_name = configObject["microgrid"][i]["name"].asString();
@@ -1044,11 +1065,10 @@ main (int argc, char *argv[])
 	     auto cc_name = configObject["controlCenter"]["name"].asString();
 	     std::cout << "Control Center network node: " << cc_name << std::endl;
 
-	     int ID = i+1;
 	     Dnp3ApplicationHelperNew dnp3Master ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, master_port));  //star.GetHubIpv4Address(i), master_port));
 
 	     dnp3Master.SetAttribute("LocalPort", UintegerValue(master_port));
-	     dnp3Master.SetAttribute("RemoteAddress", AddressValue(tempnode1->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal()));//star.GetSpokeIpv4Address (i)));
+	     dnp3Master.SetAttribute("RemoteAddress", AddressValue(tempnode1->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal()));//star.GetSpokeIpv4Address (i)));
 	     dnp3Master.SetAttribute("RemotePort", UintegerValue(port));
 	     dnp3Master.SetAttribute("JitterMinNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMin"].asString())));
 	     dnp3Master.SetAttribute("JitterMaxNs", DoubleValue (std::stoi(topologyConfigObject["Channel"][0]["jitterMax"].asString())));
@@ -1062,7 +1082,7 @@ main (int argc, char *argv[])
 
 	     Ptr<Dnp3ApplicationNew> master = dnp3Master.Install (remoteHost, std::string(cc_name+ep_name));
 	     dnpMasterApp.Add(master);
-	     Dnp3ApplicationHelperNew dnp3Outstation ("ns3::UdpSocketFactory", InetSocketAddress (tempnode1->GetObject<Ipv4>()->GetAddress(i+1,0).GetLocal(), port)); //star.GetSpokeIpv4Address (i), port));
+	     Dnp3ApplicationHelperNew dnp3Outstation ("ns3::UdpSocketFactory", InetSocketAddress (tempnode1->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal(), port)); //star.GetSpokeIpv4Address (i), port));
 	     dnp3Outstation.SetAttribute("LocalPort", UintegerValue(port));
 	     dnp3Outstation.SetAttribute("RemoteAddress", AddressValue(remoteHostAddr)); //star.GetHubIpv4Address(i)));
 	     dnp3Outstation.SetAttribute("RemotePort", UintegerValue(master_port));
