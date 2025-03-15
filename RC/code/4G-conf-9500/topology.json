@@ -18,7 +18,7 @@
                 {
                         "MinX": 0,
                         "MinY": 0,
-                        "DeltaX": 20,
+                        "DeltaX": 30,
                         "DeltaY": 20,
                         "GridWidth": 11,
 			"distance": 11,
@@ -314,6 +314,166 @@
                         "x": 12,
                         "y": 100,
                         "error": "0.001"
+                }
+        ],
+	"ConnectionMIMToUE":[
+                {
+                        "name": 0,
+                        "connections":[
+			        0,
+                                1,
+                                10	
+                        ]
+                },
+                {
+                        "name": 1,
+                        "connections":[
+			        0,
+                                1,
+                                2
+                        ]
+                },
+                {
+                        "name": 2,
+                        "connections":[
+                                1,
+                                2,
+                                3
+                        ]
+                },
+                {
+                        "name": 3,
+                        "connections":[
+                                2,
+                                3,
+                                4
+                        ]
+                },
+                {
+                        "name": 4,
+                        "connections":[
+                                3,
+                                4,
+                                5
+                        ]
+                },
+                {
+                        "name": 5,
+                        "connections":[
+                                4,
+                                5,
+                                6
+                        ]
+                },
+                {
+                        "name": 6,
+                        "connections":[
+                                5,
+                                6,
+                                7
+                        ]
+                },
+                {
+                        "name": 7,
+                        "connections":[
+                                6,
+                                7,
+                                8
+                        ]
+                },
+                {
+                        "name": 8,
+                        "connections":[
+                                7,
+                                8,
+                                9
+                        ]
+                },
+                {
+                        "name": 9,
+                        "connections":[
+                                8,
+                                9,
+                                10
+                        ]
+                },
+                {
+                        "name": 10,
+                        "connections":[
+                                0,
+				9,
+				10
+                        ]
+                }
+        ],
+        "ConnectionSubToMIM": [
+                {
+                        "name": 0,
+                        "connections":[
+                                0,
+				1
+                        ]
+                },
+                {
+                        "name": 1,
+                        "connections":[
+                                1,
+				2
+                        ]
+                },
+                {
+                        "name": 2,
+                        "connections":[
+                                2
+                        ]
+                },
+                {
+                        "name": 3,
+                        "connections":[
+                                3
+			]
+                },
+                {
+                        "name": 4,
+                        "connections":[
+                                4 
+                        ]
+                },
+                {
+                        "name": 5,
+                        "connections":[
+                                5
+                        ]
+                },
+                {
+                        "name": 6,
+                        "connections":[
+                                6
+			]
+                },
+                {
+                        "name": 7,
+                        "connections":[
+                                7
+                        ]
+                },
+                {
+                        "name": 8,
+                        "connections":[
+                                8 
+                        ]
+                },
+                {
+                        "name": 9,
+                        "connections":[
+                                9
+                        ]
+                },
+                {
+                        "name": 10,
+                        "connections":[
+                                10
+                        ]
                 }
         ]
 }

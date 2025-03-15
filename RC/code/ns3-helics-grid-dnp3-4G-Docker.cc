@@ -91,6 +91,7 @@ std::vector<NodeContainer> csmaSubNodes;
 std::map<Ptr<Node>, std::vector<NodeContainer>> subNodeConnections;
 std::map<Ptr<Node>, std::vector<NodeContainer>> MIMConnections;
 std::map<Ptr<Node>, std::vector<NodeContainer>> subNodeUE;
+std::map<Ptr<Node>, std::map<Ptr<Node>, int>> index_map;
 
 void readMicroGridConfig(std::string fpath, Json::Value& configobj)
 {
@@ -446,25 +447,30 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
         remoteHostStaticRouting->AddNetworkRouteTo (subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(x,0).GetLocal(), Ipv4Mask ("255.255.0.0"), gateway, 1, 0);
     }
   }
-  
+ 
+  std::cout << "MIM to UE" << std::endl; 
   // MIM to the subNodes and MIM to the CC nodes that is not the default paths which is set above
   for (int i = 0; i < MIM.GetN(); i++){
     Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
     int cc = 0;
     for (int j = 0; j < MIMConnections[MIM.Get(i)].size(); j++){
 	cc += 1;
-	Ipv4Address addr2_ = MIMConnections[MIM.Get(i)][j].Get(0)->GetObject<Ipv4>()->GetAddress (j+2, 0).GetLocal ();
+	int index = index_map[MIM.Get(i)][MIMConnections[MIM.Get(i)][j].Get(0)] + 1;
+	Ipv4Address addr2_ = MIMConnections[MIM.Get(i)][j].Get(0)->GetObject<Ipv4>()->GetAddress (index, 0).GetLocal ();
         subNodeStaticRouting->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.255.0.0"), addr2_, cc);
     }
   }
 
+  std::cout << "SubNode to CC" << std::endl;
   //SubNodes to CC
   for (int i = 0; i < subNodes.GetN(); i++){
     int cc = 0;
     Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
     for (int j = 0; j < subNodeConnections[subNodes.Get(i)].size(); j++){
         cc += 1;
-	int index = i + 1;
+	std::cout << "Please match this: " << i+1 << std::endl;
+	std::cout << index_map[subNodes.Get(i)][subNodeConnections[subNodes.Get(i)][j].Get(0)] << std::endl;
+	int index = index_map[subNodes.Get(i)][subNodeConnections[subNodes.Get(i)][j].Get(0)]; //i+1; //i + 1;
 	if (subNodeConnections[subNodes.Get(i)].size() == 1 and MIMConnections[subNodeConnections[subNodes.Get(i)][0].Get(0)].size() == 1){
             index = 1;
 	}
@@ -743,21 +749,99 @@ main (int argc, char *argv[])
     internet.Install (MIM);
   }
 
-  for (int i = 0; i < subNodes.GetN(); i++){
+  //topologyConfigObject["ConnectionSubToMIM"][0]["name"].asString()
+  //topologyConfigObject["ConnectionMIMToUE"][0]["name"].asString()
+  //ConnectionSubToMIM is ConnectionUEToMIM
+  //ConnectionMIMToUE is ConnectionMIMToSub
+  std::vector<std::string> IDs;
+  for (int i = 0; i < topologyConfigObject["ConnectionSubToMIM"].size(); i++){
+      std::cout << "Creating the csma nodes" << std::endl;
+      int SubID = std::stoi(topologyConfigObject["ConnectionSubToMIM"][i]["name"].asString());
+      for (int j = 0; j < topologyConfigObject["ConnectionSubToMIM"][i]["connections"].size(); j++){
+	  int MIMID = std::stoi(topologyConfigObject["ConnectionSubToMIM"][i]["connections"][j].asString());
+          for (int x = 0; x < topologyConfigObject["ConnectionMIMToUE"][MIMID]["connections"].size(); x++){
+              int UEID = std::stoi(topologyConfigObject["ConnectionMIMToUE"][MIMID]["connections"][x].asString());
+	      std::string targetString = std::to_string(SubID) + "-" + std::to_string(MIMID) + "-" + std::to_string(UEID);
+              auto it = std::find(IDs.begin(), IDs.end(), targetString); 
+	      if (it ==IDs.end()){
+                 IDs.push_back(targetString);
+		 std::cout << targetString << std::endl;
+	      }
+	  } 
+      }
+  } 
+
+  std::map<Ptr<Node>, int> ind_map;
+
+  for (int i = 0; i < IDs.size(); i++){
+     std::string line = IDs[i];
+     size_t pos = 0;
+     std::string delimiter = "-";
+     std::string token;
+     std::vector<int> ID_temp;
+     while ((pos = line.find(delimiter)) != std::string::npos) {
+         token = line.substr(0, pos);
+         line.erase(0, pos + delimiter.length());
+         ID_temp.push_back(std::stoi(token));
+     }
+     ID_temp.push_back(std::stoi(line));
+     std::cout << ID_temp[0] << "-" << ID_temp[1] << "-" << ID_temp[2] << std::endl;
+     NodeContainer csmaSubNodes_temp (ueNodes.Get(ID_temp[0]), MIM.Get(ID_temp[1]), subNodes.Get(ID_temp[2]));
+     csmaSubNodes.push_back(csmaSubNodes_temp);
+
+     NodeContainer subCon (MIM.Get(ID_temp[1]));
+     subNodeConnections[subNodes.Get(ID_temp[2])].push_back(subCon);
+
+     NodeContainer subCon2 (ueNodes.Get(ID_temp[0]));
+     subNodeUE[subNodes.Get(ID_temp[2])].push_back(subCon2);
+
+     NodeContainer subCon3 (ueNodes.Get(ID_temp[0]));
+     MIMConnections[MIM.Get(ID_temp[1])].push_back(subCon3);
+
+     if (ind_map.find(MIM.Get(ID_temp[1])) == ind_map.end()) {
+          ind_map[MIM.Get(ID_temp[1])] = 0;
+     }
+     ind_map[MIM.Get(ID_temp[1])] += 1;
+     std::cout << "----------------------" << ind_map[MIM.Get(ID_temp[1])] << std::endl;
+
+     if (index_map.find(subNodes.Get(ID_temp[2])) == index_map.end()) {
+          std::map<Ptr<Node>, int> xxx;
+	  index_map[subNodes.Get(ID_temp[2])] = xxx;
+	  index_map[subNodes.Get(ID_temp[2])][MIM.Get(ID_temp[1])] = 2;
+     }
+
+     index_map[subNodes.Get(ID_temp[2])][MIM.Get(ID_temp[1])] = ind_map[MIM.Get(ID_temp[1])];
+
+     //getting the index for the UEs
+     if (ind_map.find(ueNodes.Get(ID_temp[0])) == ind_map.end()) {
+          ind_map[ueNodes.Get(ID_temp[0])] = 0;
+     }
+     ind_map[ueNodes.Get(ID_temp[0])] += 1;
+
+     if (index_map.find(MIM.Get(ID_temp[1])) == index_map.end()) {
+          std::map<Ptr<Node>, int> xxx;
+          index_map[MIM.Get(ID_temp[1])] = xxx;
+          index_map[MIM.Get(ID_temp[1])][ueNodes.Get(ID_temp[0])] = 0;
+     }
+     index_map[MIM.Get(ID_temp[1])][ueNodes.Get(ID_temp[0])] = ind_map[ueNodes.Get(ID_temp[0])];
+  }
+
+  
+  /*for (int i = 0; i < subNodes.GetN(); i++){
     std::cout << "Creating the csma nodes" << std::endl;
     for (int j = 0; j < ueNodes.GetN(); j++){
-       NodeContainer csmaSubNodes_temp (ueNodes.Get(i%ueNodes.GetN()), MIM.Get(j), subNodes.Get(i));
+       NodeContainer csmaSubNodes_temp (ueNodes.Get(i), MIM.Get(i), subNodes.Get(j));
        csmaSubNodes.push_back(csmaSubNodes_temp);
-       NodeContainer subCon (MIM.Get(j));
-       subNodeConnections[subNodes.Get(i)].push_back(subCon);
-       NodeContainer subCon2 (ueNodes.Get(i%ueNodes.GetN()));
-       subNodeUE[subNodes.Get(i)].push_back(subCon2);
+       std::cout << i << "-" << i << "-" << j << std::endl;
+       NodeContainer subCon (MIM.Get(i));
+       subNodeConnections[subNodes.Get(j)].push_back(subCon);
+       NodeContainer subCon2 (ueNodes.Get(i));
+       subNodeUE[subNodes.Get(j)].push_back(subCon2);
     
-       NodeContainer subCon3 (ueNodes.Get(i%ueNodes.GetN()));
-       MIMConnections[MIM.Get(j)].push_back(subCon3);
+       NodeContainer subCon3 (ueNodes.Get(i));
+       MIMConnections[MIM.Get(i)].push_back(subCon3);
     }
-    //}
-  }
+  }*/
 
   CsmaHelper csma;
   csma.SetChannelAttribute ("DataRate", StringValue (topologyConfigObject["Channel"][0]["P2PRate"].asString()));
@@ -992,7 +1076,7 @@ main (int argc, char *argv[])
 	    //if (systemId == i){
 	    std::string delimiter = ".";
             std::ostringstream ss;
-	    int ID = i+1;
+	    int ID = (i%subNodeConnections[subNodes.Get(i)].size())+1;
 	    if (subNodeConnections[subNodes.Get(i)].size() < 2){
                  ID = 1;
 	    }
