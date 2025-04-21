@@ -768,12 +768,13 @@ void Outstation::control(AppHeader::FunctionCode fn)
        }
       //retrieve subclass
       /*Bit32AnalogOutput a = obj_p->value;*/
+      Bit32AnalogOutput* a = dynamic_cast<Bit32AnalogOutput*>(obj_p);
       std::cout << "obj_p index: " << obj_p->index << std::endl; //<< " a index: " << a.index);
 
       //format string to successfully publish
 
-      key = stationName + "/" + analog_pt_names[obj_p->index-2];
-      if (obj_p->index > 100){
+      key = stationName + "/" + analog_pt_names[obj_p->index];
+      if (a->status == 95){
           key = stationName + "/" + analog_pt_names[obj_p->index-2];
       }
       //key = analog_pt_names[obj_p->index];
@@ -824,7 +825,7 @@ void Outstation::control(AppHeader::FunctionCode fn)
             std::cout << "Point name: " << binary_pt_names[cur] << " : " << cur << std::endl;
        }
       //ControlOutputRelayBlock a = obj_p->value;
-      key = stationName + "/" + binary_pt_names[obj_p->index-2];
+      key = stationName + "/" + binary_pt_names[obj_p->index];
       if (obj_p->index > 100){
           key = stationName + "/" + binary_pt_names[obj_p->index-2];
       }
