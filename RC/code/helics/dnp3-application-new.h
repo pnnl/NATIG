@@ -188,7 +188,7 @@ public:
     void periodic_poll(int count);
     void attack_data(int freq);
     void GetStartStopArray();
-    std::vector<float> GetTime(std::map<std::string, std::string> attack, std::string tag);
+    std::vector<float> GetVal(std::map<std::string, std::string> attack, std::string tag);
     void periodic_poll_Integrity(int pollRate); //create perodic integrity polls
     void periodic_poll_Binary(int pollRate); //create perodic binary polls
     void periodic_poll_Analog(int pollRate); //crete perodic analog polls
@@ -249,7 +249,7 @@ private:
   void makeTcpConnection(void);
   void makeUdpConnection(void);
   void save_data(Ptr<Socket> socket, Ptr<Packet> packet, Address from);
-  void handle_inside(Ptr<Socket> socket);
+  //void handle_inside(Ptr<Socket> socket);
   void handle_MIM(Ptr<Socket> socket);
   void readMicroGridConfig(std::string fpath, Json::Value& configobj);
   void handle_normal(Ptr<Socket> socket);

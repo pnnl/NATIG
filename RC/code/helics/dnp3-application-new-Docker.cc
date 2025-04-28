@@ -567,7 +567,7 @@ void Dnp3ApplicationNew::GetStartStopArray(){
   timer_end.push_back(std::stof(attack["MIM-"+std::to_string(MIM_ID)+"-End"]));*/
 }
 
-std::vector<float> Dnp3ApplicationNew::GetTime(std::map<std::string, std::string> attack, std::string tag) {
+std::vector<float> Dnp3ApplicationNew::GetVal(std::map<std::string, std::string> attack, std::string tag) {
   std::vector<float> timer;
   std::string delimiter = ",";
   size_t pos = 0;
@@ -1211,14 +1211,12 @@ Dnp3ApplicationNew::HandleRead (Ptr<Socket> socket)
   cout << m_name << endl;
   if (m_name.find("MIM") != std::string::npos) {
       handle_MIM(socket);
-  }else if (m_name.find("Inside") != std::string::npos){
-      handle_inside(socket);
   }else {
       handle_normal(socket);
   } 
 }
 
-
+/*
 void Dnp3ApplicationNew::handle_inside(Ptr<Socket> socket) {
 	cout << "I AM AN INSIDER!!!!!!!!" << endl;
 	Address from;
@@ -1232,6 +1230,22 @@ void Dnp3ApplicationNew::handle_inside(Ptr<Socket> socket) {
 		std::cout << "This is where the data is coming from" << std::endl;
 		std::cout << SourceAddr << std::endl;
 		if(mitm_flag == true) {
+		       Json::Value configObject;
+                       std::map<std::string, std::string> attack;
+                       if (configFile.find("NA") == std::string::npos){
+                            readMicroGridConfig(configFile, configObject);
+                            for (uint32_t j = 1; j < configObject["MIM"].size(); j++){
+                                for(const auto& item : configObject["MIM"][j].getMemberNames() ){
+                                        std::string ID = "MIM-"+std::to_string(j)+"-"+item;
+                                        std::string my_str = configObject["MIM"][j][item].asString();
+
+                                        my_str.erase(remove(my_str.begin(), my_str.end(), '"'), my_str.end());
+                                        std::cout << "This is the keys value: " << ID << "  and the value is " << my_str << std::endl;
+                                        attack.insert(pair<std::string,std::string >(ID, my_str));
+                                }
+
+                            }
+                        }
 			if(m_attack_on) {
 				if(m_attackType == 1) {
 					NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Routing process is terminated by Man in the middle");
@@ -1304,6 +1318,7 @@ void Dnp3ApplicationNew::handle_inside(Ptr<Socket> socket) {
 	count += 1;
 	
 }
+*/
 void Dnp3ApplicationNew::send_directly_server(Ptr<Packet> p)
 {
    m_txTrace (p);
@@ -1624,28 +1639,24 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 	     nodesPoints.push_back(nodes[xx] + "$"+ points[xx]);
      }
      
-     std::vector<string> unique_id_an;
-     for(map<string, float>::iterator iter = analog_points.begin(); iter != analog_points.end(); iter++ ) {
-	     unique_id_an.push_back((*iter).first); //token);
-     }
-     std::vector<string> unique_id_bin;
-     std::cout << "nodesPoints.size() " << nodesPoints.size() << std::endl;
-     for(map<string, short unsigned int>::iterator iter = bin_points.begin(); iter != bin_points.end(); iter++ ) {
-	     unique_id_bin.push_back((*iter).first); //token);
-     }
      std::vector<int> ID_point;
      for (int qq = 0; qq < nodesPoints.size(); qq++){
 	     std::cout << "Searching for point " << nodesPoints[qq]  << " qq = " << qq<< std::endl;
 	     bool ffound = false; 
 	     std::cout << "Number of points " << nodesPoints.size() << std::endl;
+	     for (int i = 0; i < analog_point_names.size(); i++){
+                     std::cout << "ID: " << analog_point_names[i] << " : " << i << std::endl;
+                     bool flag = 0;
+                     if (analog_point_names[i].find(nodesPoints[qq]) != std::string::npos){ // and !flag){
+                             std::cout << "Found Analog point " << nodesPoints[qq] << " : " << analog_point_names[i] << " : " << i << std::endl;
+                             ID_point.push_back(i);
+                             break;
+                     }
+             }
+
 	     for (int i = 0; i < binary_point_names.size(); i++){
 		     std::cout << "ID: " << binary_point_names[i] << " : " << i << std::endl;
 		     bool flag = 0;
-		     /*for (auto i : ID_point){
-                          if ( binary_point_names[i].find(i) != std::string::npos ){
-                               flag = 1;
-			  }
-		     }*/
 		     if(binary_point_names[i].find(nodesPoints[qq]) != std::string::npos){ // and !flag){
 			     std::cout << "Found Binary point " << nodesPoints[qq] << " : " << binary_point_names[i] << " : " << i << std::endl;
 			     ID_point.push_back(i);
@@ -1656,20 +1667,6 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 	     /*if (ffound){
                   break;
 	     }*/
-	     for (int i = 0; i < analog_point_names.size(); i++){
-		     std::cout << "ID: " << analog_point_names[i] << " : " << i << std::endl;
-		     bool flag = 0;
-                     /*for (auto i : ID_point){
-                          if ( analog_point_names[i].find(i) != std::string::npos ){
-                               flag = 1;
-                          }
-                     }*/
-		     if (analog_point_names[i].find(nodesPoints[qq]) != std::string::npos){ // and !flag){
-			     std::cout << "Found Analog point " << nodesPoints[qq] << " : " << analog_point_names[i] << " : " << i << std::endl;
-			     ID_point.push_back(i);
-			     break;
-		     }
-	     }
      }
      if(mitm_flag == true) {
 	  Json::Value configObject;
@@ -1697,11 +1694,14 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 	      data.src = src;
 	      std::cout << "Dest: " << data.dest << " src: " << data.src << std::endl;
               //Setting up the attack scenario
+	      std::vector<float> start = GetVal(attack, "PointStart");
+              std::vector<float> stop = GetVal(attack, "PointStop");
+              std::vector<float> attackType = GetVal(attack, "attack_type");
 	      if (m_isMaster){
 		  NS_LOG_INFO("Am I the master?");
-	      } else if(m_attackType == 1) {
+	      } else if(attackType.size() == 1 and attackType[0] == 1) {
                   NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Routing process is terminated by Man in the middle");
-              } else if(m_attackType == 5) {
+              } else if(attackType.size() == 1 and attackType[0] == 5) {
 	          NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
 	          NS_LOG_INFO ("MIMServer::HandleRead >>> MIM IP" << SourceAddr ); //<< " Forwarding packet to " << destAddr);
 	          NS_LOG_INFO("End of setup before if statement");
@@ -1710,11 +1710,10 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 
 	      }else{
 		  for (int qq = 0; qq < ID_point.size(); qq++){
-	             std::vector<float> start = GetTime(attack, "PointStart");
-	             std::vector<float> stop = GetTime(attack, "PointStop");
 		     std::cout << Simulator::Now ().GetSeconds () << " " << start[qq] << " " << stop[qq] << "1111111111111111111" << std::endl; 
 		     if (Simulator::Now ().GetSeconds () > start[qq] and Simulator::Now ().GetSeconds () < stop[qq]){ 
-	             if(m_attackType == 2 and (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) {
+	             //m_attackType = attackType[qq];
+	             if(int(attackType[qq]) == 2 and (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) {
                           NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
                           NS_LOG_INFO ("MIMServer::HandleRead >>> MIM IP" << SourceAddr ); //<< " Forwarding packet to " << destAddr);
                           NS_LOG_INFO("End of setup before if statement");
@@ -1762,7 +1761,7 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 					  d += 1;
     				  }
 			  }
-                      } else if(m_attackType == 3) {
+                      } else if(int(attackType[qq]) == 3) {
 		           NS_LOG_UNCOND ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
 		           NS_LOG_UNCOND ("MIMServer::HandleRead >>> MIM IP" << SourceAddr ); //<< " Forwarding packet to " << destAddr);
 		           NS_LOG_UNCOND ("End of setup before if statement");
@@ -1784,7 +1783,7 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 				   ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::LATCH_OFF, ID_point[qq]);
 				   m_p->direct_operate(false, ao);
 			   }
-	              }else if (m_attackType == 4){
+	              }else if (int(attackType[qq]) == 4){
 	                 NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
 		         std::cout << "HandleRead MIM intersepted " << temp << std::endl;
 	                 NS_LOG_UNCOND("sending false data to the controller");
@@ -1819,29 +1818,29 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 				}
 			}
 		    }
-		  }
-	      }
-	      if (m_attackType == 3 or m_attackType == 4 or (m_attackType == 2 and not (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) ){
-                      send_directly(packet);
-	      }
-	      else if(m_attackType == 2 and (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) {
-                      for(int i = 0; i < buf2.size(); i++){
-                               appendUINT8(buf_temp, temp2[i]); 
-		      }
-		      //calculate the crc values for the header and the points
-		      calc_crc(buf_temp, temp2, testPack);
+		     if (int(attackType[qq]) == 3 or int(attackType[qq]) == 4 or (int(attackType[qq]) == 2 and not (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) ){
+                       send_directly(packet);
+                     }
+                     else if(int(attackType[qq]) == 2 and (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) {
+                          for(int i = 0; i < buf2.size(); i++){
+                               appendUINT8(buf_temp, temp2[i]);
+                          }
+                          //calculate the crc values for the header and the points
+                          calc_crc(buf_temp, temp2, testPack);
 
-		      int point_num = 0;
-		      for(int i = 0; i < buf.size(); i++){
-		         std::cout << (int)temp2[i] << ", ";
-		         if ((int)temp2[i] == 1 && point_num < 16){
+                          int point_num = 0;
+                          for(int i = 0; i < buf.size(); i++){
+                             std::cout << (int)temp2[i] << ", ";
+                             if ((int)temp2[i] == 1 && point_num < 16){
                                 point_num = i;
-		         }
-                       }
-		       std::cout << std::endl;
-		       Ptr<Packet> newPack = Create<Packet>(temp2, testPack->GetSize());
-                       send_directly(newPack);
-		       std::cout << "I have found start at " << point_num << std::endl;
+                             }
+                           }
+                           std::cout << std::endl;
+                           Ptr<Packet> newPack = Create<Packet>(temp2, testPack->GetSize());
+                           send_directly(newPack);
+                           std::cout << "I have found start at " << point_num << std::endl;
+                      }
+		  }
 	      }
           } else {
 		std::cout << "HandleRead Insider" << temp << std::endl;
