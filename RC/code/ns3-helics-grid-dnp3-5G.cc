@@ -195,47 +195,6 @@ void PrintRoutingTable (Ptr<Node>& n)
 double sigmoid(double x){
     return 1/(1+exp(-x));
 }
-
-void trTocsv(std::string file_name, std::string tag){
-    std::ifstream trFile(file_name.c_str());
-    std::string csv_name = "output" + tag + ".csv";
-    std::ofstream csvFile(csv_name.c_str());
-
-    std::string line;
-    std::vector<std::string> row;
-
-    while (std::getline(trFile, line)) {
-        row.clear();
-
-        // Split the line by tab delimiter
-        size_t pos = 0;
-        std::string token;
-        while ((pos = line.find('\t')) != std::string::npos) {
-            token = line.substr(0, pos);
-            row.push_back(token);
-            line.erase(0, pos + 1);
-        }
-        row.push_back(line); // Add the last token
-
-        // Write the row to the CSV file
-        for (size_t i = 0; i < row.size(); ++i) {
-            csvFile << row[i];
-            if (i != row.size() - 1) {
-                csvFile << ",";
-            }
-        }
-        csvFile << "\n";
-    }
-
-    trFile.close();
-    csvFile.close();
-    Simulator::Schedule (Seconds (1), &trTocsv, file_name, tag);
-}
-
-void StartEndSignal (std::string status){
-   std::cout << "The attack has " << status << std::endl;
-}
-
 void Throughput (){
 	Ptr<Ipv4FlowClassifier> classifier=DynamicCast<Ipv4FlowClassifier>(flowHelper.GetClassifier());
 	
@@ -445,8 +404,6 @@ void updateUETable(NodeContainer subNodes, NodeContainer ueNodes){
 }
 
 void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, NodeContainer MIM, NodeContainer ueNodes, Ipv4Address gateway){
-
-    // This sets the paths from the MIM nodes and UE nodes to the CC
     Ipv4StaticRoutingHelper ipv4RoutingHelper;
     Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHostContainer.Get(0)->GetObject<Ipv4> ());
   for (int i = 0; i < ueNodes.GetN(); i++){
@@ -458,19 +415,22 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
       }
   }
 
-  // This sets the path from the UE nodes to the subNode passing by the MIM nodes
-  // Gets the MIM node that corresponds to the subNodes node interface
   for (int i = 0; i < ueNodes.GetN(); i++){
     Ptr<Ipv4StaticRouting> ueNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes.Get(i)->GetObject<Ipv4>());
     int cc = 0;
     for (int j = 0; j < subNodes.GetN(); j++){
       cc += 1;
       Ptr<Ipv4> ipv4 = ueNodes.Get(i)->GetObject<Ipv4>();
+      /*if (not ipv4->IsUp (cc)){
+            cc += 1;
+      }*/
       ueNodeStaticRouting->AddNetworkRouteTo(subNodes.Get(j)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), Ipv4Mask("255.255.0.0"), MIM.Get(i)->GetObject<Ipv4>()->GetAddress(cc,0).GetLocal(), cc+1, 0);
+      /*if (not ipv4->IsUp (cc-1)){
+            cc -= 1;
+      }*/
     }
   }
 
-  // MIM to the subNodes and MIM to the CC nodes that is not the default paths which is set above
   for (int i = 0; i < MIM.GetN(); i++){
     Ipv4Address addr2_ = ueNodes.Get(i)->GetObject<Ipv4>()->GetAddress (2, 0).GetLocal ();
     Ptr<Ipv4StaticRouting> subNodeStaticRouting = ipv4RoutingHelper.GetStaticRouting (MIM.Get(i)->GetObject<Ipv4>());
@@ -484,7 +444,6 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
     }
   }
 
-  //SubNodes to CC
   for (int i = 0; i < subNodes.GetN(); i++){
     int cc = 0;
     Ptr<Ipv4StaticRouting> subNodeStaticRouting3 = ipv4RoutingHelper.GetStaticRouting (subNodes.Get(i)->GetObject<Ipv4>());
@@ -493,6 +452,9 @@ void setRoutingTable(NodeContainer remoteHostContainer, NodeContainer subNodes, 
         Ptr<Ipv4> ipv4_2 = MIM.Get(j)->GetObject<Ipv4>();
         Ptr<Ipv4> ipv4 = subNodes.Get(j)->GetObject<Ipv4>();
         int ind = i+1;
+        /*if (not ipv4->IsUp (ind)){
+            ind += 1;
+        }*/
         Ipv4Address addr5_ = ipv4_2->GetAddress(ind,0).GetLocal();
         subNodeStaticRouting3->AddNetworkRouteTo (remoteHostContainer.Get(0)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), Ipv4Mask ("255.0.0.0"), addr5_, cc, 0);
     }
@@ -1225,10 +1187,8 @@ main (int argc, char *argv[])
     std::string DDOS_RATE = configObject["DDoS"][0]["Rate"].asString(); //"2000kb/s";
 
     bool DDoS = std::stoi(configObject["DDoS"][0]["Active"].asString());
-
+    
     if (DDoS){
-	    Simulator::Schedule(Seconds(BOT_START), StartEndSignal, "started");
-            Simulator::Schedule(Seconds(BOT_STOP), StartEndSignal, "ended");
 	    ApplicationContainer onOffApp[botNodes.GetN()];
             for (int k = 0; k < botNodes.GetN(); ++k)
             {
@@ -1339,18 +1299,9 @@ main (int argc, char *argv[])
     for (int i = 0; i < subNodes.GetN(); i++){
         endpointNodes.Add (subNodes.Get (i));
     }
-    AsciiTraceHelper ascii;
-    csma.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_csma.tr"));
-    p2ph.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_p2p.tr"));
-    p2ph2.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_Bots.tr"));
-    Simulator::Schedule (Seconds (0.2), &trTocsv, "edge_performance_csma.tr", "csma");
-    Simulator::Schedule (Seconds (0.2), &trTocsv, "edge_performance_p2p.tr", "p2p");
-    Simulator::Schedule (Seconds (0.2), &trTocsv, "edge_performance_Bots.tr", "Bots");
-    //csma.EnableAsciiAll (ascii.CreateFileStream ("edge_performance_csma.tr"));
-
-    flowMonitor = flowHelper.InstallAll(); //flowHelper.Install(endpointNodes); //All();
-    flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.001));
-    flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.001));
+    flowMonitor = flowHelper.Install(endpointNodes); //All();
+    flowMonitor->SetAttribute("DelayBinWidth", DoubleValue(0.5));
+    flowMonitor->SetAttribute("JitterBinWidth", DoubleValue(0.5));
     flowMonitor->SetAttribute("PacketSizeBinWidth", DoubleValue(50));
     Simulator::Schedule (Seconds (0.2), &Throughput); //, ncP2P_nodes);
     if (mon) {  
@@ -1367,7 +1318,7 @@ main (int argc, char *argv[])
   Simulator::Stop (simTime);
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables();
   Simulator::Run ();
-  //flowMonitor->SerializeToXmlFile("flow-monitor.xml", true, true);
+
   /*GtkConfigStore config;
   config.ConfigureAttributes();*/
 

@@ -180,6 +180,7 @@ public:
     int count = 0;
     int four = 0;
     bool mitm_flag = false;
+    double m_attackChance = 0.0;
     double m_jitterMinNs; //!<minimum jitter delay time for packets sent via FNCS
     double m_jitterMaxNs; //!<maximum jitter delay time for packets sent via FNCS
     void send_control_binary(Dnp3ApplicationNew::ControlType type, DnpIndex_t index, ControlOutputRelayBlock::Code code);

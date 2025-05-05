@@ -251,8 +251,8 @@
     ],
     "MIM": [
 	{
-            "NumberAttackers": 1,
-	    "listMIM": "0"
+            "NumberAttackers": 3,
+	    "listMIM": "0,1,2"
 	},
         {
             "name": "MIM1",
@@ -262,9 +262,10 @@
 	    "point_id": "Pref,constant_power_C.real,status",
 	    "scenario_id": "a",
 	    "attack_type": "4,4,3",
+	    "attack_chance": "0.1,0.5,0.6",
 	    "Start": 1.0,
 	    "End": 20.0,
-	    "PointStart": "1.0,5.0,10.0",
+	    "PointStart": "1.0,1.0,1.0",
 	    "PointStop": "9.0,20.0,15.0"
         },
 	{
@@ -275,6 +276,7 @@
 	    "point_id": "Pref",
 	    "scenario_id": "a",
 	    "attack_type": "4",
+	    "attack_chance": "0.6",
 	    "Start": 1,
 	    "End": 20,
 	    "PointStart": "1",
@@ -288,6 +290,7 @@
             "point_id": "constant_power_C.real",
             "scenario_id": "a",
             "attack_type": "4",
+	    "attack_chance": "0.6",
             "Start": 1,
             "End": 20,
             "PointStart": "1",
@@ -301,6 +304,7 @@
 	    "point_id": "status",
 	    "scenario_id": "b",
 	    "attack_type": "3",
+	    "attack_chance": "0.6",
 	    "Start": 120,
 	    "End": 180,
 	    "PointStart": "120",

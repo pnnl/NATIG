@@ -3,11 +3,11 @@
                 {
                         "SimTime": 35,
                         "StartTime": 0.0,
-                        "PollReqFreq": 7,
-                        "includeMIM": 0,
+                        "PollReqFreq": 10,
+                        "includeMIM": 1,
                         "UseDynTop": 0,
-                        "MonitorPerf": 0,
-			"StaticSeed": 0,
+                        "MonitorPerf": 1,
+			"StaticSeed": 1,
 			"RandomSeed": 777
                 }
         ],
@@ -5880,29 +5880,30 @@
         ],
         "Controller": [
                 {
-                        "use": 1,
-                        "actionFile": "AgentDecisions11.txt",
+                        "use": 0,
+			"actionFile": "AgentDecisions11.txt",
                         "NodesControlled":[1,2,3,4]
                 }
         ],
         "DDoS": [
                 {
-                        "NumberOfBots": 40,
-			"threadsPerAttacker": 4,
-                        "Active": 1,
-                        "Start": 10,
-                        "End": 25,
+                        "NumberOfBots": 50,
+			"threadsPerAttacker": 1,
+                        "Active": 0,
+			"usePing": 0,
+                        "Start": 50,
+                        "End": 100,
                         "TimeOn": 15.0,
                         "TimeOff": 0.0,
                         "PacketSize": 1500,
                         "Rate": "80Mb/s",
                         "NodeType": [
-                                "MIM"
+                                "subNode"
                         ],
                         "NodeID": [
-                                2
+                                6
                         ],
-                        "endPoint": "CC"
+                        "endPoint": "MIM"
                 }
         ],
         "MIM": [
@@ -5918,6 +5919,7 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
+			"attack_chance": "0.6",
                         "Start": 10,
                         "End": 35,
 			"PointStart": "10",
@@ -5931,6 +5933,7 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
+			"attack_chance": "0.6",
                         "Start": 10,
                         "End": 35,
 			"PointStart": "10",
@@ -5944,6 +5947,7 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
+			"attack_chance": "0.6",
                         "Start": 10,
                         "End": 35,
 			"PointStart": "10",
@@ -5957,6 +5961,7 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
+			"attack_chance": "0.6",
                         "Start": 10,
                         "End": 35,
 			"PointStart": "10",
@@ -5970,6 +5975,7 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
+			"attack_chance": "0.6",
                         "Start": 10,
                         "End": 35,
 			"PointStart": "10",
@@ -5983,6 +5989,7 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
+			"attack_chance": "0.6",
                         "Start": 10,
                         "End": 35,
 			"PointStart": "10",
@@ -5995,7 +6002,8 @@
                         "node_id": "swt_ln4625876_sw,swt_ln0108145_sw,swt_tsw30473047_sw",
                         "point_id": "status,status,status",
                         "scenario_id": "b",
-                        "attack_type": "3",
+                        "attack_type": "3,3,3",
+			"attack_chance": "0.6,0.4,0.5",
                         "Start": 10,
                         "End": 35,
 			"PointStart": "10,10,10",
@@ -6009,6 +6017,7 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
+			"attack_chance": "0.6",
                         "Start": 10,
                         "End": 35,
 			"PointStart": "10",
@@ -6022,6 +6031,7 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
+			"attack_chance": "0.6",
                         "Start": 10,
                         "End": 35,
 			"PointStart": "10",
@@ -6034,7 +6044,8 @@
                         "node_id": "swt_ln0774470_sw,swt_l9191_48332_sw",
                         "point_id": "status,status",
                         "scenario_id": "b",
-                        "attack_type": "3",
+                        "attack_type": "3,3",
+			"attack_chance": "0.6,0.6",
                         "Start": 10,
                         "End": 35,
 			"PointStart": "10,10",
@@ -6048,6 +6059,7 @@
                         "point_id": "status",
                         "scenario_id": "b",
                         "attack_type": "3",
+			"attack_chance": "0.6",
                         "Start": 10,
                         "End": 35,
 			"PointStart": "10",

@@ -251,7 +251,6 @@ object recorder {
 	property status,current_out_A,current_out_B,current_out_C,power_out_A,power_out_B,power_out_C,phase_A_state,phase_B_state,phase_C_state;
 	flags DELTAMODE;
 	interval 1;
-	file "switch/Switch_151_300.csv";
 };
 
 object recorder {

@@ -282,6 +282,10 @@ Dnp3ApplicationNew::GetTypeId (void)
                      StringValue ("0"),
                      MakeStringAccessor (&Dnp3ApplicationNew::m_attackEndTime),
                      MakeStringChecker())
+    .AddAttribute ("AttackChance", "Attack chance in percentage (0 to 1)",
+		   DoubleValue (1.0),
+                   MakeDoubleAccessor (&Dnp3ApplicationNew::m_attackChance),
+                   MakeDoubleChecker<double> ())
     .AddAttribute ("Name",
                "The name of the application",
                StringValue (),
@@ -704,17 +708,23 @@ void Dnp3ApplicationNew::makeUdpConnection(void) {
 		    std::cout << "start threads " << timer[index] << std::endl;
                     Simulator::Schedule(Seconds(timer[index]), &Dnp3ApplicationNew::set_attack, this, true); //virtual method
 		    StartVect.push_back(std::to_string(timer[index]));
+		    std::cout << "Added to vector" << std::endl;
                 }
                 if(timer_end[index]) {
                     //Schedule for end of the attack (in seconds)
+		    std::cout << "End threads " << timer_end[index] << std::endl;
                     Simulator::Schedule(Seconds(timer_end[index]), &Dnp3ApplicationNew::set_attack, this, false); //virtual method
 		    StopVect.push_back(std::to_string(timer_end[index]));
+		    std::cout << "Added to vector" << std::endl;
                 }
         }
 	//m_socket->SetRecvCallback( MakeCallback(&Dnp3Application::HandleRead, this));
         m_socket->Connect (InetSocketAddress (Ipv4Address::ConvertFrom(m_remoteAddress), m_remotelPort));
+	std::cout << "FLAG1" << std::endl;
 	mim_socket->Connect (InetSocketAddress (Ipv4Address::ConvertFrom(m_remoteAddress2), m_localPort));
+	std::cout << "FLAG2" << std::endl;
         startOutstation(m_socket);
+	std::cout << "HEERREE" << std::endl;
 	if (m_name.find("Inside") != std::string::npos or m_name.find("MIM")!=std::string::npos){
 	  startOutstation(mim_socket);
 	}
@@ -841,6 +851,7 @@ NS_LOG_INFO("DNp3Application:initConfig");
 void Dnp3ApplicationNew::initConfig(void)
 {
 	NS_LOG_FUNCTION (this);
+	std::cout << points_filename << std::endl;
 	ifstream  pointsFile(points_filename, ifstream::in);
 	if(pointsFile) {
 		bool isValid;
@@ -1101,6 +1112,8 @@ void Dnp3ApplicationNew::startOutstation(Ptr<Socket> sock)
 {
     NS_LOG_INFO("Starting Outstation");
 
+    std::cout << "Starting Outstation" << std::endl;
+
     //OutstationConfig             outstationConfig;
     Endpoint::EndpointConfig                 epConfig;
     Datalink::DatalinkConfig                 dlConfig;
@@ -1114,7 +1127,8 @@ void Dnp3ApplicationNew::startOutstation(Ptr<Socket> sock)
     outstationConfig.masterAddr          = m_master_device_addr;
     outstationConfig.userNum             = 4; //3; // hard coded for prototype
     outstationConfig.debugLevel_p        = &debugLevel;
-
+    
+    std::cout << "PLEASE GET HERE!!!!!!!!!!!!!!!!!!!! " << std::endl;
     // end point config
     epConfig.ownerDnpAddr          = m_master_device_addr;
     epConfig.tcp                   = m_enableTcp;
@@ -1136,24 +1150,27 @@ void Dnp3ApplicationNew::startOutstation(Ptr<Socket> sock)
     dlConfig.debugLevel_p          = &debugLevel;
 
     Endpoint* ep_p = new Endpoint(epConfig, m_txTrace, sock, this);
-
+    std::cout << "HHHHHHHHHHHHHHHHHHHHHHH" << std::endl;
     // datalink required pointer to the transmit interface
     dlConfig.tx_p  = ep_p;
+    std::cout << "before init" << std::endl;
     initConfig();
+    std::cout << "hhhhhhhhhhhhhhhhh" << std::endl;
     //TimerInterface* ti = NULL; //Todo
-    NS_LOG_INFO("I AM INITIALIZING AN OUTSTATION");
+    NS_LOG_UNCOND("I AM INITIALIZING AN OUTSTATION");
     o_p = new Outstation ( outstationConfig, dlConfig,
 			   this,   // event interface
 			   &ti);   // timer interface
-    NS_LOG_INFO("I AM HERE1");
+    NS_LOG_UNCOND("I AM HERE1");
     o_p->set_point_names(analog_point_names, binary_point_names);
     o_p->set_stationName(m_name);
-    NS_LOG_INFO("I AM HERE2");
+    NS_LOG_UNCOND("I AM HERE2");
     using std::placeholders::_1;
     using std::placeholders::_2;
     using std::placeholders::_3;
     std::function<void(std::string,std::string,std::string)> func;
     func = std::bind (&Dnp3ApplicationNew::DoMessage, this, _1, _2, _3);
+    std::cout << "binding" << std::endl;
     o_p->set_publishCallback(func);
     vector<string>::iterator it;
     m_respond = true;
@@ -1687,6 +1704,9 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 	  }
           uint16_t dest = buf[5] << 0x08 | buf[4]; //To check
           uint16_t src = buf[7] << 0x08 | buf[6];
+	  //m_attackChance
+	  std::cout << "Before getVal" << std::endl;
+	  std::vector<float> attackChance = GetVal(attack, "attack_chance");
           if(m_attack_on and ((start1 == 0x05) && (0x64))) {
 	      //Setting the dest and src
 	      Lpdu::UserData data;
@@ -1710,8 +1730,9 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 
 	      }else{
 		  for (int qq = 0; qq < ID_point.size(); qq++){
-		     std::cout << Simulator::Now ().GetSeconds () << " " << start[qq] << " " << stop[qq] << "1111111111111111111" << std::endl; 
-		     if (Simulator::Now ().GetSeconds () > start[qq] and Simulator::Now ().GetSeconds () < stop[qq]){ 
+		     std::cout << Simulator::Now ().GetSeconds () << " " << start[qq] << " " << stop[qq] << "1111111111111111111" << std::endl;
+		     float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX); 
+		     if (Simulator::Now ().GetSeconds () > start[qq] and Simulator::Now ().GetSeconds () < stop[qq] and attackChance[qq] > r){ 
 	             //m_attackType = attackType[qq];
 	             if(int(attackType[qq]) == 2 and (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) {
                           NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
