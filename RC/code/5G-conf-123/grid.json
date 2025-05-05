@@ -1,9 +1,9 @@
 {
     "Simulation":[{
-	    "SimTime": 35,
+	    "SimTime": 180,
             "StartTime": 0.0,
-            "PollReqFreq": 7,
-            "includeMIM": 0,
+            "PollReqFreq": 15,
+            "includeMIM": 1,
             "UseDynTop": 0,
             "MonitorPerf": 0,
 	    "StaticSeed": 0,
@@ -219,17 +219,17 @@
         }
     ],
     "Controller": [
-          {
-               "use": 1,
-               "actionFile": "AgentDecisions11.txt",
-               "NodesControlled":[1,2,3,4]
-          }
+        {
+             "use": 0,
+             "actionFile": "AgentDecisions11.txt",
+             "NodesControlled":[1,2,3,4] 
+        }
     ],
     "DDoS": [
         {
             "NumberOfBots": 4,
 	    "threadsPerAttacker": 4,
-            "Active": 1,
+            "Active": 0,
             "Start": 10,
             "End": 35,
             "TimeOn": 25.0,
@@ -238,13 +238,13 @@
             "Rate": "40480kb/s",
 	    "usePing": 1,
             "NodeType": [
-                      "UE"
+                "UE"
             ],
             "NodeID": [
-                        2
+                2
             ],
-            "endPoint": "CC"
-         }
+            "endPoint": "CC" 
+        }
     ],
     "MIM": [
 	{
@@ -258,7 +258,8 @@
 	    "node_id": "trip_shad_inv1",
 	    "point_id": "Qref",
 	    "scenario_id": "a",
-	    "attack_type": 4,
+	    "attack_type": "4",
+	    "attack_chance": "0.6",
 	    "Start": 50,
 	    "End": 100,
 	    "PointStart": "50",
@@ -271,7 +272,8 @@
 	    "node_id": "microgrid_switch4",
 	    "point_id": "status",
 	    "scenario_id": "b",
-	    "attack_type": 3,
+	    "attack_type": "3",
+	    "attack_chance": "0.6",
 	    "Start": 50,
 	    "End": 100,
 	    "PointStart": "50",
@@ -284,11 +286,12 @@
 	    "node_id": "microgrid_switch2,microgrid_switch3",
 	    "point_id": "status,status",
 	    "scenario_id": "b",
-	    "attack_type": 3,
+	    "attack_type": "3,3",
+	    "attack_chance": "0.6,0.6",
 	    "Start": 50,
 	    "End": 100,
-	    "PointStart": "50,50",
-	    "PointStop": "100,100"
+	    "PointStart": "50,60",
+	    "PointStop": "70,100"
 	},
 	{
             "name": "MIM4",
@@ -297,7 +300,8 @@
 	    "node_id": "microgrid_switch1",
 	    "point_id": "status",
 	    "scenario_id": "b",
-	    "attack_type": 3,
+	    "attack_type": "3",
+	    "attack_chance": "0.6",
 	    "Start": 120,
 	    "End": 180,
 	    "PointStart": "120",
