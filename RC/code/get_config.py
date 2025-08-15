@@ -207,67 +207,6 @@ from networkx import *
 import itertools
 print("node degree clustering")
 k = int(args.micro) #int(len(list(G))/20)
-def divide_graph(graph, division_nodes):
-    """
-    Divides a graph into subgroups based on specified division nodes.
-
-    Parameters:
-    -----------
-    graph : nx.Graph
-        The input NetworkX graph to be divided
-    division_nodes : List[Any]
-        List of node IDs that will serve as division points
-
-    Returns:
-    --------
-    List[Set[Any]]
-        A list of sets, where each set contains nodes belonging to one subgroup
-    """
-    # Ensure all division nodes exist in the graph
-    for node in division_nodes:
-        if node not in graph.nodes:
-            raise ValueError(f"Node {node} not found in the graph")
-
-    # Create a copy of the graph to work with
-    work_graph = graph.copy()
-
-    # Remove division nodes from the graph
-    work_graph.remove_nodes_from(division_nodes)
-
-    # Find connected components (these will be our groups)
-    components = list(nx.connected_components(work_graph))
-
-    # For each division node, determine which component it should join
-    # based on its connections in the original graph
-    for div_node in division_nodes:
-        # Get neighbors of the division node in the original graph
-        neighbors = set(graph.neighbors(div_node))
-
-        # Find which components these neighbors belong to
-        connected_components = []
-        for i, component in enumerate(components):
-            if neighbors & component:  # If there's an intersection
-                connected_components.append(i)
-
-        # If division node is connected to exactly one component, add it to that component
-        if len(connected_components) == 1:
-            components[connected_components[0]].add(div_node)
-        # If connected to multiple or no components, create a new component for it
-        else:
-            components.append({div_node})
-
-    updated_components = components[1:-len(division_nodes)]
-    chunks = []
-    for i in updated_components:
-        chunks.append(list(i))
-    updated_chunks = []
-    for i in range(len(chunks)):
-        t = []
-        t.append(division_nodes[i])
-        for j in chunks[i]:
-            t.append(j)
-        updated_chunks.append(t)
-    return updated_chunks
 def nx_chunk(graph, chunk_size):
     """
     Chunk a graph into subgraphs with the specified minimum chunk size.
@@ -301,7 +240,7 @@ def nx_chunk(graph, chunk_size):
     chunks = []
     if "default_div" not in args.div:
         for x in prop_div:
-            print(x + ": " + str(total_descendants[x]))
+            #print(x + ": " + str(total_descendants[x]))
             for node in tree.nodes():
                 if x in node:
                     #print("found: "+ x)
@@ -335,10 +274,10 @@ def nx_chunk(graph, chunk_size):
                                 if x3 in descendants and x3 not in node:
                                     found = True
                             if not found:
-                                print("Using descendants")
+                                #print("Using descendants")
                                 tt = descendants
                     #print(start_End)
-                    print(len(tt))
+                    #print(tt)
                     if len(tt) > 0:
                         chunks.append(tt)
                     #print("----------------------------------------")
@@ -368,10 +307,7 @@ def nx_chunk(graph, chunk_size):
 def get_total_descendants(dag):
     return {node : len(nx.descendants(dag, node)) for node in dag.nodes()}
 g2 = g2.to_undirected()
-node_list = args.div.split(",")
-chunks = divide_graph(g2, node_list)
-#print(out)
-#chunks = nx_chunk(g2, k)
+chunks = nx_chunk(g2, k)
 print(len(chunks))
 tt = {}
 for i in range(len(chunks)):
@@ -384,6 +320,165 @@ print("----------------------------------------")
 keys = list(microgrids.keys())
 print(microgrids.keys())
 
+f = plt.figure(figsize=(40,40))
+plt.tight_layout()
+#nx.draw_networkx(g2, arrows=True)
+pos1 = nx.nx_pydot.graphviz_layout(g2)
+for x in pos1.keys():
+    ll = list(pos1[x])
+    for xx in range(len(ll)):
+        ll[xx] = ll[xx]*10
+    pos1[x] = ll
+labels = {}
+nodes_list = list(g2.nodes())
+IDs = list(pos1.keys())
+color_map = []
+size_map = []
+color_map1 = []
+size_map1 = []
+color_map2 = []
+size_map2 = []
+color_map3 = []
+size_map3 = []
+color_map4 = []
+size_map4 = []
+ColorLegend = {}
+Others = []
+Switch = []
+Source = []
+Load = []
+AttackedSwitch = []
+colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
+
+# Sort colors by hue, saturation, value and name.
+by_hsv = sorted((tuple(mcolors.rgb_to_hsv(mcolors.to_rgba(color)[:3])), name) for name, color in colors.items())
+by_hsv = by_hsv[::-1]
+random.shuffle(by_hsv)
+color_list = [name for hsv, name in by_hsv]
+#color_list = ["lightcoral", "indianred", "peru", "olivedrab", "khaki", "ivory", "orange", "tan", "steelblue", "aqua", "pink", "darkorchid", "navy", "lime", "seagreen", "bisque", "plum","lavender", ]
+MIM_switches = ["swt_ln4625876_sw", "swt_ln0108145_sw", "swt_tsw30473047_sw", "swt_ln0774470_sw", "swt_l9191_48332_sw"]
+sources_name = {}
+sources_loads = {}
+for idx, node in enumerate(g2.nodes()):
+    if "inv" in IDs[idx] or "dg" in IDs[idx]:
+        if IDs[idx] in recorders:
+        #    ColorLegend["Recorder"] = "magenta"
+            color_map3.append('magenta')
+        else:
+        #    ColorLegend["Source"] = "orange"
+            color_map3.append('orange')
+        size_map3.append(10)
+        Source.append(node)
+        #labels[node] = IDs[idx]
+        for x in microgrids.keys():
+            if IDs[idx] in microgrids[x]:
+                if x not in sources_name.keys():
+                    sources_name[x] = []
+                sources_name[x].append(IDs[idx])
+    if "ld" in IDs[idx]:
+        if IDs[idx] in recorders:
+        #    ColorLegend["Recorder"] = "magenta"
+            color_map4.append('magenta')
+        else:
+        #    ColorLegend["Load"] = "yellow"
+            color_map4.append('yellow')
+        size_map4.append(20)
+        Load.append(node)
+        labels[node] = IDs[idx]
+        for x in microgrids.keys():
+            if IDs[idx] in microgrids[x]:
+                if x not in sources_loads.keys():
+                    sources_loads[x] = []
+                sources_loads[x].append(IDs[idx])
+    if IDs[idx] in MIM_switches: #"hvmv69s1b4" in IDs[idx] or "ln2001mt1" in IDs[idx] or "ln2001mt2" in IDs[idx]:
+        ss = IDs[idx].replace('swt_', '')
+        ss1 = ss.replace("_sw", "")
+        if IDs[idx] in recorders:
+        #    ColorLegend["Recorder"] = "magenta"
+            color_map.append('magenta')
+        else:
+        #    ColorLegend["Attacked switch"] = "red"
+            color_map.append('red')
+        size_map.append(20)
+        AttackedSwitch.append(node)
+    elif "swt" in IDs[idx]: #len(list(g2.in_edges(node))) > 1 or len(list(g2.out_edges(node))) > 1:
+        #set the node name as the key and the label as its value
+        ss = IDs[idx].replace('swt_', '')
+        ss1 = ss.replace("_sw", "")
+        if IDs[idx] in recorders:
+        #    ColorLegend["Recorder"] = "magenta"
+            color_map2.append('magenta')
+            size_map2.append(20)
+        else:
+        #    ColorLegend["switch"] = "green"
+            color_map2.append('green')
+            size_map2.append(5)
+        Switch.append(node)
+        labels[node] = IDs[idx]
+    else:
+        countii = 0
+        found = False
+        for x in microgrids.keys():
+            if IDs[idx] in microgrids[x]:
+                if IDs[idx] in recorders:
+                #    ColorLegend["Recorder"] = "magenta"
+                    color_map1.append('magenta')
+                else:
+                    ColorLegend[x] = color_list[countii]
+                    color_map1.append(color_list[countii])
+                found = True
+                break
+            countii = countii + 1
+        if IDs[idx] in recorders:
+            size_map1.append(20)
+        else:
+            size_map1.append(1)
+        Others.append(node)
+
+ax = f.add_subplot(1,1,1)
+for label in ColorLegend.keys():
+    ax.plot([0],[0],color=ColorLegend[label],label=label)
+
+
+print(sources_name)
+print("===========================")
+print(sources_loads)
+for i in sources_name.keys():
+    print(i + ":")
+    total_P = 0.0
+    total_Q = 0.0
+    for x in sources_name[i]:
+        if x in microgrid_source.keys():
+            total_P += float(microgrid_source[x][0])
+            if len(microgrid_source[x]) > 1:
+                total_Q += float(microgrid_source[x][1])
+    print(total_P)
+    print(total_Q)
+    print("")
+print("Loads")
+#microgrid_loads
+for i in sources_loads.keys():
+    print(i + ":")
+    total_P = 0.0
+    for x in sources_loads[i]:
+        if x in microgrid_loads.keys():
+            total_P += float(microgrid_loads[x][0])
+    print(total_P)
+    print("")
+
+"""
+nx.draw_networkx(g2, pos=pos1, nodelist=Others,arrows=False, node_color=color_map1, node_size=size_map1, node_shape="o", linewidths=2.0, font_size=5, font_weight='bold', with_labels=False)
+nx.draw_networkx(g2, pos=pos1, nodelist=Switch,arrows=False, node_color=color_map2, node_size=size_map2, node_shape="v", linewidths=2.0, font_size=5, font_weight='bold', with_labels=False)
+nx.draw_networkx(g2, pos=pos1, nodelist=AttackedSwitch,arrows=False, node_color=color_map, node_size=size_map, node_shape="*", linewidths=2.0, font_size=5, font_weight='bold', with_labels=False)
+nx.draw_networkx(g2, pos=pos1, nodelist=Source,arrows=False, node_color=color_map3, node_size=size_map3, node_shape="s", linewidths=2.0, font_size=5, font_weight='bold', with_labels=False)
+nx.draw_networkx(g2, pos=pos1, nodelist=Load,arrows=False, node_color=color_map4, node_size=size_map4, node_shape="x", linewidths=2.0, font_size=5, font_weight='bold', with_labels=False)
+plt.legend(prop={'size': 30})
+
+#nx.draw_networkx_labels(g2,pos1,labels, font_size=5,font_color='r')
+plt.savefig("g2.png", format="PNG")
+plt.clf()
+#save_graph(g2,"g2.png")
+"""
 
 num_group = len(list(microgrids.keys())) #int(sys.argv[1]) #len(list(microgrids.keys()))
 tt = {}
@@ -558,9 +653,6 @@ for x in sorted(list(dd.keys())):
             t["name"] = "MIM"+str(attID)
             cont = True
             AV = ""
-            AC = ""
-            AT = ""
-            SID = ""
             RV = ""
             NI = ""
             PI = ""
@@ -585,16 +677,10 @@ for x in sorted(list(dd.keys())):
                 Attack_Val = input ("What is the attack value of your chosen point? ")
                 Attack_Start = int(input("When does the attack start? "))
                 Attack_End = int(input("When does the attack end? "))
-                AttackChance = float(input("What is the attack chance of success? "))
-                scenarioID = input("What scenario id are you choosing? format: \"(a|b)\". For attack type 4, if you choose a then the attack value is set once and does not fluctuate. If you select b, the attack value is random fluctuated between the selected attack value and the real value. If you are choosing attack type 3, which is an attack done on switches, this input is not use. Please default to b: ")
-                attackType =  input("What attack type are you choosing? format: \"(3|4)\". 3 is the attack type that allows you to modify points that use strings as inputs like the status of a switch. 4 is the attack type that allows you to modify points that use numbers as inputs like the Pref value of inverters. ")
                 AV += Attack_Val + ","
                 RV += Real_val + ","
                 NI += NodeID + ","
                 PI += PointID + ","
-                SID += scenarioID + ","
-                AT += attackType + ","
-                AC += str(AttackChance) + ","
                 S.append(Attack_Start)
                 Ss += str(Attack_Start) + ","
                 E.append(Attack_End)
@@ -606,9 +692,8 @@ for x in sorted(list(dd.keys())):
             t["real_val"] = RV[:-1]
             t["node_id"] = NI[:-1]
             t["point_id"] = PI[:-1]
-            t["scenario_id"] = SID[:-1] 
-            t["attack_type"] = AT[:-1] 
-            t["attack_chance"] = AC[:-1]
+            t["scenario_id"] = input("What scenario id are you choosing? format: \"(a|b)\". For attack type 4, if you choose a then the attack value is set once and does not fluctuate. If you select b, the attack value is random fluctuated between the selected attack value and the real value. If you are choosing attack type 3, which is an attack done on switches, this input is not use. Please default to b: ")
+            t["attack_type"] = input("What attack type are you choosing? format: \"(3|4)\". 3 is the attack type that allows you to modify points that use strings as inputs like the status of a switch. 4 is the attack type that allows you to modify points that use numbers as inputs like the Pref value of inverters. ")
             t["Start"] = min(S)
             t["End"] = max(E)
 
@@ -622,11 +707,10 @@ for x in sorted(list(dd.keys())):
             t["point_id"] = "status"
             t["scenario_id"] = "b"
             t["attack_type"] = "3"
-            t["attack_chance"] = "1.0"
-            t["Start"] = "10"
-            t["End"] = "35"
-            t["PointStart"] = "10"
-            t["PointStop"] = "35"
+            t["Start"] = 10
+            t["End"] = 35
+            t["PointStart"] = 10
+            t["PointStop"] = 35
     else:
         t["name"] = "MIM"+ str(int(c.replace("SS_", ""))-1)
         t["attack_val"] = "TRIP"
@@ -635,7 +719,6 @@ for x in sorted(list(dd.keys())):
         t["point_id"] = "status"
         t["scenario_id"] = "b"
         t["attack_type"] = "3"
-        t["attack_chance"] = "1.0"
         t["Start"] = 10
         t["End"] = 35
         t["PointStart"] = 10
