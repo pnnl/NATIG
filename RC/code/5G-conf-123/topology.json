@@ -127,66 +127,6 @@
 		  "y":250,
 		  "error":"0.001"
 	  }
-    ],
-    "ConnectionMIMToUE":[
-                {
-                        "name": 0,
-                        "connections":[
-                                0,
-                                1
-                        ]
-                },
-                {
-                        "name": 1,
-                        "connections":[
-                                0,
-                                1,
-                                2
-                        ]
-                },
-                {
-                        "name": 2,
-                        "connections":[
-                                1,
-                                2,
-                                3
-                        ]
-                },
-                {
-                        "name": 3,
-                        "connections":[
-                                2,
-                                3
-                        ]
-                }
-        ],
-	"ConnectionSubToMIM": [
-                {
-                        "name": 0,
-                        "connections":[
-                                0,
-                                1
-                        ]
-                },
-                {
-                        "name": 1,
-                        "connections":[
-                                1,
-                                2
-                        ]
-                },
-                {
-                        "name": 2,
-                        "connections":[
-                                2
-                        ]
-                },
-                {
-                        "name": 3,
-                        "connections":[
-                                3
-                        ]
-                }
-        ]
+    ]
 
 }
