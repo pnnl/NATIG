@@ -974,8 +974,6 @@ main (int argc, char *argv[])
       dnp3MIM1.SetAttribute("JitterMaxNs", DoubleValue (1000));
       dnp3MIM1.SetAttribute("isMaster", BooleanValue (false));
       dnp3MIM1.SetAttribute ("Name", StringValue (enamestring));
-      dnp3MIM1.SetAttribute ("ID", UintegerValue(MIM_ID));
-      dnp3MIM1.SetAttribute ("AttackConf", StringValue(configFileName));
       dnp3MIM1.SetAttribute("MasterDeviceAddress", UintegerValue(1));
       dnp3MIM1.SetAttribute("StationDeviceAddress", UintegerValue(2));
       dnp3MIM1.SetAttribute("IntegrityPollInterval", UintegerValue (10));
