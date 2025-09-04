@@ -1650,6 +1650,9 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
      std::vector<std::string> nodes = get_val_vector (delimiter, node_id);
      std::vector<std::string> points = get_val_vector (delimiter, point_id);
      std::vector<std::string> real_val = get_val_vector (delimiter, RealVal);
+     std::string loc = std::getenv("RD2C");
+     std::string out_csv = loc + "/integration/control/attack.csv";
+     std::stringstream netStatsOut2;
      std::vector<std::string> nodesPoints;
      std::cout << "node_id " << node_id << " real_val " << RealVal << std::endl;	      
      for (int xx = 0; xx < nodes.size(); xx++){
@@ -1731,8 +1734,9 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 	      }else{
 		  for (int qq = 0; qq < ID_point.size(); qq++){
 		     std::cout << Simulator::Now ().GetSeconds () << " " << start[qq] << " " << stop[qq] << "1111111111111111111" << std::endl;
-		     float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX); 
-		     if (Simulator::Now ().GetSeconds () > start[qq] and Simulator::Now ().GetSeconds () < stop[qq] and attackChance[qq] > r){ 
+		     float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		     if (Simulator::Now ().GetSeconds () > start[qq] and Simulator::Now ().GetSeconds () < stop[qq] and attackChance[qq] > r){
+		     netStatsOut2 << Simulator::Now ().GetSeconds () << " " <<  ID_point[qq] << " SUCCESS"  <<  " " << attackType[qq] << endl; 
 	             //m_attackType = attackType[qq];
 	             if(int(attackType[qq]) == 2 and (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) {
                           NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
@@ -1817,6 +1821,11 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 		         m_p->direct_operate(false,ao);
 	              }
 		    }else{
+		      if (attackChance[qq] < r){
+		          netStatsOut2 << Simulator::Now ().GetSeconds () << " " <<  ID_point[qq] << " FAILED" << " "  << attackType[qq] << endl;
+		      }else{
+                          netStatsOut2 << Simulator::Now ().GetSeconds () << " " <<  ID_point[qq] << " NO ATTACK" << " " <<attackType[qq]  << endl;
+		      }
                       if (!real_val[qq].empty() && std::find_if(real_val[qq].begin(),real_val[qq].end(), [](unsigned char c) { return !std::isdigit(c); }) == real_val[qq].end()){
 				std::cout << real_val[qq] << std::endl;
 				float f = std::stof(real_val[qq]); //get_val(val, val_min, val_max, qq);	
@@ -1838,7 +1847,14 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 					m_p->direct_operate(false, ao);
 				}
 			}
-		    }
+		     }
+	             FILE * pFile;
+                     pFile = fopen (out_csv.c_str(),"a");
+                     if (pFile!=NULL)
+                     {
+                        fprintf(pFile, netStatsOut2.str().c_str());
+                        fclose (pFile);
+                     }
 		     if (int(attackType[qq]) == 3 or int(attackType[qq]) == 4 or (int(attackType[qq]) == 2 and not (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) ){
                        send_directly(packet);
                      }
