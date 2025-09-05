@@ -249,6 +249,7 @@ private:
   void initConfig(void);
   void makeTcpConnection(void);
   void makeUdpConnection(void);
+  void resetToRealValue(int pointId, const std::string& realValue);
   void save_data(Ptr<Socket> socket, Ptr<Packet> packet, Address from);
   //void handle_inside(Ptr<Socket> socket);
   void handle_MIM(Ptr<Socket> socket);

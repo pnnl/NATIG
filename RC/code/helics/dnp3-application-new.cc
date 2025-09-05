@@ -1596,353 +1596,330 @@ float Dnp3ApplicationNew::get_val(std::vector<std::string> val, std::vector<std:
 }
 
 void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
-  Address from;
-  Ptr<Packet> packet;
-  Address SourceAddr;
-  socket->GetSockName(SourceAddr);
-  Uptime_t timeRxd = 0;
-  while ((packet = socket->RecvFrom (from)))
-    {
-     m_txTrace(packet);
-     //Getting the packet information
-     NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
-     uint32_t size = packet->GetSize();
-     uint8_t *temp = new uint8_t[size];
-     packet->CopyData(temp, size);
-     NS_LOG_INFO ("MIMServer::HandleRead >>> MIM IP" << SourceAddr ); //<< " Forwarding packet to " << destAddr);
-     Bytes buf((unsigned char*) temp, (unsigned char*)temp+size);
-     
-     //Getting the data for the man in the middle attack
-     //start
-     Ptr<Packet> testPack = packet->Copy();
-     uint32_t size2 = testPack->GetSize();
-     uint8_t *temp2 = new uint8_t[size2];
-     testPack->CopyData(temp2, size2);
-     Bytes buf2((unsigned char*) temp2, (unsigned char*)temp2+size2);
-     //end
-     Bytes emptyData;
-     Ptr<Packet> packet_mitm;
-     NS_LOG_INFO("End of setup before if statement");
+    Address from;
+    Ptr<Packet> packet;
+    Address SourceAddr;
+    socket->GetSockName(SourceAddr);
 
-     int start1;
-     AppSeqNum_t seq;
-     std::vector<uint8_t> mapping;
-     for (int k = 0; k < size2; k++){
-         mapping.push_back(temp2[k]);
-     }
-     int size_temp = buf.size();
-     Bytes buf_temp;
-     std::cout << "node_id " << node_id << std::endl;
+    while ((packet = socket->RecvFrom(from))) {
+        m_txTrace(packet);
+        std::cout << "MIMServer::HandleRead >>> Processing packet at time " << Simulator::Now().GetSeconds() << "s. MIM IP: " << SourceAddr << std::endl;
 
-     if(buf.size() >= Lpdu::HEADER_SIZE) {
-	     NS_LOG_INFO("After if statement");
-	     start1 = buf[0];
-	     NS_LOG_INFO("Getting the first item of buf");
-	     seq = buf[11] & 0x0f;
-	     NS_LOG_INFO (seq);
-     }
+        // Extract packet data
+        uint32_t size = packet->GetSize();
+        uint8_t* temp = new uint8_t[size];
+        packet->CopyData(temp, size);
+        Bytes buf((unsigned char*)temp, (unsigned char*)temp + size);
 
-     //getting the data formatted
-     std::string delimiter = ",";
-     std::vector<std::string> val = get_val_vector (delimiter, m_attack_point_val);
-     std::vector<std::string> val_min = get_val_vector (delimiter, m_attack_min);
-     std::vector<std::string> val_max = get_val_vector (delimiter, m_attack_max);
-     std::vector<std::string> nodes = get_val_vector (delimiter, node_id);
-     std::vector<std::string> points = get_val_vector (delimiter, point_id);
-     std::vector<std::string> real_val = get_val_vector (delimiter, RealVal);
-     std::string loc = std::getenv("RD2C");
-     std::string out_csv = loc + "/integration/control/attack.csv";
-     std::stringstream netStatsOut2;
-     std::vector<std::string> nodesPoints;
-     std::cout << "node_id " << node_id << " real_val " << RealVal << std::endl;	      
-     for (int xx = 0; xx < nodes.size(); xx++){
-	     nodesPoints.push_back(nodes[xx] + "$"+ points[xx]);
-     }
-     
-     std::vector<int> ID_point;
-     for (int qq = 0; qq < nodesPoints.size(); qq++){
-	     std::cout << "Searching for point " << nodesPoints[qq]  << " qq = " << qq<< std::endl;
-	     bool ffound = false; 
-	     std::cout << "Number of points " << nodesPoints.size() << std::endl;
-	     for (int i = 0; i < analog_point_names.size(); i++){
-                     std::cout << "ID: " << analog_point_names[i] << " : " << i << std::endl;
-                     bool flag = 0;
-                     if (analog_point_names[i].find(nodesPoints[qq]) != std::string::npos){ // and !flag){
-                             std::cout << "Found Analog point " << nodesPoints[qq] << " : " << analog_point_names[i] << " : " << i << std::endl;
-                             ID_point.push_back(i);
-                             break;
-                     }
-             }
+        // Copy packet for detailed processing
+        Ptr<Packet> testPack = packet->Copy();
+        uint32_t size2 = testPack->GetSize();
+        uint8_t* temp2 = new uint8_t[size2];
+        testPack->CopyData(temp2, size2);
+        Bytes buf2((unsigned char*)temp2, (unsigned char*)temp2 + size2);
 
-	     for (int i = 0; i < binary_point_names.size(); i++){
-		     std::cout << "ID: " << binary_point_names[i] << " : " << i << std::endl;
-		     bool flag = 0;
-		     if(binary_point_names[i].find(nodesPoints[qq]) != std::string::npos){ // and !flag){
-			     std::cout << "Found Binary point " << nodesPoints[qq] << " : " << binary_point_names[i] << " : " << i << std::endl;
-			     ID_point.push_back(i);
-			     ffound = true;
-			     break;
-		     }
-	     }
-	     /*if (ffound){
-                  break;
-	     }*/
-     }
-     if(mitm_flag == true) {
-	  Json::Value configObject;
-	  std::map<std::string, std::string> attack;
-	  if (configFile.find("NA") == std::string::npos and ID_point.size()>0){
-			readMicroGridConfig(configFile, configObject);
-			for (uint32_t j = 1; j < configObject["MIM"].size(); j++){
-				for(const auto& item : configObject["MIM"][j].getMemberNames() ){
-					std::string ID = "MIM-"+std::to_string(j)+"-"+item;
-					std::string my_str = configObject["MIM"][j][item].asString();
+        // Extract header information if packet size is sufficient
+        int start1 = 0;
+        AppSeqNum_t seq = 0;
+        if (buf.size() >= Lpdu::HEADER_SIZE) {
+            start1 = buf[0];
+            seq = buf[11] & 0x0f;
+            // Cast seq to int to avoid non-printable character display issues
+            std::cout << "Packet header processed. Start: " << start1 << ", Sequence: " << static_cast<int>(seq) << std::endl;
+        }
 
-					my_str.erase(remove(my_str.begin(), my_str.end(), '"'), my_str.end());
-					std::cout << "This is the keys value: " << ID << "  and the value is " << my_str << std::endl;
-					attack.insert(pair<std::string,std::string >(ID, my_str));
-				}
+        // Parse attack configuration and point data
+        std::string delimiter = ",";
+        std::vector<std::string> val = get_val_vector(delimiter, m_attack_point_val);
+        std::vector<std::string> val_min = get_val_vector(delimiter, m_attack_min);
+        std::vector<std::string> val_max = get_val_vector(delimiter, m_attack_max);
+        std::vector<std::string> nodes = get_val_vector(delimiter, node_id);
+        std::vector<std::string> points = get_val_vector(delimiter, point_id);
+        std::vector<std::string> real_val = get_val_vector(delimiter, RealVal);
 
-			}
-	  }
-          uint16_t dest = buf[5] << 0x08 | buf[4]; //To check
-          uint16_t src = buf[7] << 0x08 | buf[6];
-	  //m_attackChance
-	  std::cout << "Before getVal" << std::endl;
-	  std::vector<float> attackChance = GetVal(attack, "attack_chance");
-          if(m_attack_on and ((start1 == 0x05) && (0x64))) {
-	      //Setting the dest and src
-	      Lpdu::UserData data;
-	      data.dest = dest;
-	      data.src = src;
-	      std::cout << "Dest: " << data.dest << " src: " << data.src << std::endl;
-              //Setting up the attack scenario
-	      std::vector<float> start = GetVal(attack, "PointStart");
-              std::vector<float> stop = GetVal(attack, "PointStop");
-              std::vector<float> attackType = GetVal(attack, "attack_type");
-	      if (m_isMaster){
-		  NS_LOG_INFO("Am I the master?");
-	      } else if(attackType.size() == 1 and attackType[0] == 1) {
-                  NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Routing process is terminated by Man in the middle");
-              } else if(attackType.size() == 1 and attackType[0] == 5) {
-	          NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
-	          NS_LOG_INFO ("MIMServer::HandleRead >>> MIM IP" << SourceAddr ); //<< " Forwarding packet to " << destAddr);
-	          NS_LOG_INFO("End of setup before if statement");
-	          NS_LOG_INFO("========================\n");
-	          o_p->transmitZeroResponse(data, analog_points, bin_points, seq);
+        // Build node-point mappings
+        std::vector<std::string> nodesPoints;
+        for (size_t xx = 0; xx < nodes.size(); xx++) {
+            nodesPoints.push_back(nodes[xx] + "$" + points[xx]);
+        }
 
-	      }else{
-		  for (int qq = 0; qq < ID_point.size(); qq++){
-		     std::cout << Simulator::Now ().GetSeconds () << " " << start[qq] << " " << stop[qq] << "1111111111111111111" << std::endl;
-		     float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		     if (Simulator::Now ().GetSeconds () > start[qq] and Simulator::Now ().GetSeconds () < stop[qq] and attackChance[qq] > r){
-		     netStatsOut2 << Simulator::Now ().GetSeconds () << " " <<  ID_point[qq] << " SUCCESS"  <<  " " << attackType[qq] << endl; 
-	             //m_attackType = attackType[qq];
-	             if(int(attackType[qq]) == 2 and (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) {
-                          NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
-                          NS_LOG_INFO ("MIMServer::HandleRead >>> MIM IP" << SourceAddr ); //<< " Forwarding packet to " << destAddr);
-                          NS_LOG_INFO("End of setup before if statement");
-		          NS_LOG_INFO("========================\n");
-		          NS_LOG_INFO("transmitting 0 data!!!!!!!!!!!!!!!!!");
-		          // changing one of the points
-			  std::cout << "Searching for point " << ID_point[qq]  << " qq = " << qq<< std::endl;
-			  std::cout << "Number of points " << ID_point.size() << std::endl;
-			  //index to check how many indexes are between each 1
-			  int ind1 = 0;
-			  //index to check if there is a crc check happening
-			  int ind2 = 0;
-			  four = start_byte(temp2, testPack);
-			  std::cout << "After the start bytes" << std::endl;
-			  float f = get_val(val, val_min, val_max, qq); 
-			  std::cout << "After the get_val" << std::endl;
-			  char *cc = (char *) &f;
-			  int d = 0;
-			  for (int i= 0; i < buf2.size(); i ++){
-				  if (i>9){
-					  if (i > 19){
-    						  if (temp2[i] != 0x01 and ind2 < 16){
-							  ind1 += 1;
-							  //four += 1;
-				                  }
-    						  if(temp2[i] == 0x01){
-							  four += 1;
-    						  }
-    						  if(ind2 == 0){
-							  ind1 = 0;
-    						  }
-						  
-					  }
-					  if (ind2 < 18){
-	   					  ind2 += 1;
-					  }else{
-	   					  ind2 = 0;
-					  }
-    				  }
-    				  if (ind2 == 0 and i > 19){
-					  std::cout << "Found data crc check " << ind1 << " ID of point " << ID_point[qq] << std::endl;
-    				  }
-    				  if (( four > 0 ) && (four == ID_point[qq]) && (ind2 <= 18) && (i>19) && temp2[i] != 0x01){
- 					  temp2[i] = cc[d]; 
-					  d += 1;
-    				  }
-			  }
-                      } else if(int(attackType[qq]) == 3) {
-		           NS_LOG_UNCOND ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
-		           NS_LOG_UNCOND ("MIMServer::HandleRead >>> MIM IP" << SourceAddr ); //<< " Forwarding packet to " << destAddr);
-		           NS_LOG_UNCOND ("End of setup before if statement");
-	                   NS_LOG_UNCOND ("========================\n");
-		           std::cout << binary_point_names.size() << endl;
-		           std::cout << "I will look through the available point during ATTACK 3" << std::endl;
-			   std::cout << "Searching for point " << ID_point[qq]  << " qq = " << qq<< std::endl;
-			   std::cout << "val[x] " << val[qq] << std::endl;
-			   if (val[qq].find("TRIP") != std::string::npos){
-				   ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::TRIP, ID_point[qq]);
-				   m_p->direct_operate(false,ao);
-			   }else if (val[qq].find("CLOSE") != std::string::npos){
-				   ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::CLOSE, ID_point[qq]);
-				   m_p->direct_operate(false, ao);
-			   }else if (val[qq].find("LATCH_ON") != std::string::npos){
-				   ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::LATCH_ON, ID_point[qq]);
-				   m_p->direct_operate(false, ao);
-			   }else if (val[qq].find("LATCH_OFF") != std::string::npos){
-				   ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::LATCH_OFF, ID_point[qq]);
-				   m_p->direct_operate(false, ao);
-			   }
-	              }else if (int(attackType[qq]) == 4){
-	                 NS_LOG_INFO ("MIMServer::HandleRead >>> Attack is ON. Sending 0 payload by Man in the middle");
-		         std::cout << "HandleRead MIM intersepted " << temp << std::endl;
-	                 NS_LOG_UNCOND("sending false data to the controller");
-	                 NS_LOG_UNCOND("SENDING TO MICROGRIDS");
-	                 NS_LOG_UNCOND ("DNP3Application::send_control_analog");
-	 		 std::cout << "Searching for point " << ID_point[qq]  << " qq = " << qq<< std::endl;
-			 float f = get_val(val, val_min, val_max, qq);
-			 std::cout << "f = " << f << std::endl; 
-		         Bit32AnalogOutput ao(f*1000, ID_point[qq]);
-		         m_p->direct_operate(false,ao);
-	              }
-		    }else{
-		      if (attackChance[qq] < r){
-		          netStatsOut2 << Simulator::Now ().GetSeconds () << " " <<  ID_point[qq] << " FAILED" << " "  << attackType[qq] << endl;
-		      }else{
-                          netStatsOut2 << Simulator::Now ().GetSeconds () << " " <<  ID_point[qq] << " NO ATTACK" << " " <<attackType[qq]  << endl;
-		      }
-                      if (!real_val[qq].empty() && std::find_if(real_val[qq].begin(),real_val[qq].end(), [](unsigned char c) { return !std::isdigit(c); }) == real_val[qq].end()){
-				std::cout << real_val[qq] << std::endl;
-				float f = std::stof(real_val[qq]); //get_val(val, val_min, val_max, qq);	
-				std::cout << "f = " << f << std::endl;
-				Bit32AnalogOutput ao(f*1000, ID_point[qq]);
-				m_p->direct_operate(false,ao);
-			}else{
-				if (real_val[qq].find("TRIP") != std::string::npos){
-					ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::TRIP, ID_point[qq]);
-					m_p->direct_operate(false,ao);
-				}else if (real_val[qq].find("CLOSE") != std::string::npos){
-					ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::CLOSE, ID_point[qq]);
-					m_p->direct_operate(false, ao);
-				}else if (real_val[qq].find("LATCH_ON") != std::string::npos){
-					ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::LATCH_ON, ID_point[qq]);
-					m_p->direct_operate(false, ao);
-				}else if (real_val[qq].find("LATCH_OFF") != std::string::npos){
-					ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::LATCH_OFF, ID_point[qq]);
-					m_p->direct_operate(false, ao);
-				}
-			}
-		     }
-	             FILE * pFile;
-                     pFile = fopen (out_csv.c_str(),"a");
-                     if (pFile!=NULL)
-                     {
-                        fprintf(pFile, netStatsOut2.str().c_str());
-                        fclose (pFile);
-                     }
-		     if (int(attackType[qq]) == 3 or int(attackType[qq]) == 4 or (int(attackType[qq]) == 2 and not (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) ){
-                       send_directly(packet);
-                     }
-                     else if(int(attackType[qq]) == 2 and (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) {
-                          for(int i = 0; i < buf2.size(); i++){
-                               appendUINT8(buf_temp, temp2[i]);
-                          }
-                          //calculate the crc values for the header and the points
-                          calc_crc(buf_temp, temp2, testPack);
+        // Map node-points to IDs for analog and binary points
+        std::vector<int> ID_point;
+        for (const auto& nodePoint : nodesPoints) {
+            bool found = false;
+            for (size_t i = 0; i < analog_point_names.size(); i++) {
+                if (analog_point_names[i].find(nodePoint) != std::string::npos) {
+                    ID_point.push_back(i);
+                    found = true;
+                    std::cout << "Mapped point " << nodePoint << " to analog ID " << i << " (name: " << analog_point_names[i] << ")" << std::endl;
+                    break;
+                }
+            }
+            if (!found) {
+                for (size_t i = 0; i < binary_point_names.size(); i++) {
+                    if (binary_point_names[i].find(nodePoint) != std::string::npos) {
+                        ID_point.push_back(i);
+                        std::cout << "Mapped point " << nodePoint << " to binary ID " << i << " (name: " << binary_point_names[i] << ")" << std::endl;
+                        if (binary_point_names[i].find("sw") != std::string::npos || binary_point_names[i].find("switch") != std::string::npos) {
+                            std::cout << "Note: Point ID " << i << " appears to be a switch, likely controllable in GridLAB-D." << std::endl;
+			found = true;
+                        } else {
+                            std::cout << "Warning: Point ID " << i << " may not be a controllable switch in GridLAB-D. Attack may fail if not supported." << std::endl;
+                        }
+                        break;
+                    }
+                }
+            }
+            if (!found) {
+                std::cout << "Warning: Could not map point " << nodePoint << " to any ID in analog or binary point names. Attack may fail for this point." << std::endl;
+            }
+        }
+        std::cout << "Mapped " << ID_point.size() << " points for attack processing." << std::endl;
 
-                          int point_num = 0;
-                          for(int i = 0; i < buf.size(); i++){
-                             std::cout << (int)temp2[i] << ", ";
-                             if ((int)temp2[i] == 1 && point_num < 16){
-                                point_num = i;
-                             }
-                           }
-                           std::cout << std::endl;
-                           Ptr<Packet> newPack = Create<Packet>(temp2, testPack->GetSize());
-                           send_directly(newPack);
-                           std::cout << "I have found start at " << point_num << std::endl;
-                      }
-		  }
-	      }
-          } else {
-		std::cout << "HandleRead Insider" << temp << std::endl;
-		std::cout << "MIM-ATTACKER!!!!!!!!!!!!!!! " << dest << " " << src << std::endl;
-		//Reading updates to the start and end time of the grid.json file
-		if (configFile.find("NA") == std::string::npos and ID_point.size()>0){
-			// If start is not in start vector then trigger start update
-			// attack["MIM-"+std::to_string(MIM_ID)+"-Start"]
-			if (std::find(StartVect.begin(), StartVect.end(), attack["MIM-"+std::to_string(MIM_ID)+"-Start"]) == StartVect.end()) {
-				std::cout << attack["MIM-"+std::to_string(MIM_ID)+"-Start"] << " is not in the vector.\n";
-				std::cout << "Start threads ----------------------" << std::endl;
-				Simulator::Schedule(Seconds(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-Start"])), &Dnp3ApplicationNew::set_attack, this, true);
-				StartVect.push_back(attack["MIM-"+std::to_string(MIM_ID)+"-Start"]);
-			} else {
-				std::cout << attack["MIM-"+std::to_string(MIM_ID)+"-Start"] << " is in the vector.\n";
-			}
-			
-			if (std::find(StopVect.begin(), StopVect.end(), attack["MIM-"+std::to_string(MIM_ID)+"-End"]) == StopVect.end()) {
-				std::cout << attack["MIM-"+std::to_string(MIM_ID)+"-End"] << " is not in the vector.\n";
-				std::cout << "End threads ----------------------" << std::endl;
-				Simulator::Schedule(Seconds(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-End"])), &Dnp3ApplicationNew::set_attack, this, true);
-				StopVect.push_back(attack["MIM-"+std::to_string(MIM_ID)+"-End"]);
-			} else {
-				std::cout << attack["MIM-"+std::to_string(MIM_ID)+"-End"] << " is in the vector.\n";
-			}
-		}
-		//std::vector<std::string> real_val = get_val_vector (delimiter, RealVal);
-		std::cout << "The number of real values collected is: " << real_val.size() << std::endl;
-		for (int qq = 0; qq < ID_point.size(); qq++){
-			std::cout << "I AM HERE" << std::endl;
-			std::cout << "Searching for point " << ID_point[qq]  << " qq = " << qq<< std::endl;
-			std::cout << "real_val[qq] " << real_val[qq] << std::endl;
-			if (!real_val[qq].empty() && std::find_if(real_val[qq].begin(),real_val[qq].end(), [](unsigned char c) { return !std::isdigit(c); }) == real_val[qq].end()){
-				std::cout << real_val[qq] << std::endl;
-				float f = std::stof(real_val[qq]); //get_val(val, val_min, val_max, qq);	
-				std::cout << "f = " << f << std::endl;
-				Bit32AnalogOutput ao(f*1000, ID_point[qq]);
-				m_p->direct_operate(false,ao);
-			}else{
-				if (real_val[qq].find("TRIP") != std::string::npos){
-					ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::TRIP, ID_point[qq]);
-					m_p->direct_operate(false,ao);
-				}else if (real_val[qq].find("CLOSE") != std::string::npos){
-					ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::CLOSE, ID_point[qq]);
-					m_p->direct_operate(false, ao);
-				}else if (real_val[qq].find("LATCH_ON") != std::string::npos){
-					ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::LATCH_ON, ID_point[qq]);
-					m_p->direct_operate(false, ao);
-				}else if (real_val[qq].find("LATCH_OFF") != std::string::npos){
-					ControlOutputRelayBlock ao(ControlOutputRelayBlock::Code::LATCH_OFF, ID_point[qq]);
-					m_p->direct_operate(false, ao);
-				}
-			}
-		}
-	   }
-	   if (dest == 1){
-		 send_directly(packet);
-	   }
-	   else{
-		 send_directly_server(packet);
-	   }
-         
-      } else {
-          NS_LOG_INFO ("MIMServer::HandleRead >>> Man in the middle node is the final destination.");
-      }
+        // Handle MITM attack if flag is active
+        if (mitm_flag) {
+            Json::Value configObject;
+            std::map<std::string, std::string> attack;
+            if (configFile.find("NA") == std::string::npos && !ID_point.empty()) {
+                readMicroGridConfig(configFile, configObject);
+                for (uint32_t j = 1; j < configObject["MIM"].size(); j++) {
+                    for (const auto& item : configObject["MIM"][j].getMemberNames()) {
+                        std::string ID = "MIM-" + std::to_string(j) + "-" + item;
+                        std::string my_str = configObject["MIM"][j][item].asString();
+                        my_str.erase(remove(my_str.begin(), my_str.end(), '"'), my_str.end());
+                        attack.insert({ID, my_str});
+                    }
+                }
+            }
+
+            uint16_t dest = (buf.size() >= 6) ? (buf[5] << 0x08 | buf[4]) : 0;
+            uint16_t src = (buf.size() >= 8) ? (buf[7] << 0x08 | buf[6]) : 0;
+
+            // Initialize logging stream for attack status
+            std::stringstream netStatsOut;
+            bool hasLogData = false; // Flag to check if there's data to write to CSV
+
+            std::vector<float> attackChance = GetVal(attack, "attack_chance");
+            std::cout << "Retrieved " << attackChance.size() << " attack_chance values." << std::endl;
+            for (size_t i = 0; i < attackChance.size(); i++) {
+                std::cout << "attack_chance[" << i << "] = " << attackChance[i] << std::endl;
+            }
+
+            std::vector<float> start = GetVal(attack, "PointStart");
+            std::cout << "Retrieved " << start.size() << " PointStart values." << std::endl;
+            for (size_t i = 0; i < start.size(); i++) {
+                std::cout << "PointStart[" << i << "] = " << start[i] << std::endl;
+            }
+
+            std::vector<float> stop = GetVal(attack, "PointStop");
+            std::cout << "Retrieved " << stop.size() << " PointStop values." << std::endl;
+            for (size_t i = 0; i < stop.size(); i++) {
+                std::cout << "PointStop[" << i << "] = " << stop[i] << std::endl;
+            }
+
+            std::vector<float> attackType = GetVal(attack, "attack_type");
+            std::cout << "Retrieved " << attackType.size() << " attack_type values." << std::endl;
+            for (size_t i = 0; i < attackType.size(); i++) {
+                std::cout << "attack_type[" << i << "] = " << attackType[i] << std::endl;
+            }
+
+            if (m_attack_on && start1 == 0x05 && 0x64) {
+                Lpdu::UserData data;
+                data.dest = dest;
+                data.src = src;
+                std::cout << "Attack active at time " << Simulator::Now().GetSeconds() << "s. Dest: " << data.dest << ", Src: " << data.src << std::endl;
+
+                for (size_t qq = 0; qq < ID_point.size(); qq++) {
+                    double currentTime = Simulator::Now().GetSeconds();
+                    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    // Ensure attackChance, start, and stop have enough entries
+                    float chance = (qq < attackChance.size()) ? attackChance[qq] : 0.0f;
+                    float startTime = (qq < start.size()) ? start[qq] : 0.0f;
+                    float stopTime = (qq < stop.size()) ? stop[qq] : 0.0f;
+                    float type = (qq < attackType.size()) ? attackType[qq] : 0.0f;
+
+                    if (currentTime > startTime && currentTime < stopTime && chance > r) {
+                        netStatsOut << currentTime << " " << ID_point[qq] << " SUCCESS " << type << std::endl;
+                        hasLogData = true;
+                        int attackTypeInt = static_cast<int>(type);
+                        std::cout << "Applying attack type " << attackTypeInt << " on point " << ID_point[qq] << " at time " << currentTime << "s" << std::endl;
+
+                        if (attackTypeInt == 2 && (testPack->GetSize() == 274 || testPack->GetSize() >= 195)) {
+                            std::cout << "Attack Type 2: Modifying payload for point " << ID_point[qq] << std::endl;
+                            float f = get_val(val, val_min, val_max, qq);
+                            std::cout << "Attack value set to " << f << " for point " << ID_point[qq] << std::endl;
+                            char* cc = (char*)&f;
+                            int d = 0, four = 0, ind1 = 0, ind2 = 0;
+
+                            four = start_byte(temp2, testPack);
+                            for (size_t i = 0; i < buf2.size(); i++) {
+                                if (i > 9) {
+                                    if (i > 19) {
+                                        if (temp2[i] != 0x01 && ind2 < 16) ind1++;
+                                        if (temp2[i] == 0x01) four++;
+                                        if (ind2 == 0) ind1 = 0;
+                                    }
+                                    ind2 = (ind2 < 18) ? ind2 + 1 : 0;
+                                }
+                                if (ind2 == 0 && i > 19) {
+                                    std::cout << "Found data CRC check at index " << ind1 << " for point ID " << ID_point[qq] << std::endl;
+                                }
+                                if (four > 0 && four == ID_point[qq] && ind2 <= 18 && i > 19 && temp2[i] != 0x01) {
+                                    temp2[i] = cc[d++];
+                                    std::cout << "Modified byte at index " << i << " to value " << (int)temp2[i] << std::endl;
+                                }
+                            }
+                            Bytes buf_temp;
+                            for (size_t i = 0; i < buf2.size(); i++) {
+                                appendUINT8(buf_temp, temp2[i]);
+                            }
+                            calc_crc(buf_temp, temp2, testPack);
+                            Ptr<Packet> newPack = Create<Packet>(temp2, testPack->GetSize());
+                            std::cout << "Sending modified packet for attack type 2 on point " << ID_point[qq] << " at time " << currentTime << "s" << std::endl;
+                            send_directly(newPack);
+                        } else if (attackTypeInt == 3) {
+                            std::cout << "Attack Type 3: Sending control command for point " << ID_point[qq] << std::endl;
+                            ControlOutputRelayBlock::Code code;
+                            std::string commandStr;
+                            if (val[qq].find("TRIP") != std::string::npos) {
+                                code = ControlOutputRelayBlock::Code::TRIP;
+                                commandStr = "TRIP";
+                            } else if (val[qq].find("CLOSE") != std::string::npos) {
+                                code = ControlOutputRelayBlock::Code::CLOSE;
+                                commandStr = "CLOSE";
+                            } else if (val[qq].find("LATCH_ON") != std::string::npos) {
+                                code = ControlOutputRelayBlock::Code::LATCH_ON;
+                                commandStr = "LATCH_ON";
+                            } else if (val[qq].find("LATCH_OFF") != std::string::npos) {
+                                code = ControlOutputRelayBlock::Code::LATCH_OFF;
+                                commandStr = "LATCH_OFF";
+                            } else {
+                                std::cout << "Invalid command for attack type 3 on point " << ID_point[qq] << ". Skipping." << std::endl;
+                                continue;
+                            }
+                            std::cout << "Command: " << commandStr << std::endl;
+                            ControlOutputRelayBlock ao(code, ID_point[qq]);
+                            m_p->direct_operate(false, ao);
+                            std::cout << "Sent direct operate command for attack type 3 on point " << ID_point[qq] << " with command " << commandStr << " at time " << currentTime << "s. Check if GridLAB-D acknowledges this point and command." << std::endl;
+                        } else if (attackTypeInt == 4) {
+                            std::cout << "Attack Type 4: Sending false analog data for point " << ID_point[qq] << std::endl;
+                            float f = get_val(val, val_min, val_max, qq);
+                            std::cout << "Analog attack value: " << f << std::endl;
+                            Bit32AnalogOutput ao(f * 1000, ID_point[qq]);
+                            m_p->direct_operate(false, ao);
+                            std::cout << "Sent direct operate analog value for attack type 4 on point " << ID_point[qq] << " at time " << currentTime << "s. Check if GridLAB-D acknowledges this point and value." << std::endl;
+                        }
+                    } else {
+                        // Log reason for not applying attack
+                        std::string status = (chance < r) ? "FAILED" : "NO ATTACK";
+                        std::string reason = (currentTime <= startTime) ? "Before start time" : (currentTime >= stopTime) ? "After stop time" : "Chance failed";
+                        netStatsOut << currentTime << " " << ID_point[qq] << " " << status << " " << type << std::endl;
+                        hasLogData = true;
+                        std::cout << "Attack not applied for point " << ID_point[qq] << " at time " << currentTime << "s. Status: " << status << ". Reason: " << reason << ". Scheduling reset." << std::endl;
+                        // Delay reset slightly to ensure attack data (if any) is processed by GridLAB-D
+                        Simulator::Schedule(Seconds(0.1), &Dnp3ApplicationNew::resetToRealValue, this, ID_point[qq], real_val[qq]);
+                    }
+                }
+
+                // Forward packet if attack type does not modify data directly
+                if (attackType.empty() || (static_cast<int>(attackType[0]) != 2 || (testPack->GetSize() != 274 && testPack->GetSize() < 195))) {
+                    std::cout << "Forwarding unmodified packet at time " << Simulator::Now().GetSeconds() << "s" << std::endl;
+                    send_directly(packet);
+                }
+            } else {
+                // Attack not active, log status for all points
+                std::cout << "Attack not active at time " << Simulator::Now().GetSeconds() << "s (m_attack_on: " << (m_attack_on ? "true" : "false") << ", start1: " << start1 << "). Logging status for all points." << std::endl;
+                double currentTime = Simulator::Now().GetSeconds();
+                for (size_t qq = 0; qq < ID_point.size(); qq++) {
+                    float type = (qq < attackType.size()) ? attackType[qq] : 0.0f;
+                    netStatsOut << currentTime << " " << ID_point[qq] << " NO ATTACK " << type << std::endl;
+                    hasLogData = true;
+                    // Delay reset to ensure any prior attack data is processed by GridLAB-D
+                    Simulator::Schedule(Seconds(0.1), &Dnp3ApplicationNew::resetToRealValue, this, ID_point[qq], real_val[qq]);
+                }
+
+                // Schedule attack start/stop if needed
+                if (configFile.find("NA") == std::string::npos && !ID_point.empty()) {
+                    if (std::find(StartVect.begin(), StartVect.end(), attack["MIM-" + std::to_string(MIM_ID) + "-Start"]) == StartVect.end()) {
+                        Simulator::Schedule(Seconds(std::stoi(attack["MIM-" + std::to_string(MIM_ID) + "-Start"])), &Dnp3ApplicationNew::set_attack, this, true);
+                        StartVect.push_back(attack["MIM-" + std::to_string(MIM_ID) + "-Start"]);
+                        std::cout << "Scheduled attack start at " << attack["MIM-" + std::to_string(MIM_ID) + "-Start"] << "s" << std::endl;
+                    }
+                    if (std::find(StopVect.begin(), StopVect.end(), attack["MIM-" + std::to_string(MIM_ID) + "-End"]) == StopVect.end()) {
+                        Simulator::Schedule(Seconds(std::stoi(attack["MIM-" + std::to_string(MIM_ID) + "-End"])), &Dnp3ApplicationNew::set_attack, this, false);
+                        StopVect.push_back(attack["MIM-" + std::to_string(MIM_ID) + "-End"]);
+                        std::cout << "Scheduled attack stop at " << attack["MIM-" + std::to_string(MIM_ID) + "-End"] << "s" << std::endl;
+                    }
+                }
+
+                // Forward packet based on destination
+                if (dest == 1) {
+                    std::cout << "Forwarding packet directly at time " << Simulator::Now().GetSeconds() << "s" << std::endl;
+                    send_directly(packet);
+                } else {
+                    std::cout << "Forwarding packet to server at time " << Simulator::Now().GetSeconds() << "s" << std::endl;
+                    send_directly_server(packet);
+                }
+            }
+
+            // Log attack statistics to CSV if there is data to write
+            if (hasLogData) {
+                std::string loc = std::getenv("RD2C");
+                std::string out_csv = loc + "/integration/control/attack.csv";
+                FILE* pFile = fopen(out_csv.c_str(), "a");
+                if (pFile != nullptr) {
+                    fprintf(pFile, netStatsOut.str().c_str());
+                    fclose(pFile);
+                    std::cout << "Logged attack stats to " << out_csv << " at time " << Simulator::Now().GetSeconds() << "s" << std::endl;
+                } else {
+                    std::cout << "Failed to open " << out_csv << " for writing at time " << Simulator::Now().GetSeconds() << "s. Check path or permissions." << std::endl;
+                }
+            } else {
+                std::cout << "No attack status data to log at time " << Simulator::Now().GetSeconds() << "s" << std::endl;
+            }
+        } else {
+            std::cout << "MIMServer::HandleRead >>> Man in the middle node is the final destination at time " << Simulator::Now().GetSeconds() << "s" << std::endl;
+        }
+
+        // Clean up dynamically allocated memory
+        delete[] temp;
+        delete[] temp2;
+    }
+}
+
+// Helper method to reset points to real values
+void Dnp3ApplicationNew::resetToRealValue(int pointId, const std::string& realValue) {
+    if (!realValue.empty()) {
+        double currentTime = Simulator::Now().GetSeconds();
+        if (std::find_if(realValue.begin(), realValue.end(), [](unsigned char c) { return !std::isdigit(c); }) == realValue.end()) {
+            try {
+                float f = std::stof(realValue);
+                Bit32AnalogOutput ao(f * 1000, pointId);
+                m_p->direct_operate(false, ao);
+                std::cout << "Reset analog point " << pointId << " to value " << f << " at time " << currentTime << "s" << std::endl;
+            } catch (const std::exception& e) {
+                std::cout << "Error resetting analog point " << pointId << ": " << e.what() << " at time " << currentTime << "s" << std::endl;
+            }
+        } else {
+            ControlOutputRelayBlock::Code code;
+            if (realValue.find("TRIP") != std::string::npos) {
+                code = ControlOutputRelayBlock::Code::TRIP;
+            } else if (realValue.find("CLOSE") != std::string::npos) {
+                code = ControlOutputRelayBlock::Code::CLOSE;
+            } else if (realValue.find("LATCH_ON") != std::string::npos) {
+                code = ControlOutputRelayBlock::Code::LATCH_ON;
+            } else if (realValue.find("LATCH_OFF") != std::string::npos) {
+                code = ControlOutputRelayBlock::Code::LATCH_OFF;
+            } else {
+                std::cout << "Invalid real value for binary point " << pointId << ": " << realValue << " at time " << currentTime << "s" << std::endl;
+                return;
+            }
+            ControlOutputRelayBlock ao(code, pointId);
+            m_p->direct_operate(false, ao);
+            std::cout << "Reset binary point " << pointId << " to state " << realValue << " at time " << currentTime << "s" << std::endl;
+        }
+    } else {
+        std::cout << "No real value provided for point " << pointId << " to reset at time " << Simulator::Now().GetSeconds() << "s" << std::endl;
     }
 }
 
