@@ -147,6 +147,8 @@ public:
     Stats               stats;
 
     void transmit();
+    int ind = 0;
+    std::map<int, std::string> observed;
     // primarity for unit testing
     DnpStat_t getStat( int index);
     DnpStat_t getSecAuthStat( int index);

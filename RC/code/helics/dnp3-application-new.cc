@@ -1645,11 +1645,13 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 
         // Map node-points to IDs for analog and binary points
         std::vector<int> ID_point;
+	std::vector<std::string> pointID;
         for (const auto& nodePoint : nodesPoints) {
             bool found = false;
             for (size_t i = 0; i < analog_point_names.size(); i++) {
                 if (analog_point_names[i].find(nodePoint) != std::string::npos) {
                     ID_point.push_back(i);
+                    pointID.push_back(nodePoint);
                     found = true;
                     std::cout << "Mapped point " << nodePoint << " to analog ID " << i << " (name: " << analog_point_names[i] << ")" << std::endl;
                     break;
@@ -1659,10 +1661,11 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
                 for (size_t i = 0; i < binary_point_names.size(); i++) {
                     if (binary_point_names[i].find(nodePoint) != std::string::npos) {
                         ID_point.push_back(i);
+			pointID.push_back(nodePoint);
                         std::cout << "Mapped point " << nodePoint << " to binary ID " << i << " (name: " << binary_point_names[i] << ")" << std::endl;
                         if (binary_point_names[i].find("sw") != std::string::npos || binary_point_names[i].find("switch") != std::string::npos) {
                             std::cout << "Note: Point ID " << i << " appears to be a switch, likely controllable in GridLAB-D." << std::endl;
-			found = true;
+			    found = true;
                         } else {
                             std::cout << "Warning: Point ID " << i << " may not be a controllable switch in GridLAB-D. Attack may fail if not supported." << std::endl;
                         }
@@ -1723,7 +1726,11 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
                 std::cout << "attack_type[" << i << "] = " << attackType[i] << std::endl;
             }
 
-            if (m_attack_on && start1 == 0x05 && 0x64) {
+	    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+	    bool firstStat = false;
+	    int num_point = 7;
+	    int cur_point = 0;
+            if (m_attack_on && start1 == 0x05 && 0x64 ) {
                 Lpdu::UserData data;
                 data.dest = dest;
                 data.src = src;
@@ -1731,12 +1738,28 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 
                 for (size_t qq = 0; qq < ID_point.size(); qq++) {
                     double currentTime = Simulator::Now().GetSeconds();
-                    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    // float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                     // Ensure attackChance, start, and stop have enough entries
-                    float chance = (qq < attackChance.size()) ? attackChance[qq] : 0.0f;
-                    float startTime = (qq < start.size()) ? start[qq] : 0.0f;
-                    float stopTime = (qq < stop.size()) ? stop[qq] : 0.0f;
-                    float type = (qq < attackType.size()) ? attackType[qq] : 0.0f;
+		    if (firstStat == true && qq > cur_point + num_point){
+                       firstStat = false;
+		       cur_point = 0;
+		    }
+		    if (pointID[qq].find("status") != std::string::npos and firstStat == false){
+                        firstStat = true;
+			cur_point = qq;
+                        if (pointID[qq+1].find("phase") == std::string::npos){
+                            firstStat = false;
+			    cur_point = 0;
+		        }
+		    }
+		    if (firstStat == false or qq > cur_point + num_point){
+                        r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+		    }
+
+                    float chance = attackChance[qq]; //(qq < attackChance.size()) ? attackChance[qq] : 0.0f;
+                    float startTime = start[qq]; //(qq < start.size()) ? start[qq] : 0.0f;
+                    float stopTime = stop[qq]; // (qq < stop.size()) ? stop[qq] : 0.0f;
+                    float type = attackType[qq]; //(qq < attackType.size()) ? attackType[qq] : 0.0f;
 
                     if (currentTime > startTime && currentTime < stopTime && chance > r) {
                         netStatsOut << currentTime << " " << ID_point[qq] << " SUCCESS " << type << std::endl;
@@ -1817,7 +1840,9 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
                         hasLogData = true;
                         std::cout << "Attack not applied for point " << ID_point[qq] << " at time " << currentTime << "s. Status: " << status << ". Reason: " << reason << ". Scheduling reset." << std::endl;
                         // Delay reset slightly to ensure attack data (if any) is processed by GridLAB-D
-                        Simulator::Schedule(Seconds(0.1), &Dnp3ApplicationNew::resetToRealValue, this, ID_point[qq], real_val[qq]);
+			if (currentTime <= stopTime and currentTime >= startTime){
+                            Simulator::Schedule(Seconds(0.1), &Dnp3ApplicationNew::resetToRealValue, this, ID_point[qq], real_val[qq]);
+			}
                     }
                 }
 

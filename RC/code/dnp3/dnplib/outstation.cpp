@@ -718,192 +718,172 @@ void Outstation::write()
 
 void Outstation::control(AppHeader::FunctionCode fn)
 {
-    /*for(int listIndex = 0; listIndex < analog_pt_names.size(); listIndex++) {
-        cout << "VICTORTEST6 A" << listIndex << ":   " << analog_pt_names[listIndex] << endl;
-    }
-    for(int listIndex = 0; listIndex < binary_pt_names.size(); listIndex++) {
-        cout << "VICTORTEST6 B" << listIndex << ":   " << binary_pt_names[listIndex] << endl;
-    }*/
-    NS_LOG_INFO("INSIDE CONTROL");
-    initResponse( 1, 1, 0, 0);
-    // append a copy of the control request (which happens to be the
-    // remaining portion of the request)
-    //appendBytes( txFragment, session.rxFragment);
-    //Get object to determine correct data for FNCS to publish
-    oh.decode( session.rxFragment, stats );
-    // NS_LOG_INFO("object group: " << unsigned(oh.grp));
+    //std::cout << "Entering control function at time " << Simulator::Now().GetSeconds() << "s" << std::endl;
+    initResponse(1, 1, 0, 0); // Initialize response with default parameters
+
+    // Decode the received fragment to get the control object
+    oh.decode(session.rxFragment, stats);
     DnpObject* obj_p = of.decode(oh, session.rxFragment, addr, stats);
-    int32_t v = obj_p->value;
-    uint8_t f = obj_p->flag;
-    string value;
-    // value_type to handle different types of values (e.g., binary, analog, string)
-    string value_type;
-    // NS_LOG_INFO("Oh range specifier: " << unsigned(oh.rangeSpecifier));
-    EventInterface::PointType_t pt = obj_p->pointType;
-    NS_LOG_UNCOND("DNP val: " << v);
-    NS_LOG_UNCOND("DNP point type: " << pt);
-    NS_LOG_UNCOND("DNP flag: " << f);
-    NS_LOG_UNCOND("DNP index: " << unsigned(obj_p->index));
-    //NS_LOG_INFO("KYLE outstation name: " << Dnp3Application::GetName());
-    string key;
-    if(pt == EventInterface::AI){
-      key = "AI";
-    }
-    else if(pt == EventInterface::BI){
-      key = "BI";
 
-    }
-    else if(pt == EventInterface::CI){
-      key = "CI";
-    }
-    else if(pt == EventInterface::AO){
-      if (Bit32AnalogOutput* a = dynamic_cast<Bit32AnalogOutput*>(obj_p)) {
-          cout << "Requested value:" << a->request/1000 << " , Status: " << a->status << endl;  // request << ", Status:" << a->status << endl;
-          //set value and its type
-          value = to_string(a->request/1000);
-          value_type = "int";
-       }
-       else {
-             /// TODO: adding more types
-       }
-      //retrieve subclass
-      /*Bit32AnalogOutput a = obj_p->value;*/
-      Bit32AnalogOutput* a = dynamic_cast<Bit32AnalogOutput*>(obj_p);
-      std::cout << "obj_p index: " << obj_p->index << std::endl; //<< " a index: " << a.index);
+    // Extract object details for debugging
+    int32_t value = obj_p->value;
+    uint8_t flag = obj_p->flag;
+    EventInterface::PointType_t pointType = obj_p->pointType;
+    std::cout << "DNP value: " << value << std::endl;
+    std::cout << "DNP point type: " << pointType << std::endl;
+    std::cout << "DNP flag: " << static_cast<int>(flag) << std::endl;
+    std::cout << "DNP index: " << obj_p->index << std::endl;
 
-      //format string to successfully publish
+    std::string key;
+    std::string valueStr;
+    std::string valueType;
 
-      key = stationName + "/" + analog_pt_names[obj_p->index];
-      if (a->status == 95){
-          key = stationName + "/" + analog_pt_names[obj_p->index-2];
-      }
-      //key = analog_pt_names[obj_p->index];
+    // Handle different point types
+    switch (pointType) {
+        case EventInterface::AI:
+            key = "AI";
+            break;
+        case EventInterface::BI:
+            key = "BI";
+            break;
+        case EventInterface::CI:
+            key = "CI";
+            break;
+        case EventInterface::AO: {
+            Bit32AnalogOutput* a = dynamic_cast<Bit32AnalogOutput*>(obj_p);
+            if (a) {
+                std::cout << "Analog Output - Requested value: " << a->request/1000.0 << ", Status: " << static_cast<int>(a->status) << std::endl;
+                std::cout << "Analog Output - Index: " << obj_p->index << std::endl;
+                valueStr = std::to_string(a->request/1000.0);
+                valueType = "int";
+                if (obj_p->index >= 0 && static_cast<size_t>(obj_p->index) < analog_pt_names.size()) {
+                    key = stationName + "/" + analog_pt_names[obj_p->index];
+                    std::cout << "Analog Output - Using standard key: " << key << std::endl;
+                } else {
+                    std::cout << "ERROR: Analog Output index " << obj_p->index << " out of bounds for analog_pt_names (size: " << analog_pt_names.size() << ")" << std::endl;
+                    key = stationName + "/INVALID_ANALOG_POINT";
+                }
+                if (a->status == 95 && obj_p->index >= 2 && static_cast<size_t>(obj_p->index - 2) < analog_pt_names.size()) {
+                    key = stationName + "/" + analog_pt_names[obj_p->index - 2];
+                    std::cout << "Analog Output - Adjusted key due to status 95: " << key << std::endl;
+                }
+            } else {
+                std::cout << "WARNING: Failed to cast to Bit32AnalogOutput for point type AO, index: " << obj_p->index << std::endl;
+            }
+            break;
+        }
+        case EventInterface::BO: {
+            ControlOutputRelayBlock* a = dynamic_cast<ControlOutputRelayBlock*>(obj_p);
+            if (a) {
+                std::cout << "Binary Output - Output Code: " << static_cast<int>(a->outputCode) << std::endl;
+                std::cout << "Binary Output - Index: " << obj_p->index << std::endl;
+                std::cout << "Binary Output - TRIP Code Reference: " << static_cast<int>(ControlOutputRelayBlock::Code::TRIP) << std::endl;
+                valueType = "string";
+                if (a->outputCode == ControlOutputRelayBlock::Code::TRIP) {
+                    valueStr = "OPEN";
+                    std::cout << "Set value to OPEN for TRIP command on index " << obj_p->index << std::endl;
+                } else if (a->outputCode == ControlOutputRelayBlock::Code::CLOSE) {
+                    valueStr = "CLOSED";
+                    std::cout << "Set value to CLOSED for CLOSE command on index " << obj_p->index << std::endl;
+                } else {
+                    std::cout << "ERROR: Unsupported binary output code " << static_cast<int>(a->outputCode) << " on index " << obj_p->index << std::endl;
+                    throw(__LINE__);
+                }
+                // Log available binary point names for reference
+                std::cout << "Available binary points for reference:" << std::endl;
+                for (size_t cur = 0; cur < binary_pt_names.size() && cur < 10; cur++) {
+                    std::cout << "Point name: " << binary_pt_names[cur] << " : ID " << cur << std::endl;
+                }
+                if (binary_pt_names.size() > 10) std::cout << "... (more binary points available)" << std::endl;
+                // Use index directly if within bounds, otherwise log error
+                if (obj_p->index >= 0 && static_cast<size_t>(obj_p->index) < binary_pt_names.size()) {
+                    key = stationName + "/" + binary_pt_names[int(obj_p->index)];
+		    if (binary_pt_names.size() < 10){
+			if (observed.find(int(obj_p->index)) == observed.end()) {
+                           observed[int(obj_p->index)] = "NO";
+			}
+			if (observed[int(obj_p->index)] == valueStr){
+                           ind = 2;
+			   observed[int(obj_p->index)] == "NO";
+			}else{
+                           ind = 0;
+			   observed[int(obj_p->index)] = valueStr;
+			}
+			if (int(obj_p->index)-ind < 0){
+                            key = stationName + "/" + binary_pt_names[binary_pt_names.size()+int(obj_p->index)-ind];
+			}else{
+                            key = stationName + "/" + binary_pt_names[int(obj_p->index)-ind];
+			}
+		    }
+		    std::cout << "Binary Output - Using standard key: " << key << " for index " << obj_p->index << " " << int(obj_p->index)-ind << std::endl;
+                } else {
+                    std::cout << "ERROR: Binary Output index " << obj_p->index << " out of bounds for binary_pt_names (size: " << binary_pt_names.size() << ")" << std::endl;
+                    key = stationName + "/INVALID_BINARY_POINT";
+                }
+            } else {
+                std::cout << "ERROR: Failed to cast to ControlOutputRelayBlock for point type BO, index: " << obj_p->index << std::endl;
+                throw(__LINE__);
+            }
+            break;
+        }
+        case EventInterface::NONE:
+            key = "NONE";
+            break;
+        case EventInterface::ST:
+            key = "ST";
+            break;
+        case EventInterface::AP_AB_ST:
+            key = "AP_AB_ST";
+            break;
+        case EventInterface::AP_NM_ST:
+            key = "AP_NM_ST";
+            break;
+        case EventInterface::DL_AB_ST:
+            key = "DL_AB_ST";
+            break;
+        case EventInterface::DL_NM_ST:
+            key = "DL_NM_ST";
+            break;
+        case EventInterface::SA_AB_ST:
+            key = "SA_AB_ST";
+            break;
+        case EventInterface::SA_NM_ST:
+            key = "SA_NM_ST";
+            break;
+        case EventInterface::EP_AB_ST:
+            key = "EP_AB_ST";
+            break;
+        case EventInterface::EP_NM_ST:
+            key = "EP_NM_ST";
+            break;
+        default:
+            std::cout << "WARNING: Unrecognized point type " << pointType << " for index " << obj_p->index << std::endl;
+            key = "UNKNOWN";
+            break;
+    }
 
-
-      //a.decode();
-
-      //set value
-      //value = to_string(a.request);
-      //cout << "VICTORTEST4: value = " << value << endl;
-      
-      //cout << "key: " << key <<endl;
-      
-
-    }
-    else if(pt == EventInterface::BO){
-      //check with Priya about what GridLAB-D prefers.
-      /*if(v == 0){
-        value = "OPEN";
-      }
-      else{
-        value = "CLOSED";
-      }*/
-      //cout << "I am in the Binary event "<< endl;
-      if (ControlOutputRelayBlock* a = dynamic_cast<ControlOutputRelayBlock*>(obj_p)) {
-         value_type = "string";
-	 cout << "a->outputCode: " << a->outputCode << endl;
-	 cout << "obj_p->index: " << obj_p->index << endl;
-	 cout << "TRIP: " << ControlOutputRelayBlock::Code::TRIP << endl;
-         if(a->outputCode == ControlOutputRelayBlock::Code::TRIP){
-             value = "OPEN";
-         }
-         else if (a->outputCode == ControlOutputRelayBlock::Code::CLOSE){
-              value = "CLOSED";
-         }
-         else {
-              /// TODO: Add ControlOutputRelayBlock::Code to handle different binary output
-              throw(__LINE__);
-          }
-	 cout << a->index << endl;
-       }
-       else {
-               /// TODO: Add DNP objects to handle different binary output
-               throw(__LINE__);
-       }
-
-       for (int cur = 0; cur < binary_pt_names.size()-1; cur ++){
-            std::cout << "Point name: " << binary_pt_names[cur] << " : " << cur << std::endl;
-       }
-      //ControlOutputRelayBlock a = obj_p->value;
-      key = stationName + "/" + binary_pt_names[obj_p->index];
-      if (obj_p->index > 100){
-          key = stationName + "/" + binary_pt_names[obj_p->index-2];
-      }
-      //key = binary_pt_names[obj_p->index];
-
-      cout<<"key: " << key << endl;
-
-    }
-    else if(pt == EventInterface::NONE){
-      key = "NONE";
-    }
-    else if(pt == EventInterface::ST){
-      key = "ST";
-    }
-    else if(pt == EventInterface::AP_AB_ST){
-      key = "AP_AB_ST";
-    }
-    else if(pt == EventInterface::AP_NM_ST){
-      key = "AP_NM_ST";
-    }
-    else if(pt == EventInterface::DL_AB_ST){
-      key = "DL_AB_ST";
-    }
-    else if(pt == EventInterface::DL_NM_ST){
-      key = "DL_NM_ST";
-    }
-    else if(pt == EventInterface::SA_AB_ST){
-      key = "SA_AB_ST";
-    }
-    else if(pt == EventInterface::SA_NM_ST){
-      key = "SA_NM_ST";
-    }
-    else if(pt == EventInterface::EP_AB_ST){
-      key = "EP_AB_ST";
-    }
-    else if(pt == EventInterface::EP_NM_ST){
-      key = "EP_NM_ST";
+    // Handle response based on function code
+    if (fn == AppHeader::DIR_OPERATE_NO_RESP) {
+        std::cout << "Direct Operate No Response received. Publishing key: " << key << ", value: " << valueStr << ", type: " << valueType << std::endl;
+        publishCallback(key, valueStr, valueType);
+        return;
     }
 
+    transmit(); // Send the response
 
-
-
-    //Don't respond if command is for no response
-    if(fn == AppHeader::DIR_OPERATE_NO_RESP){
-
-      #ifdef FNCS
-      //cout << "VICTORTEST key: " << key << "  |  value: " << value << endl;
-      //fncs::publish(key, value);
-      #endif
-      // NS_LOG_INFO("Here in direct operate no response");
-      //transmit();
-      publishCallback(key, value, value_type);
-      return;
+    if (fn == AppHeader::SELECT) {
+        stats.increment(TX_SELECT_RESP);
+        std::cout << "SELECT function processed. Incremented TX_SELECT_RESP stats." << std::endl;
+    } else if (fn == AppHeader::OPERATE || fn == AppHeader::DIR_OPERATE) {
+        std::cout << "OPERATE or DIR_OPERATE function received. Publishing key: " << key << ", value: " << valueStr << ", type: " << valueType << std::endl;
+        publishCallback(key, valueStr, valueType);
+        stats.increment(TX_OPERATE_RESP);
+        std::cout << "Incremented TX_OPERATE_RESP stats." << std::endl;
+    } else {
+        std::cout << "ERROR: Unsupported function code received: " << fn << std::endl;
+        assert(0); // Fail on unsupported function code
     }
-    //moved line below to execute at beginning of fucntion
-    // initResponse( 1, 1, 0, 0);
-    // // append a copy of the control request (which happens to be the
-    // // remaining portion of the request)
-    // appendBytes( txFragment, session.rxFragment);
-
-    transmit();
-
-    if (fn == AppHeader::SELECT){
-	     stats.increment(TX_SELECT_RESP);
-    }
-    else if (fn == AppHeader::OPERATE || fn == AppHeader::DIR_OPERATE ){
-      // NS_LOG_INFO("Here in operate and direct operate");
-      #ifdef FNCS
-      //cout << "VICTORTEST2 key: " << key << "  |  value: " << value << endl;
-      //fncs::publish(key, value);
-      #endif
-      publishCallback(key, value, value_type);
-      stats.increment(TX_OPERATE_RESP);
-    }
-    else
-	assert(0);
 }
-
 
 void Outstation::sendNullResponse()
 {
