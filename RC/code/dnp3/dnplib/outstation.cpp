@@ -798,7 +798,7 @@ void Outstation::control(AppHeader::FunctionCode fn)
                 // Use index directly if within bounds, otherwise log error
                 if (obj_p->index >= 0 && static_cast<size_t>(obj_p->index) < binary_pt_names.size()) {
                     key = stationName + "/" + binary_pt_names[int(obj_p->index)];
-		    if (binary_pt_names.size() < 10){
+		    if (false){ //binary_pt_names.size() < 10){ //Only enable this for the miramar model
 			if (observed.find(int(obj_p->index)) == observed.end()) {
                            observed[int(obj_p->index)] = "NO";
 			}
