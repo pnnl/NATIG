@@ -4,6 +4,7 @@
             "StartTime": 0.0,
             "PollReqFreq": 10,
             "includeMIM": 1,
+            "includeFDI": 1,
             "UseDynTop": 1,
             "MonitorPerf": 0,
 	    "StaticSeed": 1,
@@ -309,6 +310,21 @@
 	    "End": 180,
 	    "PointStart": "120",
 	    "PointStop": "180"
+	}
+    ],
+    "FDI": [
+	{
+	    "NumberAttackers": 1,
+	    "listFDI": "0"
+	},
+	{
+	    "name": "FDI1",
+	    "node_id": "node_36",
+	    "point_id": "voltage_A.real",
+	    "attack_val": "132000",
+	    "attack_chance": "0.8",
+	    "Start": "1",
+	    "End": "20"
 	}
     ],
     "controlCenter": {

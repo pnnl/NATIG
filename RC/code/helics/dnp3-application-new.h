@@ -192,6 +192,7 @@ public:
     int count = 0;
     int four = 0;
     bool mitm_flag = false;
+    bool fdi_flag = false; //Compromised-endpoint false-data-injection flag (outstation lies about its own readings; no MITM position needed)
     double m_attackChance = 0.0;
     double m_jitterMinNs; //!<minimum jitter delay time for packets sent via FNCS
     double m_jitterMaxNs; //!<maximum jitter delay time for packets sent via FNCS
@@ -258,6 +259,7 @@ private:
 
 
   void store_points(std::string point, std::string value);
+  float apply_fdi(const std::string& name, float realValue);
   void initConfig(void);
   void makeTcpConnection(void);
   void makeUdpConnection(void);
@@ -314,6 +316,25 @@ private:
   map<string, uint16_t> bin_points;
   map<string, float> frozen_analog_points;
   map<string, uint16_t> frozen_bin_points;
+
+  // Snapshot of analog_points immediately after the CSV load in
+  // initConfig(), used to restore real values once an FDI attack
+  // window ends (set_attack(false)). NOT the same as
+  // frozen_analog_points above -- that's reassigned at runtime for
+  // offline-mode responses and may not hold startup values by the
+  // time an attack window closes. This is the only true baseline,
+  // since the HELICS pipeline that would otherwise refresh these
+  // values live never fires (see natig-v2 research notes).
+  map<string, float> m_preAttackAnalogPoints;
+
+  // Uses ns-3's own seeded RNG stream (respects --RngRun for real
+  // reproducibility/variation across runs), unlike apply_fdi's
+  // original bare rand()/RAND_MAX, which was never seeded via
+  // srand() anywhere in this codebase -- meaning AttackChance's
+  // roll was silently deterministic (identical outcome every run,
+  // regardless of RngRun) across all four protocols until this fix.
+  Ptr<UniformRandomVariable> m_fdiRand;
+
   vector<string> binary_point_names;
   vector<string> analog_point_names;
   static const int MAX_LEN = 77;
@@ -324,6 +345,7 @@ private:
   std::string m_attack_min;
   uint16_t m_attackType;
   uint16_t MIM_ID;
+  uint16_t FDI_ID;
   std::string m_attackStartTime;
   std::string m_attackEndTime;
   std::vector<string> StartVect;

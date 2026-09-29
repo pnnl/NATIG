@@ -658,6 +658,10 @@ main (int argc, char *argv[])
   simTime = Seconds(std::stof(configObject["Simulation"][0]["SimTime"].asString()));
   float start = std::stof(configObject["Simulation"][0]["StartTime"].asString());
   int includeMIM = std::stoi(configObject["Simulation"][0]["includeMIM"].asString());
+  // includeFDI is a new key -- guard its lookup so configs written before this
+  // feature existed don't crash on a missing key (unlike includeMIM, which every
+  // existing config already has). See DNP3/Modbus/MMS's identical addition.
+  int includeFDI = configObject["Simulation"][0].isMember("includeFDI") ? std::stoi(configObject["Simulation"][0]["includeFDI"].asString()) : 0;
 
   NodeContainer Microgrid;
   Microgrid.Create(configObject["microgrid"].size());
@@ -938,6 +942,33 @@ main (int argc, char *argv[])
   }
   val.push_back(VI);
 
+  //reading the FDI (compromised-endpoint false data injection) configuration.
+  //Missing "FDI" key is fine -- configObject["FDI"] just comes back empty/null
+  //and the loops below run zero times, matching includeFDI defaulting to 0.
+  std::map<std::string, std::string> attackFDI;
+  for (uint32_t j = 1; j < configObject["FDI"].size(); j++){
+     for(const auto& item : configObject["FDI"][j].getMemberNames() ){
+	 std::string ID = "FDI-"+std::to_string(j)+"-"+item;
+	 std::string my_str = configObject["FDI"][j][item].asString();
+	 my_str.erase(remove(my_str.begin(), my_str.end(), '"'), my_str.end());
+         attackFDI.insert(pair<std::string,std::string >(ID, my_str));
+     }
+  }
+
+  std::string IDsFDI = configObject["FDI"][0]["listFDI"].asString();
+  std::vector<std::string> valFDI;
+  {
+    size_t posFDI = 0;
+    std::string tokenFDI;
+    std::string VIFDI = IDsFDI;
+    while ((posFDI = VIFDI.find(delimiter)) != std::string::npos) {
+	    tokenFDI = VIFDI.substr(0, posFDI);
+	    valFDI.push_back(tokenFDI);
+	    VIFDI.erase(0, posFDI + delimiter.length());
+    }
+    valFDI.push_back(VIFDI);
+  }
+
   uint16_t goosePort = 40000;
   // Kept only because the shared DDoS setup code further below still
   // references master_port (as UDP_SINK_PORT) -- not otherwise used by
@@ -1101,6 +1132,33 @@ main (int argc, char *argv[])
 
       rogue->SetAttribute("AttackStartTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-Start"]));
       rogue->SetAttribute("AttackEndTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-End"]));
+    }
+  }
+
+  //Compromised-endpoint FDI: unlike the rogue-publisher MIM attack above,
+  //this does not add a competing publisher -- it sets attributes directly
+  //on the real per-microgrid publisher itself (goosePublisherApp, not
+  //gooseSubscriberByMicrogrid), simulating a compromised meter/RTU that
+  //lies about its own readings. A fabricated value here flows through the
+  //normal publish path, so it naturally trips the same
+  //datasetChangedSinceLastPublish()/burst logic a real change would --
+  //no stNum-forging needed since this is the authoritative publisher.
+  //See DNP3/Modbus/MMS's identical wiring.
+  if (includeFDI == 1){
+    for (int x = 0; x < valFDI.size(); x++){
+      int FDI_ID = std::stoi(valFDI[x]) + 1;
+      int mgIndex = FDI_ID - 1; //matches goosePublisherApp's install order in the microgrid loop above
+      Ptr<GooseApplicationNew> publisher = DynamicCast<GooseApplicationNew>(goosePublisherApp.Get(mgIndex));
+      if (!publisher) { continue; }
+
+      publisher->SetAttribute("FdiFlag", BooleanValue(true));
+      publisher->SetAttribute("FdiID", UintegerValue(FDI_ID));
+      publisher->SetAttribute("Value_attck", StringValue(attackFDI["FDI-"+std::to_string(FDI_ID)+"-attack_val"]));
+      publisher->SetAttribute("NodeID", StringValue(attackFDI["FDI-"+std::to_string(FDI_ID)+"-node_id"]));
+      publisher->SetAttribute("PointID", StringValue(attackFDI["FDI-"+std::to_string(FDI_ID)+"-point_id"]));
+      publisher->SetAttribute("AttackChance", DoubleValue(std::stod(attackFDI["FDI-"+std::to_string(FDI_ID)+"-attack_chance"])));
+      publisher->SetAttribute("AttackStartTime", StringValue(attackFDI["FDI-"+std::to_string(FDI_ID)+"-Start"]));
+      publisher->SetAttribute("AttackEndTime", StringValue(attackFDI["FDI-"+std::to_string(FDI_ID)+"-End"]));
     }
   }
 

@@ -227,6 +227,7 @@ private:
   void Record (Ptr<Packet> packet, Address from);
 
   void store_points (std::string point, std::string value);
+  float apply_fdi (const std::string& name, float realValue);
   void initConfig (void);
   void makeMulticastConnection (void);
   void send_directly (Ptr<Packet> packet);
@@ -272,12 +273,21 @@ private:
   int integrityPollInterval;
 
   GooseDeviceConfig m_deviceConfig;
+
   // Snapshot compared against on each scheduling tick to detect a real
   // state change (drives stNum increment / burst-mode reset) --
   // conceptually similar to the frozen-snapshot mechanism the other
   // protocols use for offline mode, but consulted every tick here
   // rather than only while offline.
   GooseDeviceConfig m_lastPublishedConfig;
+
+  // Snapshot of m_deviceConfig immediately after the CSV load in
+  // initConfig(), used to restore real values once an FDI attack
+  // window ends (set_attack(false)) -- this is the only baseline
+  // that has ever existed for a point, since the HELICS pipeline
+  // that would otherwise refresh these values live never fires
+  // (see natig-v2 research notes).
+  GooseDeviceConfig m_preAttackAnalogValues;
 
   bool m_connected;
   Ptr<UniformRandomVariable> m_rand_delay_ns;
@@ -292,6 +302,7 @@ private:
   std::vector<std::string> binary_point_names;
 
   bool mitm_flag = false;
+  bool fdi_flag = false; //Compromised-endpoint FDI: the real publisher fabricates its own readings, no rogue instance needed (see DNP3/Modbus/MMS's identical addition)
 
   // -- Attack state: mirrors DNP3/Modbus/MMS's naming exactly for mergeability --
   std::string node_id;
@@ -301,6 +312,7 @@ private:
   std::string m_attack_min;
   uint16_t m_attackType;
   uint16_t MIM_ID;
+  uint16_t FDI_ID;
   std::string m_attackStartTime;
   std::string m_attackEndTime;
   std::vector<std::string> StartVect;

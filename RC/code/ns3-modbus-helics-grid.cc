@@ -633,6 +633,10 @@ main (int argc, char *argv[])
   simTime = Seconds(std::stof(configObject["Simulation"][0]["SimTime"].asString()));
   float start = std::stof(configObject["Simulation"][0]["StartTime"].asString());
   int includeMIM = std::stoi(configObject["Simulation"][0]["includeMIM"].asString());
+  // includeFDI is a new key -- guard its lookup so configs written before this
+  // feature existed don't crash on a missing key (unlike includeMIM, which every
+  // existing config already has). See DNP3's identical addition.
+  int includeFDI = configObject["Simulation"][0].isMember("includeFDI") ? std::stoi(configObject["Simulation"][0]["includeFDI"].asString()) : 0;
 
   NodeContainer Microgrid;
   Microgrid.Create(configObject["microgrid"].size());
@@ -892,6 +896,33 @@ main (int argc, char *argv[])
   }
   val.push_back(VI);
 
+  //reading the FDI (compromised-endpoint false data injection) configuration.
+  //Missing "FDI" key is fine -- configObject["FDI"] just comes back empty/null
+  //and the loops below run zero times, matching includeFDI defaulting to 0.
+  std::map<std::string, std::string> attackFDI;
+  for (uint32_t j = 1; j < configObject["FDI"].size(); j++){
+     for(const auto& item : configObject["FDI"][j].getMemberNames() ){
+	 std::string ID = "FDI-"+std::to_string(j)+"-"+item;
+	 std::string my_str = configObject["FDI"][j][item].asString();
+	 my_str.erase(remove(my_str.begin(), my_str.end(), '"'), my_str.end());
+         attackFDI.insert(pair<std::string,std::string >(ID, my_str));
+     }
+  }
+
+  std::string IDsFDI = configObject["FDI"][0]["listFDI"].asString();
+  std::vector<std::string> valFDI;
+  {
+    size_t posFDI = 0;
+    std::string tokenFDI;
+    std::string VIFDI = IDsFDI;
+    while ((posFDI = VIFDI.find(delimiter)) != std::string::npos) {
+	    tokenFDI = VIFDI.substr(0, posFDI);
+	    valFDI.push_back(tokenFDI);
+	    VIFDI.erase(0, posFDI + delimiter.length());
+    }
+    valFDI.push_back(VIFDI);
+  }
+
   uint16_t port = 20000;
   uint16_t master_port = 40000;
   ApplicationContainer dnpOutstationApp, dnpMasterApp;
@@ -1071,6 +1102,13 @@ main (int argc, char *argv[])
       modbusMIM1.SetAttribute ("Name", StringValue (enamestring));
       modbusMIM1.SetAttribute("UnitId", UintegerValue(2));
       modbusMIM1.SetAttribute("EnableTCP", BooleanValue (true));
+      // BUG FIX: see identical fix in ns3-helics-grid-dnp3.cc -- handle_MIM()
+      // re-reads AttackConf's JSON at packet-arrival time, keyed by the
+      // object's own MIM_ID attribute, but neither was ever set here, so the
+      // lookup map stayed empty and GetVal()'s std::stof("") threw the first
+      // time an attack window opened against live telemetry.
+      modbusMIM1.SetAttribute("AttackConf", StringValue(configFileName));
+      modbusMIM1.SetAttribute("ID", UintegerValue(MIM_ID));
       modbusMIM1.SetAttribute("AttackSelection", UintegerValue(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"])));
 
       modbusMIM1.SetAttribute("RealVal", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-real_val"]));
@@ -1103,6 +1141,29 @@ main (int argc, char *argv[])
       dnpMIMApp.Start (Seconds (start));
       dnpMIMApp.Stop (simTime);
 
+    }
+  }
+
+  //Compromised-endpoint FDI: unlike MIM, this does not install a new node in
+  //path -- it sets attributes directly on the real outstation that's already
+  //running (installed in the microgrid loop above), simulating a compromised
+  //meter/RTU that lies about its own readings rather than an interceptor
+  //sitting between master and outstation. See DNP3's identical wiring.
+  if (includeFDI == 1){
+    for (int x = 0; x < valFDI.size(); x++){
+      int FDI_ID = std::stoi(valFDI[x]) + 1;
+      int mgIndex = FDI_ID - 1; //matches dnpOutstationApp's install order in the microgrid loop above
+      Ptr<ModbusApplicationNew> slave = DynamicCast<ModbusApplicationNew>(dnpOutstationApp.Get(mgIndex));
+      if (!slave) { continue; }
+
+      slave->SetAttribute("FdiFlag", BooleanValue(true));
+      slave->SetAttribute("FdiID", UintegerValue(FDI_ID));
+      slave->SetAttribute("Value_attck", StringValue(attackFDI["FDI-"+std::to_string(FDI_ID)+"-attack_val"]));
+      slave->SetAttribute("NodeID", StringValue(attackFDI["FDI-"+std::to_string(FDI_ID)+"-node_id"]));
+      slave->SetAttribute("PointID", StringValue(attackFDI["FDI-"+std::to_string(FDI_ID)+"-point_id"]));
+      slave->SetAttribute("AttackChance", DoubleValue(std::stod(attackFDI["FDI-"+std::to_string(FDI_ID)+"-attack_chance"])));
+      slave->SetAttribute("AttackStartTime", StringValue(attackFDI["FDI-"+std::to_string(FDI_ID)+"-Start"]));
+      slave->SetAttribute("AttackEndTime", StringValue(attackFDI["FDI-"+std::to_string(FDI_ID)+"-End"]));
     }
   }
 
