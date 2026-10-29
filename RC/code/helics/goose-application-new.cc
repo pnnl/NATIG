@@ -979,8 +979,17 @@ GooseApplicationNew::makeMulticastConnection (void)
     }
   timer_end.push_back (std::stof (m_attackEndTime));
 
-  bool isRogue = (m_name.find ("Inside") != std::string::npos
-                   || m_name.find ("MIM") != std::string::npos);
+  // BUG FIX: this used to be a name-substring match ("Inside"/"MIM"), copied from
+  // DNP3/Modbus/MMS where the MIM node is a separately-named, separately-installed
+  // node. GOOSE has no such node -- the rogue role reuses the already-installed
+  // per-microgrid subscriber (see file header note), whose name is its microgrid's,
+  // never "MIM"/"Inside". That meant this always evaluated false for the real rogue
+  // instance: set_attack(true) never got scheduled below, and the socket never left
+  // subscriber mode, so handle_rogue_publish's mitm_flag/m_attack_on guard silently
+  // no-op'd forever, for every attack type (2/3/4/5), not just replay. mitm_flag is
+  // the attribute that's actually set for this purpose (see the topology file's
+  // rogue-role wiring) -- use it directly instead of inferring from a name.
+  bool isRogue = mitm_flag;
 
   for (size_t index = 0; index < timer.size (); index++)
     {
@@ -1006,9 +1015,29 @@ GooseApplicationNew::makeMulticastConnection (void)
       // group by connecting the UDP socket to it -- Connect() on a UDP
       // socket just sets a default destination, a real send target for
       // Send() without needing SendTo() each time.
-      Address group = isRogue ? m_multicastGroup2 : m_multicastGroup;
+      //
+      // BUG FIX: this used to pick m_multicastGroup2 for the rogue role, mirroring
+      // DNP3/Modbus/MMS's RemoteAddress2 (their MIM node's separate outbound leg to
+      // the real backend). GOOSE has no such second leg -- a rogue publisher's whole
+      // point is to compete on the *same* multicast group the real publisher and
+      // subscribers already use, not a different one. m_multicastGroup2 is also never
+      // actually wired in the topology file, so it defaulted to the RemoteAddress2
+      // attribute's placeholder value (10.0.0.0) -- frames would have gone nowhere
+      // real subscribers were listening, even with isRogue fixed. Use the same group
+      // this instance is already correctly configured with as a subscriber.
+      Address group = m_multicastGroup;
       m_socket->Connect (InetSocketAddress (Ipv4Address::ConvertFrom (group), m_multicastPort));
       startPublisher ();
+      if (isRogue)
+        {
+          // The rogue role reuses a real subscriber instance and needs to keep
+          // acting like one -- HandleRead's accept/capture logic (which
+          // attack_type 5 depends on to have a real frame to replay) is gated on
+          // m_respond, which only startSubscriber() sets and which this instance
+          // never calls now that it's going through the publisher branch above.
+          m_respond = true;
+          m_offline = false;
+        }
     }
   else
     {
@@ -1114,6 +1143,16 @@ GooseApplicationNew::HandleRead (Ptr<Socket> socket)
         {
           m_stNum = pdu.stNum;
           m_sqNum = pdu.sqNum;
+          // attack_type 5 (replay): only refresh the capture while the attack window is
+          // closed, so a later window replays a genuinely frozen, aging observation --
+          // not whatever was most recently seen a moment ago -- mirroring DNP3/Modbus/
+          // MMS's identical freeze-at-window-open design (GOOSE has no separate per-point
+          // PointStart/PointStop the way those protocols do; m_attack_on/Start/End is the
+          // only window here, so it's also what freeze is gated on).
+          if (!m_attack_on)
+            {
+              m_replayCapture[pdu.goID] = pdu;
+            }
           for (const auto& entry : pdu.analogValues)
             {
               SetAnalogPoint (entry.first, entry.second);
@@ -1122,8 +1161,9 @@ GooseApplicationNew::HandleRead (Ptr<Socket> socket)
             {
               SetBinaryPoint (entry.first, entry.second);
             }
-          NS_LOG_INFO ("GooseApplication (subscriber): accepted goID=" << pdu.goID
-                       << " stNum=" << pdu.stNum << " sqNum=" << pdu.sqNum);
+          std::cout << "GooseApplication (subscriber): accepted goID=" << pdu.goID
+                       << " stNum=" << pdu.stNum << " sqNum=" << pdu.sqNum
+                       << " t=" << Simulator::Now ().GetSeconds () << "s" << std::endl;
         }
       else
         {
@@ -1339,6 +1379,30 @@ GooseApplicationNew::handle_rogue_publish (void)
   std::vector<std::string> points = get_val_vector (delimiter, point_id);
 
   std::vector<float> attackType = GetVal (attack, "attack_type");
+
+  // attack_type 5 (replay): unlike types 2/3/4 below, this doesn't forge a new,
+  // strictly-newer state -- it resends a real frame captured earlier by this same
+  // instance's own subscriber path (HandleRead), verbatim, including its now-stale
+  // stNum/sqNum. A spec-compliant subscriber should reject it via the same "newest
+  // wins" check that lets the other attack types succeed -- this is the detectability
+  // baseline for GOOSE's built-in anti-replay defense, not a variant expected to win.
+  if (!attackType.empty () && static_cast<int>(attackType[0]) == 5)
+    {
+      auto it = m_replayCapture.find (m_gooseId);
+      if (it == m_replayCapture.end ())
+        {
+          std::cout << "GooseApplication::handle_rogue_publish: attack_type 5 configured but no "
+                       "real frame captured yet for goID=" << m_gooseId << std::endl;
+          return;
+        }
+      Ptr<Packet> packet = EncodePDU (it->second);
+      send_directly (packet);
+      std::cout << "GooseApplication::handle_rogue_publish: replaying captured frame stNum="
+                   << it->second.stNum << " sqNum=" << it->second.sqNum << " for goID=" << m_gooseId
+                   << " at time " << Simulator::Now ().GetSeconds ()
+                   << "s (expect a spec-compliant subscriber to reject this as stale)" << std::endl;
+      return;
+    }
 
   GoosePDU pdu;
   pdu.goID = m_gooseId;

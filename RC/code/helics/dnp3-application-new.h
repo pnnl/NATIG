@@ -264,6 +264,7 @@ private:
   void makeTcpConnection(void);
   void makeUdpConnection(void);
   void resetToRealValue(int pointId, const std::string& realValue);
+  std::vector<size_t> find_point_byte_indices(uint8_t * temp2, Ptr<Packet> testPack, Bytes& buf2, int idPointTarget);
   void save_data(Ptr<Socket> socket, Ptr<Packet> packet, Address from);
   //void handle_inside(Ptr<Socket> socket);
   void handle_MIM(Ptr<Socket> socket);
@@ -300,6 +301,7 @@ private:
   Outstation::OutstationConfig  outstationConfig;
   RemoteDevice remoteDevice;
   std::map<uint16_t, RemoteDevice>  deviceMap;
+  std::map<std::string, std::vector<uint8_t>> m_replayCapture; //!< attack_type 5: last real bytes captured per point, frozen once its attack window opens
   Master* m_p;
   Outstation* o_p;
   DummyTimer ti;

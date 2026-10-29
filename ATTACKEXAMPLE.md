@@ -11,6 +11,7 @@
 
 1. Man-In-The-Middle (MIM) Attacks: A Man-In-The-Middle (MITM) attack occurs when a malicious actor intercepts and potentially alters communication between two parties without their knowledge. This breach compromises data integrity and confidentiality, allowing the attacker to steal sensitive information, inject malicious content, or manipulate communication for fraudulent purposes.
 2. Denial of Service (DDoS) Attacks: A Denial of Service (DoS) attack targets a network or service to make it unavailable to users by overwhelming it with excessive traffic or exploiting vulnerabilities. This results in service disruption, downtime, and potential financial loss, as legitimate users are unable to access the targeted resource.
+3. Slow DDoS Attacks: A low-and-slow companion to the flat-rate DDoS above, using the same "SlowDDoS" config section. For DNP3/Modbus/MMS this holds many real TCP connections open against the target's own listening socket instead of flooding it with traffic (Slowloris-style connection exhaustion). For GOOSE, which is connectionless UDP multicast with no connection to exhaust, it instead sustains a low-rate hum directly on the shared link real GOOSE traffic travels over, rather than flooding a node's IP stack the way the flat-rate DDoS attack does.
 
 ## Configuring attacks on out of the box examples
 
@@ -52,7 +53,42 @@
     ],
 ```
 
-2. MIM configuration. The following section controls the number of MIM attackers on the network.
+2. SlowDDoS configuration. Low-and-slow companion to DDoS above, sharing several of its field meanings. Which fields apply depends on the protocol:
+    1. __NumberOfBots__, __threadsPerAttacker__, __Active__, __Start__, __End__: same meaning as in DDoS.
+    2. __NodeType__, __NodeID__, __endPoint__: for DNP3/Modbus/MMS, same victim-selection meaning as in DDoS. For GOOSE, __NodeID__ is instead the list of microgrid indices to jam (__NodeType__/__endPoint__ are ignored).
+    3. __ConnectionsPerBot__ (DNP3/Modbus/MMS only): number of TCP connections each bot opens and holds open against the target's real listening socket.
+    4. __ConnectRate__ (DNP3/Modbus/MMS only): connections opened per second by each bot -- a low, steady value here is what makes the attack "slow" rather than a same-instant burst of connection attempts.
+    5. __TrickleBytes__ / __TrickleInterval__ (DNP3/Modbus/MMS only): bytes sent on each held-open connection every __TrickleInterval__ seconds. Default 0/0.0 (pure silence) is normally sufficient, since none of these protocols' servers enforce an idle-connection timeout today.
+    6. __PacketSize__, __Rate__, __TimeOn__, __TimeOff__ (GOOSE only): same field names as DDoS, but tuned for a continuous hum on the shared link (__TimeOn__ covering the whole attack window, __TimeOff__ of 0) instead of DDoS's short burst/long rest pattern. "Slow" here describes the *duty cycle* (sustained vs. bursty), not the absolute __Rate__ -- tested against this repo's GOOSE segments (100Mbps CSMA), a gentle rate (e.g. a few kb/s) produced no measurable effect at all; a sustained rate that's a large fraction of the link's own capacity (e.g. 70Mb/s) was needed before the jammed microgrid showed real queueing delay (worst-case inter-frame gap ~77x the unjammed control's, with effects still measurable for several seconds after the attack window closed). Tune __Rate__ relative to whatever `DataRate` the deployment's own CSMA segment uses, not as a small absolute number.
+
+```
+"SlowDDoS": [
+        {
+            "NumberOfBots": 8,
+            "threadsPerAttacker": 1,
+            "Active": 0,
+            "Start": 10,
+            "End": 60,
+            "NodeType": [
+                      "subNode"
+            ],
+            "NodeID": [
+                        2
+            ],
+            "endPoint": "MIM",
+            "ConnectionsPerBot": 50,
+            "ConnectRate": 0.5,
+            "TrickleBytes": 0,
+            "TrickleInterval": 0.0,
+            "PacketSize": 1400,
+            "Rate": "70Mb/s",
+            "TimeOn": 60.0,
+            "TimeOff": 0.0
+         }
+    ],
+```
+
+3. MIM configuration. The following section controls the number of MIM attackers on the network.
     1. In the first section, the __Numberattackers__ and the __listMIM__ controls the number of attackers and lists their indexes. 
     2. The following sections, there are one section per MIM attacker. Currently there is the same number of attacker nodes as the number of Microgrids but not all of them need to be active to work correctly
     3. Description of the MIM configuration parameters:
@@ -174,6 +210,8 @@
                 }
     ],
 ```
+
+3. SlowDDoS gets enabled the same way, by setting __Active__ to 1 in its own "SlowDDoS" section -- independent of DDoS's own __Active__ flag, so both attacks can run at the same time as separate bot swarms.
 
 ## Under development
 

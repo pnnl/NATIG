@@ -314,6 +314,13 @@ private:
   // mechanism -- serves "last known good" values while offline.
   MmsDeviceConfig m_frozenDeviceConfig;
 
+  // attack_type 5 (replay): last real value captured per object reference,
+  // frozen once that point's attack window opens. Distinct from
+  // m_frozenDeviceConfig above (that's a whole-device offline snapshot);
+  // this is per-point and keyed by the attack config, not device state.
+  std::map<std::string, float> m_replayCaptureAnalog;
+  std::map<std::string, bool> m_replayCaptureBinary;
+
   bool m_enableTcp;
   bool m_connected;
   Ptr<UniformRandomVariable> m_rand_delay_ns;

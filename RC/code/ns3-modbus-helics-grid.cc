@@ -55,6 +55,8 @@
 
 #include "ns3/modbus-application-helper-new.h"
 #include "ns3/modbus-application-new.h"
+#include "ns3/slowloris-bot-application-helper.h"
+#include "ns3/slowloris-bot-application.h"
 
 
 #include "ns3/core-module.h"
@@ -139,6 +141,26 @@ float epsilon_min = 0.01;
 float epsilon_decay = 0.5;
 float alpha = 0.3;
 int period_routing = 150;
+
+// Source address the hub's routing table would stamp on a packet sent toward
+// `peer` -- i.e. the address a TCP master on the hub actually uses, and so the
+// address the outstation's replies come back to. Used to wire the MIM node's
+// victimAddr. Returns Ipv4Address::GetAny() when no route exists (e.g. routes
+// not populated yet), so the caller can fall back to a fixed interface.
+static Ipv4Address
+HubSourceAddressToward (Ptr<Node> hub, Ipv4Address peer)
+{
+  Ptr<Ipv4> hubIpv4 = hub->GetObject<Ipv4> ();
+  if (!hubIpv4) { return Ipv4Address::GetAny (); }
+  Ptr<Ipv4RoutingProtocol> routing = hubIpv4->GetRoutingProtocol ();
+  if (!routing) { return Ipv4Address::GetAny (); }
+  Ipv4Header header;
+  header.SetDestination (peer);
+  Socket::SocketErrno err = Socket::ERROR_NOTERROR;
+  Ptr<Ipv4Route> route = routing->RouteOutput (Create<Packet> (), header, Ptr<NetDevice> (), err);
+  return route ? route->GetSource () : Ipv4Address::GetAny ();
+}
+
 void readMicroGridConfig(std::string fpath, Json::Value& configobj)
 {
     std::ifstream tifs(fpath);
@@ -863,6 +885,70 @@ main (int argc, char *argv[])
           ipv4_n.NewNetwork();
   }
 
+  // --- Slow-DDoS (Slowloris-style TCP connection exhaustion) bot nodes ---
+  // Deliberately a separate NodeContainer/link/subnet from the flood-DDoS
+  // bots above, so both attacks can be Active independently. Node/link/
+  // address setup happens here, unconditionally (mirroring how the
+  // flood-DDoS bots above are always created regardless of DDoS.Active),
+  // so it's covered by the single PopulateRoutingTables() call below --
+  // calling PopulateRoutingTables() a second time later in this file
+  // segfaults (confirmed by instrumented testing; this file's own
+  // commented-out second calls at other lines are a pre-existing record
+  // of the same landmine). Application install (which needs `port`,
+  // not yet declared here) happens later, gated on SlowDDoS.Active.
+  //
+  // BUG FIX (replay-modbus SIGABRT, 2026-10-12): configs written before the
+  // SlowDDoS key existed -- or that simply don't need it, like replay-modbus's
+  // MIM-only grid.json (confirmed on Unity: keys are
+  // Controller/DDoS/MIM/Simulation/controlCenter/microgrid, no SlowDDoS) --
+  // crashed right here. configObject["SlowDDoS"] on a missing key is
+  // jsoncpp's null Value; ["NumberOfBots"] on that is null too, and
+  // .asString() on null silently returns "", so std::stoi("") throws
+  // std::invalid_argument and the whole process aborts (confirmed via the
+  // exact "terminate called ... what(): stoi" trace, landing right after the
+  // last successful cout, with no isMember() guard anywhere in this file for
+  // either SlowDDoS access site). isMember() guard so a missing key means 0
+  // bots instead: Create(0) and every loop below keyed off slowDdosNumBots
+  // become a safe no-op, matching the same pattern already relied on for
+  // includeMIM/includeFDI being 0.
+  bool hasSlowDdosConf = configObject.isMember("SlowDDoS")
+      && configObject["SlowDDoS"][0]["NodeID"].size() > 0;
+  int slowDdosNumBots = hasSlowDdosConf
+      ? std::stoi(configObject["SlowDDoS"][0]["NumberOfBots"].asString()) : 0;
+  int slowDdosNumThreads = hasSlowDdosConf
+      ? std::stoi(configObject["SlowDDoS"][0]["threadsPerAttacker"].asString()) : 1;
+  int slowDdosNodeID = hasSlowDdosConf
+      ? std::stoi(configObject["SlowDDoS"][0]["NodeID"][0].asString()) : 0;
+  NodeContainer slowDdosBotNodes;
+  slowDdosBotNodes.Create(slowDdosNumBots);
+  PointToPointHelper p2ph3;
+  p2ph3.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Mbps")));
+  p2ph3.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (std::stoi(topologyConfigObject["Channel"][0]["delay"].asString()))));
+  std::vector<NetDeviceContainer> slowDdosBotDeviceContainer(slowDdosNumBots);
+  std::vector<Ipv4Address> slowDdosVictimAddresses;
+  for (int i = 0; i < slowDdosNumBots; ++i)
+  {
+      Ptr<Node> victimNode;
+      if (configObject["SlowDDoS"][0]["endPoint"].asString().find("CC") != std::string::npos){
+          victimNode = hubNode.Get(0);
+      }
+      else if (configObject["SlowDDoS"][0]["endPoint"].asString().find("subNode") != std::string::npos){
+          victimNode = Microgrid.Get((i%slowDdosNumThreads)+slowDdosNodeID);
+      }
+      else{
+          victimNode = MIMNode.Get((i%slowDdosNumThreads)+slowDdosNodeID);
+      }
+      slowDdosBotDeviceContainer[i] = p2ph3.Install(slowDdosBotNodes.Get(i), victimNode);
+      slowDdosVictimAddresses.push_back(victimNode->GetObject<Ipv4>()->GetAddress(1,0).GetLocal());
+  }
+  internetStack.Install(slowDdosBotNodes);
+  Ipv4AddressHelper ipv4_slowddos;
+  ipv4_slowddos.SetBase("31.0.0.0", "255.255.255.252");
+  for (int j = 0; j < slowDdosNumBots; ++j)
+  {
+      ipv4_slowddos.Assign(slowDdosBotDeviceContainer[j]);
+      ipv4_slowddos.NewNetwork();
+  }
 
   //if (ring){
   Ipv4GlobalRoutingHelper::PopulateRoutingTables();
@@ -1076,20 +1162,60 @@ main (int argc, char *argv[])
                   Names::Add(ep_name, tempnode);
                   std::string enamestring = ep_name;
                   Ptr<Ipv4> ip = Names::Find<Node>(enamestring)->GetObject<Ipv4>();
-                  int ID = MIM_ID-1;
+                  // BUG FIX (loopback victimAddr): this used to be
+                  // `int ID = MIM_ID-1;`, fed straight into
+                  // hubNode->GetAddress(ID,0). That is the star-helper
+                  // call GetHubIpv4Address(MIM_ID-1) translated to a raw
+                  // Ipv4::GetAddress() index, but Ipv4 interface indices
+                  // start at 1 (interface 0 is loopback), so the "-1"
+                  // landed on 127.0.0.1 for MIM_ID=1 and on the wrong
+                  // spoke for every other MIM_ID. With a loopback victim,
+                  // Ipv4L3ProtocolMIM never claims the real return
+                  // traffic and instead rewrites the source address of
+                  // every packet the armed MIM node forwards. Upstream's
+                  // own (now commented-out) wiring above used
+                  // `ID = MIM_ID; if (ring) ID = 1;`, which is what the
+                  // fallback below restores.
+                  int ID = ring ? 1 : MIM_ID;
 
       // Ipv4L3ProtocolMIM/victimAddr is a protocol-agnostic IP-layer
       // mechanism (operates purely on IP addresses inside the L3
       // Send/Forward path, with no awareness of what protocol is
       // running above it) -- reused here completely unchanged from
       // DNP3's wiring, per project discussion.
-      ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal(); //star.GetHubIpv4Address(MIM_ID-1);
+      //
+      // victimAddr must be the address the outstation's replies are
+      // addressed TO. Over UDP (DNP3) that is always the configured
+      // RemoteAddress (hub interface ID), but Modbus is TCP, where the
+      // outstation replies to whatever source address the master's
+      // stack picked for the connection, i.e. the source of the hub's
+      // route toward this microgrid. Ask the routing table (populated
+      // above) for exactly that, and fall back to hub interface ID if
+      // there is no route yet.
+      Ipv4Address hubFallbackAddr = hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID,0).GetLocal();
+      Ipv4Address mgAddr = Microgrid.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
+      Ipv4Address hubRouteSrc = HubSourceAddressToward (hubNode.Get(0), mgAddr);
+      Ipv4Address victimAddress = (hubRouteSrc != Ipv4Address::GetAny ()) ? hubRouteSrc : hubFallbackAddr;
+      // std::cout, not NS_LOG_*: compiled out in this build's optimized profile.
+      std::cout << "MIM victim wiring: MIM_ID=" << MIM_ID << " ring=" << ring
+                << " hubIface" << ID << "Addr=" << hubFallbackAddr
+                << " hubRouteSrcToMg(" << mgAddr << ")=" << hubRouteSrc
+                << " -> victimAddr=" << victimAddress << std::endl;
+      if (hubRouteSrc != Ipv4Address::GetAny () && hubRouteSrc != hubFallbackAddr) {
+          std::cout << "[WARN] MIM victim wiring: route-derived hub source differs from hub interface "
+                    << ID << " address; using the route-derived one (TCP replies target it)." << std::endl;
+      }
+      // Hard guard so the loopback regression can never come back silently
+      // (NS_ABORT_*, unlike NS_ASSERT, is not compiled out in optimized builds).
+      NS_ABORT_MSG_IF (victimAddress.IsLocalhost () || victimAddress == Ipv4Address::GetAny (),
+                       "MIM victimAddr resolved to " << victimAddress << " for MIM_ID=" << MIM_ID);
+      ip->GetObject<Ipv4L3ProtocolMIM> ()->victimAddr = victimAddress; //star.GetHubIpv4Address(MIM_ID-1);
 
 
       //scenario 1, 2 and 3
-      ModbusApplicationHelperNew modbusMIM1 ("ns3::TcpSocketFactory", InetSocketAddress (MIMNode.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), port)); //star.GetSpokeIpv4Address(MIM_ID-1),port)); 
+      ModbusApplicationHelperNew modbusMIM1 ("ns3::TcpSocketFactory", InetSocketAddress (MIMNode.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), port)); //star.GetSpokeIpv4Address(MIM_ID-1),port));
       modbusMIM1.SetAttribute("LocalPort", UintegerValue(port));
-      modbusMIM1.SetAttribute("RemoteAddress", AddressValue(hubNode.Get(0)->GetObject<Ipv4>()->GetAddress(ID, 0).GetLocal())); //star.GetHubIpv4Address(MIM_ID-1)));
+      modbusMIM1.SetAttribute("RemoteAddress", AddressValue(victimAddress)); //star.GetHubIpv4Address(MIM_ID-1)));
       if(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 3 || std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 4){
           modbusMIM1.SetAttribute("RemoteAddress2", AddressValue(Microgrid.Get(MIM_ID-1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal()));
       }
@@ -1129,11 +1255,19 @@ main (int argc, char *argv[])
 
       if(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 3){
          modbusMIM1.SetAttribute("Value_attck", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-attack_val"]));
-         modbusMIM1.SetAttribute("NodeID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-node_id"])); 
-         modbusMIM1.SetAttribute("PointID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-point_id"])); 
+         modbusMIM1.SetAttribute("NodeID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-node_id"]));
+         modbusMIM1.SetAttribute("PointID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-point_id"]));
       }
 
-      modbusMIM1.SetAttribute("AttackStartTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-Start"])); 
+      // attack_type 5 (replay): doesn't inject a configured Value_attck, but still needs
+      // NodeID/PointID set so handle_MIM can match intercepted requests to the target point
+      // -- see DNP3's identical addition for why this is required, not optional.
+      if(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 5){
+         modbusMIM1.SetAttribute("NodeID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-node_id"]));
+         modbusMIM1.SetAttribute("PointID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-point_id"]));
+      }
+
+      modbusMIM1.SetAttribute("AttackStartTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-Start"]));
       modbusMIM1.SetAttribute("AttackEndTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-End"])); 
       modbusMIM1.SetAttribute("mitmFlag", BooleanValue(true));
       Ptr<ModbusApplicationNew> mim = modbusMIM1.Install (tempnode, enamestring);
@@ -1296,6 +1430,40 @@ main (int argc, char *argv[])
      }
 
     std::cout << "Done Setting up the bots " << std::endl;
+
+  // --- Slow-DDoS (Slowloris-style TCP connection exhaustion) app install ---
+  // Node/link/address setup for slowDdosBotNodes already happened earlier
+  // (before the file's single PopulateRoutingTables() call -- see the
+  // comment there for why). This just installs the actual bot application,
+  // holding real TCP connections open against the outstation's listening
+  // socket (port) instead of flooding raw IP packets at a raw socket
+  // victim, gated on SlowDDoS.Active so it's independent of flood-DDoS.
+  std::cout << "Setting up Slow-DDoS bots" << std::endl;
+  // Same isMember() guard as the node/link setup above -- configs without a
+  // SlowDDoS key (e.g. replay-modbus) have no "Active" to read either.
+  bool slowDdosActive = hasSlowDdosConf
+      && std::stoi(configObject["SlowDDoS"][0]["Active"].asString());
+  if (slowDdosActive) {
+    double slowDdosStart = std::stof(configObject["SlowDDoS"][0]["Start"].asString());
+    double slowDdosEnd = std::stof(configObject["SlowDDoS"][0]["End"].asString());
+    int slowDdosConnectionsPerBot = std::stoi(configObject["SlowDDoS"][0]["ConnectionsPerBot"].asString());
+    double slowDdosConnectRate = std::stof(configObject["SlowDDoS"][0]["ConnectRate"].asString());
+    int slowDdosTrickleBytes = std::stoi(configObject["SlowDDoS"][0]["TrickleBytes"].asString());
+    double slowDdosTrickleInterval = std::stof(configObject["SlowDDoS"][0]["TrickleInterval"].asString());
+
+    for (int i = 0; i < slowDdosNumBots; ++i)
+    {
+        SlowlorisBotApplicationHelper slowDdosHelper (Address(slowDdosVictimAddresses[i]), port);
+        slowDdosHelper.SetAttribute ("ConnectionsPerBot", UintegerValue (slowDdosConnectionsPerBot));
+        slowDdosHelper.SetAttribute ("ConnectRate", DoubleValue (slowDdosConnectRate));
+        slowDdosHelper.SetAttribute ("TrickleBytes", UintegerValue (slowDdosTrickleBytes));
+        slowDdosHelper.SetAttribute ("TrickleInterval", DoubleValue (slowDdosTrickleInterval));
+        ApplicationContainer slowDdosApp = slowDdosHelper.Install (slowDdosBotNodes.Get(i));
+        slowDdosApp.Start (Seconds (slowDdosStart));
+        slowDdosApp.Stop (Seconds (slowDdosEnd));
+    }
+  }
+  std::cout << "Done Setting up Slow-DDoS bots" << std::endl;
 
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   if(!dirExists(pcapFileDir.c_str())) {

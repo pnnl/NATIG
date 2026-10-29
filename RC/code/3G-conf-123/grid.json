@@ -250,6 +250,30 @@
                         "endPoint": "MIM"
                 }
     ],
+    "SlowDDoS": [
+            {
+                    "NumberOfBots": 8,
+                    "threadsPerAttacker": 1,
+                    "Active": 0,
+                    "Start": 10,
+                    "End": 60,
+                    "NodeType": [
+                    	"subNode"
+                    ],
+                    "NodeID": [
+                    	2
+                    ],
+                    "endPoint": "subNode",
+                    "ConnectionsPerBot": 50,
+                    "ConnectRate": 0.5,
+                    "TrickleBytes": 0,
+                    "TrickleInterval": 0.0,
+                    "PacketSize": 1400,
+                    "Rate": "70Mb/s",
+                    "TimeOn": 60.0,
+                    "TimeOff": 0.0
+            }
+    ],
     "MIM": [
 	{
             "NumberAttackers": 3,
@@ -276,12 +300,12 @@
 	    "node_id": "trip_shad_inv3",
 	    "point_id": "Pref",
 	    "scenario_id": "a",
-	    "attack_type": "4",
+	    "attack_type": "5",
 	    "attack_chance": "0.6",
 	    "Start": 1,
 	    "End": 20,
-	    "PointStart": "1",
-	    "PointStop": "20"
+	    "PointStart": "5",
+	    "PointStop": "15"
 	},
 	{
 	    "name": "MIM3",

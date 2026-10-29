@@ -874,6 +874,71 @@ main (int argc, char *argv[])
 	  ipv4Sub.SetBase(address.c_str(), "255.255.255.0", "0.0.0.1");
 	  Ipv4InterfaceContainer interfacesSub = ipv4Sub.Assign(NetDev);
   }
+
+  // --- Slow-DDoS (sustained low-rate CSMA-segment congestion) ---
+  // Unlike DNP3/Modbus/MMS (TCP connection exhaustion -- not applicable
+  // here, GOOSE is connectionless UDP multicast with nothing to exhaust)
+  // and unlike this file's own flood-DDoS below (which floods a raw IP
+  // victim's own interface via a separate point-to-point link --
+  // topologically unrelated to GOOSE's actual delivery path, see
+  // attack_model_reference.md), this attaches a jammer device directly
+  // onto the same CsmaChannel real publisher->subscriber GOOSE frames
+  // traverse for a targeted microgrid, and sustains a low-rate broadcast
+  // hum on it -- contending for the shared medium itself rather than a
+  // node's IP stack/CPU. NodeID lists which microgrid indices to jam;
+  // NodeType/endPoint/threadsPerAttacker (meaningful for DNP3/Modbus/MMS's
+  // victim-selection convention) don't apply to a shared-medium jam and
+  // are ignored here. No PopulateRoutingTables() ordering concern like
+  // the TCP protocols' bots have: the jammer only ever broadcasts within
+  // its own directly-connected CSMA segment, never needing a routed path.
+  // Guard against configs written before the SlowDDoS key existed --
+  // isMember() is required because a missing key resolves to an empty
+  // string via jsoncpp, and std::stoi("") throws std::invalid_argument,
+  // crashing at startup on any pre-slow-ddos-era config (e.g. lacked this
+  // key entirely: only had DDoS/MIM). Same gap fixed identically in
+  // ns3-modbus-helics-grid.cc, ns3-iec61850-helics-grid.cc, and
+  // ns3-helics-grid-dnp3-slowddos.cc.
+  bool slowDdosActive = configObject.isMember("SlowDDoS")
+      ? std::stoi(configObject["SlowDDoS"][0]["Active"].asString())
+      : false;
+  if (slowDdosActive) {
+    double slowDdosStart = std::stof(configObject["SlowDDoS"][0]["Start"].asString());
+    double slowDdosEnd = std::stof(configObject["SlowDDoS"][0]["End"].asString());
+    std::string slowDdosRate = configObject["SlowDDoS"][0]["Rate"].asString();
+    int slowDdosPacketSize = std::stoi(configObject["SlowDDoS"][0]["PacketSize"].asString());
+    std::string slowDdosTimeOn = configObject["SlowDDoS"][0]["TimeOn"].asString();
+    std::string slowDdosTimeOff = configObject["SlowDDoS"][0]["TimeOff"].asString();
+
+    NodeContainer slowDdosJammerNodes;
+    slowDdosJammerNodes.Create(configObject["SlowDDoS"][0]["NodeID"].size());
+    internetStack.Install(slowDdosJammerNodes);
+
+    for (Json::ArrayIndex k = 0; k < configObject["SlowDDoS"][0]["NodeID"].size(); k++) {
+        int mg = std::stoi(configObject["SlowDDoS"][0]["NodeID"][k].asString());
+        Ptr<CsmaChannel> chan = DynamicCast<CsmaChannel>(gooseSegments[mg].Get(0)->GetChannel());
+        NetDeviceContainer jamDev = gooseCsma.Install(slowDdosJammerNodes.Get(k), chan);
+
+        // Base "0.0.0.3": the existing per-microgrid loop above already
+        // assigned .1 (substation/publisher) and .2 (MIM/subscriber) on
+        // this same /24 via its own ipv4Sub helper -- start the jammer at
+        // .3 so it doesn't collide.
+        Ipv4AddressHelper ipv4Jam;
+        std::string jamAddress = "11."+std::to_string(mg+2)+".0.0";
+        ipv4Jam.SetBase(jamAddress.c_str(), "255.255.255.0", "0.0.0.3");
+        Ipv4InterfaceContainer jamIf = ipv4Jam.Assign(jamDev);
+
+        Ipv4Address broadcastAddr = jamIf.GetAddress(0).GetSubnetDirectedBroadcast(Ipv4Mask("255.255.255.0"));
+        OnOffHelper jamTraffic("ns3::UdpSocketFactory", InetSocketAddress(broadcastAddr, 9999));
+        jamTraffic.SetAttribute("PacketSize", UintegerValue(slowDdosPacketSize));
+        jamTraffic.SetAttribute("DataRate", DataRateValue(DataRate(slowDdosRate)));
+        jamTraffic.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant="+slowDdosTimeOn+"]"));
+        jamTraffic.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant="+slowDdosTimeOff+"]"));
+        ApplicationContainer jamApp = jamTraffic.Install(slowDdosJammerNodes.Get(k));
+        jamApp.Start(Seconds(slowDdosStart));
+        jamApp.Stop(Seconds(slowDdosEnd));
+    }
+  }
+
   PointToPointHelper p2ph2;
   std::string rate = configObject["DDoS"][0]["Rate"].asString();
   p2ph2.SetDeviceAttribute ("DataRate", DataRateValue (DataRate (rate)));
@@ -1132,6 +1197,18 @@ main (int argc, char *argv[])
 
       rogue->SetAttribute("AttackStartTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-Start"]));
       rogue->SetAttribute("AttackEndTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-End"]));
+
+      // BUG FIX: handle_rogue_publish is only ever reached via DoEndpoint (requires a
+      // HELICS endpoint, which this reused subscriber instance never gets -- only the
+      // real publisher above is wired via SetEndpointName) or attack_data (which was
+      // only ever called on the real publisher, with mitmFlag=false, a few lines above
+      // this loop -- never on the rogue role). Net effect: handle_rogue_publish was
+      // never invoked by any path in this production topology, for any attack type,
+      // not just replay -- this is what iec61850_session_summary.md:164 flagged as
+      // needing independent re-verification before building replay on top of it.
+      // mitm_flag is already true on `rogue` by this point, so attack_data's own
+      // dispatch correctly routes to scheduleRoguePublish.
+      Simulator::Schedule(MilliSeconds(1010), &GooseApplicationNew::attack_data, rogue, 1000);
     }
   }
 

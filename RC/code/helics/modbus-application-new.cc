@@ -2015,7 +2015,6 @@ ModbusApplicationNew::handle_MIM (Ptr<Socket> socket)
               float startTime = (qq < start.size ()) ? start[qq] : 0.0f;
               float stopTime = (qq < stop.size ()) ? stop[qq] : 0.0f;
               int attackTypeInt = (qq < attackType.size ()) ? static_cast<int>(attackType[qq]) : 0;
-
               bool inWindow = (currentTime > startTime && currentTime < stopTime);
 
               // attack_type 5 (replay): outside the window this is real traffic, so keep
@@ -2035,9 +2034,9 @@ ModbusApplicationNew::handle_MIM (Ptr<Socket> socket)
 
               if (inWindow && chance > r)
                 {
-                  NS_LOG_INFO ("ModbusApplication::handle_MIM: applying attack type "
+                  std::cout << "ModbusApplication::handle_MIM: applying attack type "
                                << attackTypeInt << " on point " << pointID[qq]
-                               << " (address " << requestPdu.address << ") at time " << currentTime << "s");
+                               << " (address " << requestPdu.address << ") at time " << currentTime << "s" << std::endl;
 
                   // -- Attack application: direct point-map mutation --
                   // (replaces DNP3's raw-byte scan + CRC recompute --

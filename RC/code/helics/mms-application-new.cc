@@ -1439,6 +1439,13 @@ MmsApplicationNew::HandleAccept (Ptr<Socket> s, const Address& from)
   m_socketList.push_back (s);
   startServer (s);
   NS_LOG_INFO ("MmsApplication: in HandleAccept");
+  // std::cout, not NS_LOG_*: compiled out in this build's optimized
+  // profile. Tracks slow-DDoS connection-exhaustion evidence: this list
+  // has no cap and no idle timeout, so its size should grow and hold for
+  // the attack window.
+  std::cout << "MmsApplication: '" << m_name << "' accepted connection at t="
+            << Simulator::Now ().GetSeconds () << "s, m_socketList.size()="
+            << m_socketList.size () << std::endl;
 }
 
 void
@@ -1840,8 +1847,24 @@ MmsApplicationNew::handle_MIM (Ptr<Socket> socket)
               float startTime = (qq < start.size ()) ? start[qq] : 0.0f;
               float stopTime = (qq < stop.size ()) ? stop[qq] : 0.0f;
               int attackTypeInt = (qq < attackType.size ()) ? static_cast<int>(attackType[qq]) : 0;
+              bool inWindow = (currentTime > startTime && currentTime < stopTime);
 
-              if (currentTime > startTime && currentTime < stopTime && chance > r)
+              // attack_type 5 (replay): outside the window this is real traffic, so keep
+              // refreshing the captured value -- a later window then replays a recent real
+              // observation (frozen once the window opens), not whatever was first ever seen.
+              if (attackTypeInt == 5 && !inWindow)
+                {
+                  if (requestIsAnalog)
+                    {
+                      m_replayCaptureAnalog[requestPdu.objectReference] = GetAnalogPoint (requestPdu.objectReference);
+                    }
+                  else if (requestIsBinary)
+                    {
+                      m_replayCaptureBinary[requestPdu.objectReference] = GetBinaryPoint (requestPdu.objectReference);
+                    }
+                }
+
+              if (inWindow && chance > r)
                 {
                   NS_LOG_INFO ("MmsApplication::handle_MIM: applying attack type "
                                << attackTypeInt << " on " << requestPdu.objectReference
@@ -1849,8 +1872,9 @@ MmsApplicationNew::handle_MIM (Ptr<Socket> socket)
 
                   // Same attack-type numbering as DNP3/Modbus (2/4 =
                   // false data injection on an analog point, 3 = forced
-                  // control command on a binary point), so cross-
-                  // protocol attack comparisons stay valid.
+                  // control command on a binary point, 5 = replay a
+                  // captured real value), so cross-protocol attack
+                  // comparisons stay valid.
                   if ((attackTypeInt == 2 || attackTypeInt == 4) && requestIsAnalog)
                     {
                       float f = get_val (val, val_min, val_max, qq);
@@ -1865,6 +1889,36 @@ MmsApplicationNew::handle_MIM (Ptr<Socket> socket)
                       SetBinaryPoint (requestPdu.objectReference, forcedState);
                       NS_LOG_INFO ("MmsApplication::handle_MIM: forced " << requestPdu.objectReference
                                    << " to " << (forcedState ? "ON" : "OFF"));
+                    }
+                  else if (attackTypeInt == 5 && requestIsAnalog)
+                    {
+                      auto it = m_replayCaptureAnalog.find (requestPdu.objectReference);
+                      if (it != m_replayCaptureAnalog.end ())
+                        {
+                          SetAnalogPoint (requestPdu.objectReference, it->second);
+                          NS_LOG_INFO ("MmsApplication::handle_MIM: replayed captured value " << it->second
+                                       << " for " << requestPdu.objectReference);
+                        }
+                      else
+                        {
+                          NS_LOG_WARN ("MmsApplication::handle_MIM: attack_type 5 fired for "
+                                       << requestPdu.objectReference << " but no real value was captured yet");
+                        }
+                    }
+                  else if (attackTypeInt == 5 && requestIsBinary)
+                    {
+                      auto it = m_replayCaptureBinary.find (requestPdu.objectReference);
+                      if (it != m_replayCaptureBinary.end ())
+                        {
+                          SetBinaryPoint (requestPdu.objectReference, it->second);
+                          NS_LOG_INFO ("MmsApplication::handle_MIM: replayed captured state "
+                                       << it->second << " for " << requestPdu.objectReference);
+                        }
+                      else
+                        {
+                          NS_LOG_WARN ("MmsApplication::handle_MIM: attack_type 5 fired for "
+                                       << requestPdu.objectReference << " but no real value was captured yet");
+                        }
                     }
 
                   attackApplied = true;

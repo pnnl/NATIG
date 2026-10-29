@@ -816,7 +816,14 @@ void Dnp3ApplicationNew::ConnectToPeer(Ptr<Socket> localSocket, uint16_t servPor
 {
     NS_LOG_INFO("Remote: "<<m_remoteAddress);
     m_socket->Connect (InetSocketAddress(Ipv4Address::ConvertFrom(m_remoteAddress), m_remotelPort));
-    mim_socket->Connect (InetSocketAddress(Ipv4Address::ConvertFrom(m_remoteAddress2),m_localPort));
+    // BUG FIX: mim_socket is only constructed for Inside/MIM-role instances
+    // in makeUdpConnection() -- makeTcpConnection() never touches it, so it
+    // stays null (constructor default) for any TCP-mode master/MIM instance.
+    // Same fix as modbus-application-new.cc's ConnectToPeer.
+    if (mim_socket)
+      {
+        mim_socket->Connect (InetSocketAddress(Ipv4Address::ConvertFrom(m_remoteAddress2),m_localPort));
+      }
 }
 
 void Dnp3ApplicationNew::StopApplication ()     // Called at time specified by Stop
@@ -1058,6 +1065,13 @@ void Dnp3ApplicationNew::HandleAccept (Ptr<Socket> s, const Address& from)
   m_socketList.push_back (s);
   startOutstation(s);
   NS_LOG_INFO("In Handle Accept");
+  // std::cout, not NS_LOG_*: compiled out in this build's optimized
+  // profile. Tracks slow-DDoS connection-exhaustion evidence: this list
+  // has no cap and no idle timeout, so its size should grow and hold for
+  // the attack window.
+  std::cout << "Dnp3Application: '" << m_name << "' accepted connection at t="
+            << Simulator::Now ().GetSeconds () << "s, m_socketList.size()="
+            << m_socketList.size () << std::endl;
 }
 
 
@@ -1714,6 +1728,29 @@ std::vector<std::string> Dnp3ApplicationNew::get_val_vector (std::string delimit
     return val;
 }
 
+std::vector<size_t> Dnp3ApplicationNew::find_point_byte_indices(uint8_t * temp2, Ptr<Packet> testPack, Bytes& buf2, int idPointTarget){
+    // Mirrors the byte-offset walk used by attack type 2's payload write below, but only
+    // locates the target point's bytes instead of overwriting them - shared by attack type 5
+    // (replay) for both capturing real bytes pre-window and re-injecting them during the window.
+    std::vector<size_t> indices;
+    int four = start_byte(temp2, testPack);
+    int ind1 = 0, ind2 = 0;
+    for (size_t i = 0; i < buf2.size(); i++) {
+        if (i > 9) {
+            if (i > 19) {
+                if (temp2[i] != 0x01 && ind2 < 16) ind1++;
+                if (temp2[i] == 0x01) four++;
+                if (ind2 == 0) ind1 = 0;
+            }
+            ind2 = (ind2 < 18) ? ind2 + 1 : 0;
+        }
+        if (four > 0 && four == idPointTarget && ind2 <= 18 && i > 19 && temp2[i] != 0x01) {
+            indices.push_back(i);
+        }
+    }
+    return indices;
+}
+
 int Dnp3ApplicationNew::start_byte(uint8_t * temp2, Ptr<Packet> testPack){
     int start;
     if ((int)temp2[15] == 30 && (int)temp2[16] == 5){
@@ -1883,6 +1920,10 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
 	    bool firstStat = false;
 	    int num_point = 7;
 	    int cur_point = 0;
+	    // attack_type 5 (replay) has no fixed size gate like type 2 (see the branch below),
+	    // so whether a modified packet actually went out can't be inferred from packet size
+	    // the way the "forward unmodified" check further down does for type 2 -- track it directly.
+	    bool replayPacketSent = false;
             if (m_attack_on && start1 == 0x05 && 0x64 ) {
                 Lpdu::UserData data;
                 data.dest = dest;
@@ -1984,6 +2025,37 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
                             Bit32AnalogOutput ao(f * 1000, ID_point[qq]);
                             m_p->direct_operate(false, ao);
                             std::cout << "Sent direct operate analog value for attack type 4 on point " << ID_point[qq] << " at time " << currentTime << "s. Check if GridLAB-D acknowledges this point and value." << std::endl;
+                        } else if (attackTypeInt == 5) {
+                            std::cout << "Attack Type 5: Replaying captured real value for point " << ID_point[qq] << std::endl;
+                            auto captureIt = m_replayCapture.find(pointID[qq]);
+                            if (captureIt == m_replayCapture.end() || captureIt->second.empty()) {
+                                std::cout << "Attack Type 5: No captured value yet for point " << ID_point[qq] << " (window opened before any real traffic was observed) - skipping." << std::endl;
+                            } else {
+                                // Unlike type 2's fixed size gate, replay doesn't assume a
+                                // particular packet shape -- a point's byte offset only resolves
+                                // in whatever packet size it was originally captured from (e.g. a
+                                // direct-operate ack, not a bulk poll response), so just try the
+                                // walk and skip this packet if it doesn't apply here.
+                                std::vector<size_t> idx = find_point_byte_indices(temp2, testPack, buf2, ID_point[qq]);
+                                const std::vector<uint8_t>& captured = captureIt->second;
+                                if (idx.empty()) {
+                                    std::cout << "Attack Type 5: point " << ID_point[qq] << " not present in this packet's byte layout (size "
+                                               << testPack->GetSize() << ") - skipping." << std::endl;
+                                } else {
+                                    for (size_t d = 0; d < idx.size() && d < captured.size(); d++) {
+                                        temp2[idx[d]] = captured[d];
+                                    }
+                                    Bytes buf_temp;
+                                    for (size_t i = 0; i < buf2.size(); i++) {
+                                        appendUINT8(buf_temp, temp2[i]);
+                                    }
+                                    calc_crc(buf_temp, temp2, testPack);
+                                    Ptr<Packet> newPack = Create<Packet>(temp2, testPack->GetSize());
+                                    std::cout << "Sending replayed packet for attack type 5 on point " << ID_point[qq] << " at time " << currentTime << "s" << std::endl;
+                                    send_directly(newPack);
+                                    replayPacketSent = true;
+                                }
+                            }
                         }
                     } else {
                         // Log reason for not applying attack
@@ -1991,6 +2063,21 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
                         std::string reason = (currentTime <= startTime) ? "Before start time" : (currentTime >= stopTime) ? "After stop time" : "Chance failed";
                         netStatsOut << currentTime << " " << ID_point[qq] << " " << status << " " << type << std::endl;
                         hasLogData = true;
+                        // attack_type 5 (replay): this branch also covers points still outside
+                        // their own PointStart/PointStop window even while m_attack_on is globally
+                        // true (e.g. another point on this same attacker is already active) -- keep
+                        // capturing real bytes here too, not only in the m_attack_on-false branch
+                        // below, which for a config where Start/End roughly match PointStart/PointStop
+                        // would otherwise never run.
+                        if (static_cast<int>(type) == 5 && !(currentTime > startTime && currentTime < stopTime)) {
+                            std::vector<size_t> idx = find_point_byte_indices(temp2, testPack, buf2, ID_point[qq]);
+                            if (!idx.empty()) {
+                                std::vector<uint8_t> captured;
+                                for (size_t bi : idx) captured.push_back(temp2[bi]);
+                                m_replayCapture[pointID[qq]] = captured;
+                                std::cout << "Replay capture: stored " << captured.size() << " real bytes for point " << pointID[qq] << " at time " << currentTime << "s" << std::endl;
+                            }
+                        }
                         std::cout << "Attack not applied for point " << ID_point[qq] << " at time " << currentTime << "s. Status: " << status << ". Reason: " << reason << ". Scheduling reset." << std::endl;
                         // Delay reset slightly to ensure attack data (if any) is processed by GridLAB-D
 			if (currentTime <= stopTime and currentTime >= startTime){
@@ -1999,8 +2086,13 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
                     }
                 }
 
-                // Forward packet if attack type does not modify data directly
-                if (attackType.empty() || (static_cast<int>(attackType[0]) != 2 || (testPack->GetSize() != 274 && testPack->GetSize() < 195))) {
+                // Forward packet if attack type does not modify data directly. Type 2's size
+                // gate is checked explicitly here (it's the same fixed gate as its own branch
+                // above); type 5 tracks whether it actually sent a replayed packet directly
+                // (replayPacketSent), since unlike type 2 it has no fixed size gate to re-check.
+                bool type2Sent = (!attackType.empty() && static_cast<int>(attackType[0]) == 2
+                                   && (testPack->GetSize() == 274 || testPack->GetSize() >= 195));
+                if (!type2Sent && !replayPacketSent) {
                     std::cout << "Forwarding unmodified packet at time " << Simulator::Now().GetSeconds() << "s" << std::endl;
                     send_directly(packet);
                 }
@@ -2012,6 +2104,18 @@ void Dnp3ApplicationNew::handle_MIM(Ptr<Socket> socket) {
                     float type = (qq < attackType.size()) ? attackType[qq] : 0.0f;
                     netStatsOut << currentTime << " " << ID_point[qq] << " NO ATTACK " << type << std::endl;
                     hasLogData = true;
+                    // attack_type 5 (replay): the window is closed, so this is real traffic - keep
+                    // refreshing the captured bytes so a later window replays a recent observation,
+                    // not whatever happened to be on the wire the first time this point was ever seen.
+                    if (static_cast<int>(type) == 5) {
+                        std::vector<size_t> idx = find_point_byte_indices(temp2, testPack, buf2, ID_point[qq]);
+                        if (!idx.empty()) {
+                            std::vector<uint8_t> captured;
+                            for (size_t bi : idx) captured.push_back(temp2[bi]);
+                            m_replayCapture[pointID[qq]] = captured;
+                            std::cout << "Replay capture: stored " << captured.size() << " real bytes for point " << pointID[qq] << " at time " << currentTime << "s" << std::endl;
+                        }
+                    }
                     // Delay reset to ensure any prior attack data is processed by GridLAB-D
                     Simulator::Schedule(Seconds(0.1), &Dnp3ApplicationNew::resetToRealValue, this, ID_point[qq], real_val[qq]);
                 }

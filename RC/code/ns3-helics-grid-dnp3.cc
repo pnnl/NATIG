@@ -103,6 +103,14 @@ float epsilon_min = 0.01;
 float epsilon_decay = 0.5;
 float alpha = 0.3;
 int period_routing = 150;
+// tpFileDir controls where Throughput() writes TP.txt/TP-Prob.txt (see
+// below). Declared here at global scope, not as a main()-local, because
+// Throughput() is defined in this file *before* main() and can't see a
+// local declared inside it -- a plain function-local here would compile
+// but silently never take effect from Throughput()'s point of view.
+// main() only assigns into this via cmd.AddValue("tpFileDir", ...); it
+// does not re-declare it.
+std::string tpFileDir = "./";
 void readMicroGridConfig(std::string fpath, Json::Value& configobj)
 {
     std::ifstream tifs(fpath);
@@ -140,9 +148,8 @@ void Throughput (){
 
         //std::stringstream netStatsOut;
         std::stringstream netStatsOut2;
-        std::string loc = std::getenv("RD2C");
-        std::string loc1 = loc + "/integration/control/TP-Prob.txt";
-        std::string loc2 = loc + "/integration/control/TP.txt";
+        std::string loc1 = tpFileDir + "TP-Prob.txt";
+        std::string loc2 = tpFileDir + "TP.txt";
         string proto;
         map< FlowId, FlowMonitor::FlowStats > stats = flowMonitor->GetFlowStats();
         std::vector <Ptr<FlowProbe>> xx = flowMonitor->GetAllProbes();
@@ -503,6 +510,7 @@ main (int argc, char *argv[])
   cmd.AddValue("topologyConfig", "NS3 topology configuration file path", topologyConfigFileName);
   cmd.AddValue("pointFileDir", "Points file path", pointFileDir);
   cmd.AddValue("pcapFileDir", "PCAP output file path", pcapFileDir);
+  cmd.AddValue("tpFileDir", "TP output file path", tpFileDir);
   cmd.Parse(argc, argv);
 
   readMicroGridConfig(configFileName, configObject);
@@ -1057,11 +1065,21 @@ main (int argc, char *argv[])
 
       if(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 3){
          dnp3MIM1.SetAttribute("Value_attck", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-attack_val"]));
-         dnp3MIM1.SetAttribute("NodeID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-node_id"])); 
-         dnp3MIM1.SetAttribute("PointID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-point_id"])); 
+         dnp3MIM1.SetAttribute("NodeID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-node_id"]));
+         dnp3MIM1.SetAttribute("PointID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-point_id"]));
       }
 
-      dnp3MIM1.SetAttribute("AttackStartTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-Start"])); 
+      // attack_type 5 (replay): doesn't inject a configured Value_attck, but still needs
+      // NodeID/PointID set so handle_MIM can match intercepted packets to the target point
+      // at all -- without this the point-matching loop silently falls through to comparing
+      // against an empty string, which substring-matches whichever analog point happens to
+      // be first in the list rather than the configured target.
+      if(std::stoi(attack["MIM-"+std::to_string(MIM_ID)+"-attack_type"]) == 5){
+         dnp3MIM1.SetAttribute("NodeID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-node_id"]));
+         dnp3MIM1.SetAttribute("PointID", StringValue (attack["MIM-"+std::to_string(MIM_ID)+"-point_id"]));
+      }
+
+      dnp3MIM1.SetAttribute("AttackStartTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-Start"]));
       dnp3MIM1.SetAttribute("AttackEndTime", StringValue(attack["MIM-"+std::to_string(MIM_ID)+"-End"])); 
       dnp3MIM1.SetAttribute("mitmFlag", BooleanValue(true));
       Ptr<Dnp3ApplicationNew> mim = dnp3MIM1.Install (tempnode, enamestring);

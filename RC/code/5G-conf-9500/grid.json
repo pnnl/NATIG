@@ -5906,6 +5906,30 @@
                         "endPoint": "MIM"
                 }
         ],
+        "SlowDDoS": [
+                {
+                        "NumberOfBots": 8,
+                        "threadsPerAttacker": 1,
+                        "Active": 0,
+                        "Start": 10,
+                        "End": 60,
+                        "NodeType": [
+                        	"subNode"
+                        ],
+                        "NodeID": [
+                        	2
+                        ],
+                        "endPoint": "subNode",
+                        "ConnectionsPerBot": 50,
+                        "ConnectRate": 0.5,
+                        "TrickleBytes": 0,
+                        "TrickleInterval": 0.0,
+                        "PacketSize": 1400,
+                        "Rate": "70Mb/s",
+                        "TimeOn": 60.0,
+                        "TimeOff": 0.0
+                }
+        ],
         "MIM": [
                 {
                         "NumberAttackers": 2,

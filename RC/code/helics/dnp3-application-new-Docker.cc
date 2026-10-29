@@ -746,7 +746,14 @@ void Dnp3ApplicationNew::ConnectToPeer(Ptr<Socket> localSocket, uint16_t servPor
 {
     NS_LOG_INFO("Remote: "<<m_remoteAddress);
     m_socket->Connect (InetSocketAddress(Ipv4Address::ConvertFrom(m_remoteAddress), m_remotelPort));
-    mim_socket->Connect (InetSocketAddress(Ipv4Address::ConvertFrom(m_remoteAddress2),m_localPort));
+    // BUG FIX: mim_socket is only constructed for Inside/MIM-role instances
+    // in makeUdpConnection() -- makeTcpConnection() never touches it, so it
+    // stays null (constructor default) for any TCP-mode master/MIM instance.
+    // Same fix as modbus-application-new.cc's ConnectToPeer.
+    if (mim_socket)
+      {
+        mim_socket->Connect (InetSocketAddress(Ipv4Address::ConvertFrom(m_remoteAddress2),m_localPort));
+      }
 }
 
 void Dnp3ApplicationNew::StopApplication ()     // Called at time specified by Stop
@@ -947,6 +954,13 @@ void Dnp3ApplicationNew::HandleAccept (Ptr<Socket> s, const Address& from)
   m_socketList.push_back (s);
   startOutstation(s);
   NS_LOG_INFO("In Handle Accept");
+  // std::cout, not NS_LOG_*: compiled out in this build's optimized
+  // profile. Tracks slow-DDoS connection-exhaustion evidence: this list
+  // has no cap and no idle timeout, so its size should grow and hold for
+  // the attack window.
+  std::cout << "Dnp3Application: '" << m_name << "' accepted connection at t="
+            << Simulator::Now ().GetSeconds () << "s, m_socketList.size()="
+            << m_socketList.size () << std::endl;
 }
 
 

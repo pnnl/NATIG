@@ -147,6 +147,9 @@ def build(bld):
         #NATIG
         'model/goose-application-new.cc',
         ####
+        #NATIG
+        'model/slowloris-bot-application.cc',
+        ####
         'model/helics-filter-application.cc',
         'model/helics-static-sink-application.cc',
         'model/helics-static-source-application.cc',
@@ -164,6 +167,9 @@ def build(bld):
         ####
         #NATIG
         'helper/goose-application-helper-new.cc',
+        ####
+        #NATIG
+        'helper/slowloris-bot-application-helper.cc',
         ####
         ]
     module_test = bld.create_ns3_module_test_library('helics')
@@ -191,6 +197,9 @@ def build(bld):
         #NATIG
         'model/goose-application-new.h',
         ####
+        #NATIG
+        'model/slowloris-bot-application.h',
+        ####
         'model/helics-filter-application.h',
         'model/helics-static-sink-application.h',
         'model/helics-static-source-application.h',
@@ -208,6 +217,9 @@ def build(bld):
         ####
         #NATIG
         'helper/goose-application-helper-new.h',
+        ####
+        #NATIG
+        'helper/slowloris-bot-application-helper.h',
         ####
         ]
 
